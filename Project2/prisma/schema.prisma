@@ -1,0 +1,115 @@
+// Prisma schema for Digital Copyright Blockchain System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  role      String    @default("CREATOR")
+  balance   Float     @default(0)
+  createdAt DateTime  @default(now())
+  works     Work[]
+  licensedWorks License[] @relation("Licensor")
+  acquiredLicenses License[] @relation("Licensee")
+}
+
+model Work {
+  id                     String                @id @default(uuid())
+  title                  String
+  type                   String
+  author                 String
+  description            String                @default("")
+  content                String                @default("")
+  contentHash            String
+  blockchainTxHash       String?
+  blockchainBlockNumber  Int?
+  certificateNo          String?
+  status                 String                @default("PENDING")
+  userId                 String
+  user                   User                  @relation(fields: [userId], references: [id])
+  infringements          InfringementRecord[]
+  evidences              Evidence[]
+  licenses               License[]
+  royaltySettlements     RoyaltySettlement[]
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model InfringementRecord {
+  id         String              @id @default(uuid())
+  workId     String
+  work       Work                @relation(fields: [workId], references: [id], onDelete: Cascade)
+  sourceUrl  String
+  sourceTitle String
+  similarity Float
+  riskLevel  String
+  status     String              @default("DETECTED")
+  evidence   Evidence?
+  detectedAt DateTime            @default(now())
+
+  @@index([workId])
+}
+
+model Evidence {
+  id                String         @id @default(uuid())
+  infringementId    String         @unique
+  infringement      InfringementRecord @relation(fields: [infringementId], references: [id], onDelete: Cascade)
+  workId            String
+  work              Work           @relation(fields: [workId], references: [id], onDelete: Cascade)
+  evidenceHash      String
+  blockchainTxHash  String
+  timestamp         DateTime
+  contentSnapshot   String
+  digitalSignature  String
+  status            String         @default("FIXED")
+
+  @@index([workId])
+}
+
+model License {
+  id           String        @id @default(uuid())
+  workId       String
+  work         Work          @relation(fields: [workId], references: [id], onDelete: Cascade)
+  licensorId   String
+  licensor     User          @relation("Licensor", fields: [licensorId], references: [id])
+  licenseeId   String
+  licensee     User          @relation("Licensee", fields: [licenseeId], references: [id])
+  type         String
+  price        Float
+  duration     Int
+  startDate    DateTime
+  endDate      DateTime
+  status       String        @default("ACTIVE")
+  settlements  RoyaltySettlement[]
+  createdAt    DateTime      @default(now())
+
+  @@index([workId])
+}
+
+model RoyaltySettlement {
+  id          String           @id @default(uuid())
+  licenseId   String
+  license     License          @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+  workId      String
+  work        Work             @relation(fields: [workId], references: [id], onDelete: Cascade)
+  amount      Float
+  platformFee Float
+  netAmount   Float
+  status      String           @default("PENDING")
+  settledAt   DateTime?
+  createdAt   DateTime         @default(now())
+
+  @@index([licenseId])
+  @@index([workId])
+}

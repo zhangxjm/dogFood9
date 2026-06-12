@@ -1,0 +1,40 @@
+Copyright Blockchain System - Port Information
+===============================================
+
+This system uses the following TCP ports:
+
++--------+---------------------------+------------------------------+
+| Port   | Service                   | Description                  |
++--------+---------------------------+------------------------------+
+| 3000   | Remix Web Application     | Main user interface and API  |
+| 7700   | Meilisearch Engine        | Full-text search engine      |
++--------+---------------------------+------------------------------+
+
+Access Points:
+--------------
+- Web Application: http://localhost:3000
+- Meilisearch Dashboard: http://localhost:7700
+  - Master Key: copyright-master-key-2024
+
+Notes:
+------
+1. Port 3000 is required for the web application.
+   This port is configurable in vite.config.ts.
+
+2. Port 7700 is used by Meilisearch running inside Docker.
+   If this port is occupied, modify docker-compose.yml to use a different port.
+
+3. SQLite database uses file-based storage (prisma/dev.db) and does not require a network port.
+
+4. All services bind to 127.0.0.1 by default (localhost access only).
+   The Remix server can be configured to bind to 0.0.0.0 for network access.
+
+Startup:
+--------
+chmod +x start.sh
+./start.sh
+
+Stop:
+-----
+chmod +x stop.sh
+./stop.sh

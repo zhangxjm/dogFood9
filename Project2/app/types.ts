@@ -1,0 +1,9 @@
+export type UserRole = "CREATOR" | "LICENSEE";
+export type WorkType = "MUSIC" | "VIDEO" | "TEXT";
+export type WorkStatus = "PENDING" | "CONFIRMED" | "REJECTED";
+export type RiskLevel = "HIGH" | "MEDIUM" | "LOW";
+export type InfringementStatus = "DETECTED" | "EVIDENCE_FIXED" | "ACTION_TAKEN";
+export type EvidenceStatus = "FIXED" | "CHAIN_CONFIRMED";
+export type LicenseType = "EXCLUSIVE" | "NON_EXCLUSIVE";
+export type LicenseStatus = "ACTIVE" | "EXPIRED" | "TERMINATED";
+export type SettlementStatus = "PENDING" | "SETTLED";

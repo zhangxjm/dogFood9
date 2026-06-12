@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.6
+    container_name: copyright-meilisearch
+    restart: unless-stopped
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_MASTER_KEY: copyright-master-key-2024
+      MEILI_ENV: production
+    volumes:
+      - meilisearch_data:/meili_data
+
+volumes:
+  meilisearch_data:
