@@ -1,0 +1,19 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: warehouse-service
+  datasource:
+    url: jdbc:sqlite:data/warehouse.db
+    driver-class-name: org.sqlite.JDBC
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

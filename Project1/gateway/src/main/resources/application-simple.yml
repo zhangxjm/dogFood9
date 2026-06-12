@@ -1,0 +1,46 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: bonded-gateway
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+        server-addr: 127.0.0.1:8848
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        - id: warehouse-service
+          uri: http://127.0.0.1:9001
+          predicates:
+            - Path=/api/warehouse/**
+          filters:
+            - StripPrefix=2
+          order: 1
+        - id: customs-service
+          uri: http://127.0.0.1:9002
+          predicates:
+            - Path=/api/customs/**
+          filters:
+            - StripPrefix=2
+          order: 2
+        - id: order-service
+          uri: http://127.0.0.1:9003
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - StripPrefix=2
+          order: 3
+        - id: index-page
+          uri: http://127.0.0.1:9001
+          predicates:
+            - Path=/
+          order: 100
+
+logging:
+  level:
+    com.bonded.gateway: INFO

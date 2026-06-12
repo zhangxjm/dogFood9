@@ -1,0 +1,17 @@
+server:
+  port: 9002
+
+spring:
+  application:
+    name: customs-service
+  datasource:
+    url: jdbc:sqlite:data/customs.db
+    driver-class-name: org.sqlite.JDBC
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+logging:
+  level:
+    com.bonded.customs: INFO

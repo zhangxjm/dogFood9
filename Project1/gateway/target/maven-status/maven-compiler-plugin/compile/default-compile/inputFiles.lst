@@ -1,0 +1,6 @@
+/Users/darian/projects/dogFood9/Project1/gateway/src/main/java/com/bonded/gateway/GatewayApplication.java
+/Users/darian/projects/dogFood9/Project1/gateway/src/main/java/com/bonded/gateway/filter/WafFilter.java
+/Users/darian/projects/dogFood9/Project1/gateway/src/main/java/com/bonded/gateway/config/GatewayConfig.java
+/Users/darian/projects/dogFood9/Project1/gateway/src/main/java/com/bonded/gateway/filter/SqlInjectionFilter.java
+/Users/darian/projects/dogFood9/Project1/gateway/src/main/java/com/bonded/gateway/filter/XssFilter.java
+/Users/darian/projects/dogFood9/Project1/gateway/src/main/java/com/bonded/gateway/filter/RateLimitFilter.java

@@ -1,0 +1,17 @@
+server:
+  port: 9003
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:sqlite:data/order.db
+    driver-class-name: org.sqlite.JDBC
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+
+logging:
+  level:
+    com.bonded.order: INFO

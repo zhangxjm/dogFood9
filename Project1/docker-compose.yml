@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  nacos:
+    image: nacos/nacos-server:v2.2.3
+    container_name: bonded-nacos
+    environment:
+      - MODE=standalone
+      - JVM_XMS=256m
+      - JVM_XMX=512m
+      - PREFER_HOST_MODE=hostname
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+    restart: unless-stopped

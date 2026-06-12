@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保税仓库管理系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;display:flex;min-height:100vh;background:#f5f6fa;color:#333}
+.sidebar{width:240px;background:#1a2332;color:#fff;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:100}
+.sidebar .logo{padding:20px;font-size:20px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1);text-align:center}
+.sidebar .logo span{color:#4a90d9}
+.sidebar nav{padding:10px 0}
+.sidebar nav a{display:flex;align-items:center;padding:12px 20px;color:rgba(255,255,255,.7);text-decoration:none;font-size:14px;transition:all .2s;cursor:pointer}
+.sidebar nav a:hover{background:rgba(255,255,255,.08);color:#fff}
+.sidebar nav a.active{background:rgba(74,144,217,.2);color:#4a90d9;border-right:3px solid #4a90d9}
+.sidebar nav a .icon{margin-right:10px;font-size:16px;width:20px;text-align:center}
+.main{margin-left:240px;flex:1;padding:24px;min-height:100vh}
+.page{display:none}
+.page.active{display:block}
+.page h2{font-size:22px;margin-bottom:20px;color:#1a2332;font-weight:600}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.stat-card .label{font-size:13px;color:#999;margin-bottom:8px}
+.stat-card .value{font-size:28px;font-weight:700;color:#1a2332}
+.stat-card .value.blue{color:#4a90d9}
+.stat-card .value.orange{color:#e6a23c}
+.stat-card .value.red{color:#f56c6c}
+.stat-card .value.green{color:#67c23a}
+.card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.06);padding:20px;margin-bottom:20px}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.card-header h3{font-size:16px;color:#1a2332}
+.btn{padding:8px 16px;border:none;border-radius:4px;cursor:pointer;font-size:13px;transition:all .2s;display:inline-flex;align-items:center;gap:4px}
+.btn-primary{background:#4a90d9;color:#fff}
+.btn-primary:hover{background:#3a7bc8}
+.btn-success{background:#67c23a;color:#fff}
+.btn-success:hover{background:#5daf34}
+.btn-warning{background:#e6a23c;color:#fff}
+.btn-warning:hover{background:#cf9236}
+.btn-danger{background:#f56c6c;color:#fff}
+.btn-danger:hover{background:#e05555}
+.btn-info{background:#909399;color:#fff}
+.btn-info:hover{background:#7a7d82}
+.btn-sm{padding:5px 10px;font-size:12px}
+table{width:100%;border-collapse:collapse}
+table th{background:#f0f2f5;padding:10px 12px;text-align:left;font-size:13px;color:#666;font-weight:600;white-space:nowrap}
+table td{padding:10px 12px;border-bottom:1px solid #f0f2f5;font-size:13px;white-space:nowrap}
+table tr:nth-child(even){background:#fafbfc}
+table tr:hover{background:#f0f5ff}
+.badge{display:inline-block;padding:3px 8px;border-radius:10px;font-size:12px;font-weight:500}
+.badge-green{background:#f0f9eb;color:#67c23a}
+.badge-blue{background:#ecf5ff;color:#4a90d9}
+.badge-red{background:#fef0f0;color:#f56c6c}
+.badge-orange{background:#fdf6ec;color:#e6a23c}
+.badge-gray{background:#f4f4f5;color:#909399}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:none;justify-content:center;align-items:center}
+.modal-overlay.active{display:flex}
+.modal{background:#fff;border-radius:8px;width:600px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.modal-header{padding:16px 20px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:16px}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:#999;padding:0}
+.modal-close:hover{color:#333}
+.modal-body{padding:20px}
+.modal-footer{padding:16px 20px;border-top:1px solid #f0f2f5;text-align:right;display:flex;gap:8px;justify-content:flex-end}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:13px;color:#666;margin-bottom:5px;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:8px 12px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:#4a90d9}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.table-wrap{overflow-x:auto}
+.actions{display:flex;gap:4px}
+.confirm-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1100;display:none;justify-content:center;align-items:center}
+.confirm-overlay.active{display:flex}
+.confirm-box{background:#fff;border-radius:8px;padding:24px;width:400px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.confirm-box p{margin-bottom:20px;font-size:15px}
+.confirm-box .btns{display:flex;gap:12px;justify-content:center}
+.quick-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.item-row{border:1px solid #eee;border-radius:4px;padding:12px;margin-bottom:8px;position:relative;background:#fafbfc}
+.item-row .remove-item{position:absolute;top:8px;right:8px;background:none;border:none;color:#f56c6c;cursor:pointer;font-size:16px}
+.empty-msg{text-align:center;padding:40px;color:#999;font-size:14px}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.status-dot.green{background:#67c23a}
+.status-dot.red{background:#f56c6c}
+.status-dot.yellow{background:#e6a23c}
+.security-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.security-card{background:#fff;border-radius:8px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06);display:flex;align-items:center;gap:12px}
+.security-card .sec-icon{font-size:28px}
+.security-card .sec-info .sec-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.security-card .sec-info .sec-status{font-size:12px;color:#67c23a;display:flex;align-items:center;gap:4px}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="logo">保税仓库<span>管理系统</span></div>
+<nav id="sidebarNav"></nav>
+</div>
+<div class="main" id="mainContent"></div>
+<div class="modal-overlay" id="modalOverlay">
+<div class="modal"><div class="modal-header"><h3 id="modalTitle"></h3><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="modal-body" id="modalBody"></div><div class="modal-footer" id="modalFooter"></div></div>
+</div>
+<div class="confirm-overlay" id="confirmOverlay">
+<div class="confirm-box"><p id="confirmMsg"></p><div class="btns"><button class="btn btn-info" onclick="closeConfirm()">取消</button><button class="btn btn-danger" id="confirmOk">确定</button></div></div>
+</div>
+
+<script>
+const NAV_ITEMS=[
+{id:'dashboard',icon:'📊',label:'系统总览'},
+{id:'goods',icon:'📦',label:'商品管理'},
+{id:'location',icon:'🏭',label:'库位管理'},
+{id:'inbound',icon:'📥',label:'入库管理'},
+{id:'outbound',icon:'📤',label:'出库管理'},
+{id:'sort',icon:'🔄',label:'分拣任务'},
+{id:'pack',icon:'📋',label:'包装任务'},
+{id:'alert',icon:'⚠️',label:'库存预警'},
+{id:'declaration',icon:'🛃',label:'海关申报'},
+{id:'document',icon:'📑',label:'三单比对'},
+{id:'order',icon:'🛒',label:'订单管理'},
+{id:'payment',icon:'💳',label:'支付管理'},
+{id:'logistics',icon:'🚚',label:'物流管理'},
+{id:'security',icon:'🛡️',label:'安全监控'}
+];
+
+let currentPage='dashboard';
+let confirmCallback=null;
+
+function init(){
+const nav=document.getElementById('sidebarNav');
+nav.innerHTML=NAV_ITEMS.map(i=>`<a data-page="${i.id}" class="${i.id==='dashboard'?'active':''}"><span class="icon">${i.icon}</span>${i.label}</a>`).join('');
+nav.querySelectorAll('a').forEach(a=>{
+a.addEventListener('click',()=>{
+nav.querySelectorAll('a').forEach(x=>x.classList.remove('active'));
+a.classList.add('active');
+switchPage(a.dataset.page);
+});
+});
+buildAllPages();
+switchPage('dashboard');
+}
+
+function switchPage(page){
+currentPage=page;
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+const el=document.getElementById('page-'+page);
+if(el)el.classList.add('active');
+loadPage(page);
+}
+
+async function api(url,opts={}){
+try{
+const r=await fetch(url,opts);
+const j=await r.json();
+if(j.code===200)return j.data;
+throw new Error(j.message||'请求失败');
+}catch(e){alert('操作失败: '+e.message);throw e;}
+}
+
+function showModal(title,bodyHtml,footerHtml){
+document.getElementById('modalTitle').textContent=title;
+document.getElementById('modalBody').innerHTML=bodyHtml;
+document.getElementById('modalFooter').innerHTML=footerHtml;
+document.getElementById('modalOverlay').classList.add('active');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('active')}
+
+function showConfirm(msg,cb){
+document.getElementById('confirmMsg').textContent=msg;
+confirmCallback=cb;
+document.getElementById('confirmOverlay').classList.add('active');
+document.getElementById('confirmOk').onclick=()=>{closeConfirm();if(cb)cb();};
+}
+function closeConfirm(){document.getElementById('confirmOverlay').classList.remove('active');confirmCallback=null}
+
+function fmtDate(d){return d?new Date(d).toLocaleString('zh-CN'):'-'}
+function badge(text,type){return `<span class="badge badge-${type}">${text}</span>`}
+function actBtns(btns){return `<div class="actions">${btns.join('')}</div>`}
+
+function buildAllPages(){
+const main=document.getElementById('mainContent');
+main.innerHTML=NAV_ITEMS.map(i=>`<div class="page" id="page-${i.id}"></div>`).join('');
+document.getElementById('page-dashboard').innerHTML=`
+<h2>系统总览</h2>
+<div class="stat-cards" id="dashStats"></div>
+<div class="card"><div class="card-header"><h3>最近预警</h3><button class="btn btn-primary btn-sm" onclick="loadPage('alert')">查看全部</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>商品</th><th>类型</th><th>阈值</th><th>状态</th><th>时间</th></tr></thead><tbody id="dashAlerts"></tbody></table></div></div>
+<div class="card"><div class="card-header"><h3>快捷操作</h3></div><div class="quick-actions"><button class="btn btn-primary" onclick="navTo('inbound')">📥 新增入库</button><button class="btn btn-success" onclick="navTo('outbound')">📤 新增出库</button><button class="btn btn-warning" onclick="navTo('alert')">⚠️ 检查预警</button><button class="btn btn-info" onclick="navTo('declaration')">🛃 海关申报</button></div></div>`;
+document.getElementById('page-goods').innerHTML=`
+<h2>商品管理</h2>
+<div class="card"><div class="card-header"><h3>商品列表</h3><div><select id="goodsCatFilter" onchange="loadGoods()" style="padding:6px 10px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px"><option value="">全部分类</option></select> <button class="btn btn-primary" onclick="editGoods()">+ 新增商品</button></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>SKU</th><th>名称</th><th>分类</th><th>产地</th><th>品牌</th><th>规格</th><th>单位</th><th>HS编码</th><th>单价</th><th>操作</th></tr></thead><tbody id="goodsBody"></tbody></table></div></div>`;
+document.getElementById('page-location').innerHTML=`
+<h2>库位管理</h2>
+<div class="card"><div class="card-header"><h3>库位列表</h3><div><button class="btn btn-primary" onclick="editLocation()">+ 新增库位</button> <button class="btn btn-warning" onclick="assignLocation()">分配库位</button> <button class="btn btn-info" onclick="optimizeLocation()">优化库位</button></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>区域</th><th>行</th><th>列</th><th>层</th><th>状态</th><th>商品</th><th>容量</th><th>已用</th></tr></thead><tbody id="locBody"></tbody></table></div></div>`;
+document.getElementById('page-inbound').innerHTML=`
+<h2>入库管理</h2>
+<div class="card"><div class="card-header"><h3>入库单列表</h3><button class="btn btn-primary" onclick="createInbound()">+ 新增入库</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>单号</th><th>供应商</th><th>数量</th><th>金额</th><th>状态</th><th>操作员</th><th>时间</th><th>操作</th></tr></thead><tbody id="inboundBody"></tbody></table></div></div>`;
+document.getElementById('page-outbound').innerHTML=`
+<h2>出库管理</h2>
+<div class="card"><div class="card-header"><h3>出库单列表</h3><button class="btn btn-primary" onclick="createOutbound()">+ 新增出库</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>单号</th><th>数量</th><th>状态</th><th>操作员</th><th>时间</th><th>操作</th></tr></thead><tbody id="outboundBody"></tbody></table></div></div>`;
+document.getElementById('page-sort').innerHTML=`
+<h2>分拣任务</h2>
+<div class="card"><div class="card-header"><h3>分拣任务列表</h3></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>订单</th><th>商品</th><th>起始位</th><th>目标位</th><th>数量</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="sortBody"></tbody></table></div></div>`;
+document.getElementById('page-pack').innerHTML=`
+<h2>包装任务</h2>
+<div class="card"><div class="card-header"><h3>包装任务列表</h3></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>订单</th><th>商品</th><th>数量</th><th>类型</th><th>重量</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="packBody"></tbody></table></div></div>`;
+document.getElementById('page-alert').innerHTML=`
+<h2>库存预警</h2>
+<div class="card"><div class="card-header"><h3>预警列表</h3><div><button class="btn btn-warning" onclick="checkAlerts()">🔍 检查预警</button> <button class="btn btn-primary" onclick="createAlert()">+ 新增规则</button></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>商品</th><th>类型</th><th>阈值</th><th>当前量</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="alertBody"></tbody></table></div></div>`;
+document.getElementById('page-declaration').innerHTML=`
+<h2>海关申报</h2>
+<div class="card"><div class="card-header"><h3>申报列表</h3><div><select id="declStatusFilter" onchange="loadDeclarations()" style="padding:6px 10px;border:1px solid #dcdfe6;border-radius:4px;font-size:13px"><option value="">全部状态</option><option value="PENDING">待提交</option><option value="SUBMITTED">审核中</option><option value="APPROVED">已通过</option><option value="REJECTED">已驳回</option></select> <button class="btn btn-primary" onclick="createDeclaration()">+ 新增申报</button></div></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>申报号</th><th>订单号</th><th>买方</th><th>卖方</th><th>金额</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="declBody"></tbody></table></div></div>`;
+document.getElementById('page-document').innerHTML=`
+<h2>三单比对</h2>
+<div class="card"><div class="card-header"><h3>三单列表</h3><button class="btn btn-primary" onclick="createDocument()">+ 新增三单</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>订单号</th><th>订单单</th><th>支付单</th><th>物流单</th><th>比对状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="docBody"></tbody></table></div></div>`;
+document.getElementById('page-order').innerHTML=`
+<h2>订单管理</h2>
+<div class="stat-cards" id="orderStats"></div>
+<div class="card"><div class="card-header"><h3>订单列表</h3><button class="btn btn-primary" onclick="createOrder()">+ 新增订单</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>单号</th><th>买方</th><th>金额</th><th>状态</th><th>支付状态</th><th>物流状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="orderBody"></tbody></table></div></div>`;
+document.getElementById('page-payment').innerHTML=`
+<h2>支付管理</h2>
+<div class="card"><div class="card-header"><h3>支付列表</h3><button class="btn btn-primary" onclick="createPayment()">+ 新增支付</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>订单</th><th>支付号</th><th>金额</th><th>渠道</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="payBody"></tbody></table></div></div>`;
+document.getElementById('page-logistics').innerHTML=`
+<h2>物流管理</h2>
+<div class="card"><div class="card-header"><h3>物流列表</h3><button class="btn btn-primary" onclick="createLogistics()">+ 新增物流</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>订单</th><th>快递号</th><th>快递公司</th><th>收件人</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="logBody"></tbody></table></div></div>`;
+document.getElementById('page-security').innerHTML=`
+<h2>安全监控</h2>
+<div class="security-cards" id="securityCards"></div>`;
+}
+
+function navTo(page){
+const nav=document.getElementById('sidebarNav');
+nav.querySelectorAll('a').forEach(a=>{a.classList.toggle('active',a.dataset.page===page)});
+switchPage(page);
+}
+
+function loadPage(page){
+switch(page){
+case 'dashboard':loadDashboard();break;
+case 'goods':loadGoods();break;
+case 'location':loadLocations();break;
+case 'inbound':loadInbound();break;
+case 'outbound':loadOutbound();break;
+case 'sort':loadSort();break;
+case 'pack':loadPack();break;
+case 'alert':loadAlerts();break;
+case 'declaration':loadDeclarations();break;
+case 'document':loadDocuments();break;
+case 'order':loadOrders();break;
+case 'payment':loadPayments();break;
+case 'logistics':loadLogistics();break;
+case 'security':renderSecurity();break;
+}
+}
+
+// Dashboard
+async function loadDashboard(){
+try{
+const d=await api('/api/warehouse/dashboard');
+document.getElementById('dashStats').innerHTML=`
+<div class="stat-card"><div class="label">商品总数</div><div class="value blue">${d.goodsCount??0}</div></div>
+<div class="stat-card"><div class="label">库位总数</div><div class="value blue">${d.locationCount??0}</div></div>
+<div class="stat-card"><div class="label">待入库</div><div class="value orange">${d.pendingInbound??0}</div></div>
+<div class="stat-card"><div class="label">待出库</div><div class="value orange">${d.pendingOutbound??0}</div></div>
+<div class="stat-card"><div class="label">预警数</div><div class="value red">${d.alertCount??0}</div></div>
+<div class="stat-card"><div class="label">库位利用率</div><div class="value green">${d.locationUtilization??0}%</div></div>`;
+}catch(e){}
+try{
+const alerts=await api('/api/warehouse/alert/pending');
+const tb=document.getElementById('dashAlerts');
+if(!alerts||alerts.length===0){tb.innerHTML='<tr><td colspan="6" class="empty-msg">暂无预警</td></tr>';return;}
+tb.innerHTML=alerts.slice(0,5).map(a=>`<tr><td>${a.id}</td><td>${a.goodsId||'-'}</td><td>${a.alertType==='LOW_STOCK'?'库存不足':a.alertType==='OUT_OF_STOCK'?'缺货':a.alertType}</td><td>${a.threshold}</td><td>${badge(a.status==='PENDING'?'待处理':'已处理',a.status==='PENDING'?'orange':'green')}</td><td>${fmtDate(a.createdAt)}</td></tr>`).join('');
+}catch(e){}
+}
+
+// Goods
+async function loadGoods(){
+try{
+const list=await api('/api/warehouse/goods/list');
+const tb=document.getElementById('goodsBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="11" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(g=>`<tr><td>${g.id}</td><td>${g.sku||''}</td><td>${g.name||''}</td><td>${g.category||''}</td><td>${g.originCountry||''}</td><td>${g.brand||''}</td><td>${g.specification||''}</td><td>${g.unit||''}</td><td>${g.hsCode||''}</td><td>${g.value||''}</td><td>${actBtns([`<button class="btn btn-primary btn-sm" onclick="editGoods(${g.id})">编辑</button>`,`<button class="btn btn-danger btn-sm" onclick="delGoods(${g.id})">删除</button>`])}</td></tr>`).join('');
+const cats=[...new Set(list.map(g=>g.category).filter(Boolean))];
+const sel=document.getElementById('goodsCatFilter');
+const cv=sel.value;
+sel.innerHTML='<option value="">全部分类</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+sel.value=cv;
+}catch(e){}
+}
+
+function editGoods(id){
+if(id){
+api('/api/warehouse/goods/'+id).then(g=>{
+showGoodsForm(g);
+}).catch(()=>{});
+}else{showGoodsForm({});}
+}
+
+function showGoodsForm(g){
+showModal(g.id?'编辑商品':'新增商品',`
+<div class="form-row"><div class="form-group"><label>SKU</label><input id="fSku" value="${g.sku||''}"></div><div class="form-group"><label>名称</label><input id="fName" value="${g.name||''}"></div></div>
+<div class="form-row"><div class="form-group"><label>分类</label><input id="fCategory" value="${g.category||''}"></div><div class="form-group"><label>产地</label><input id="fOrigin" value="${g.originCountry||''}"></div></div>
+<div class="form-row"><div class="form-group"><label>品牌</label><input id="fBrand" value="${g.brand||''}"></div><div class="form-group"><label>规格</label><input id="fSpec" value="${g.specification||''}"></div></div>
+<div class="form-row"><div class="form-group"><label>单位</label><input id="fUnit" value="${g.unit||''}"></div><div class="form-group"><label>HS编码</label><input id="fHs" value="${g.hsCode||''}"></div></div>
+<div class="form-group"><label>单价</label><input id="fValue" type="number" step="0.01" value="${g.value||''}">` ,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveGoods(${g.id||0})">保存</button>`);
+}
+
+async function saveGoods(id){
+const body={sku:document.getElementById('fSku').value,name:document.getElementById('fName').value,category:document.getElementById('fCategory').value,originCountry:document.getElementById('fOrigin').value,brand:document.getElementById('fBrand').value,specification:document.getElementById('fSpec').value,unit:document.getElementById('fUnit').value,hsCode:document.getElementById('fHs').value,value:parseFloat(document.getElementById('fValue').value)||0};
+if(id){body.id=id;await api('/api/warehouse/goods',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
+else{await api('/api/warehouse/goods',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});}
+closeModal();loadGoods();
+}
+
+function delGoods(id){showConfirm('确定删除该商品？',async()=>{await api('/api/warehouse/goods/'+id,{method:'DELETE'});loadGoods();})}
+
+// Locations
+async function loadLocations(){
+try{
+const list=await api('/api/warehouse/location/list');
+const tb=document.getElementById('locBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="9" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(l=>{
+const sc=l.status==='AVAILABLE'?'green':l.status==='OCCUPIED'?'blue':'red';
+const sl=l.status==='AVAILABLE'?'空闲':l.status==='OCCUPIED'?'占用':'锁定';
+return `<tr><td>${l.id}</td><td>${l.zone||''}</td><td>${l.row??''}</td><td>${l.column??''}</td><td>${l.layer??''}</td><td>${badge(sl,sc)}</td><td>${l.goodsId||'-'}</td><td>${l.capacity??''}</td><td>${l.usedCapacity??''}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+function editLocation(id){
+showModal('新增库位',`
+<div class="form-row"><div class="form-group"><label>区域</label><input id="fZone"></div><div class="form-group"><label>行</label><input id="fRow" type="number"></div></div>
+<div class="form-row"><div class="form-group"><label>列</label><input id="fCol" type="number"></div><div class="form-group"><label>层</label><input id="fLayer" type="number"></div></div>
+<div class="form-group"><label>容量</label><input id="fCap" type="number">`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveLocation()">保存</button>`);
+}
+
+async function saveLocation(){
+const body={zone:document.getElementById('fZone').value,row:parseInt(document.getElementById('fRow').value)||0,column:parseInt(document.getElementById('fCol').value)||0,layer:parseInt(document.getElementById('fLayer').value)||0,capacity:parseInt(document.getElementById('fCap').value)||0};
+await api('/api/warehouse/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadLocations();
+}
+
+async function assignLocation(){
+const goods=await api('/api/warehouse/goods/list');
+const locs=await api('/api/warehouse/location/available');
+showModal('分配库位',`
+<div class="form-group"><label>商品</label><select id="fGoodsId">${(goods||[]).map(g=>`<option value="${g.id}">${g.name||g.sku||g.id}</option>`).join('')}</select></div>
+<div class="form-group"><label>库位</label><select id="fLocId">${(locs||[]).map(l=>`<option value="${l.id}">${l.zone||''}-${l.row||''}-${l.column||''}-${l.layer||''}</option>`).join('')}</select></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="doAssign()">分配</button>`);
+}
+
+async function doAssign(){
+await api('/api/warehouse/location/assign',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({goodsId:parseInt(document.getElementById('fGoodsId').value),locationId:parseInt(document.getElementById('fLocId').value)})});
+closeModal();loadLocations();
+}
+
+async function optimizeLocation(){showConfirm('确定执行库位优化？',async()=>{await api('/api/warehouse/location/optimize',{method:'POST'});loadLocations();})}
+
+// Inbound
+async function loadInbound(){
+try{
+const list=await api('/api/warehouse/inbound/list');
+const tb=document.getElementById('inboundBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="9" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(o=>{
+const sc=o.status==='PENDING'?'orange':'green';
+const sl=o.status==='PENDING'?'待入库':'已入库';
+return `<tr><td>${o.id}</td><td>${o.orderNo||''}</td><td>${o.supplier||''}</td><td>${o.totalQuantity??''}</td><td>${o.totalValue??''}</td><td>${badge(sl,sc)}</td><td>${o.operator||''}</td><td>${fmtDate(o.createdAt)}</td><td>${o.status==='PENDING'?actBtns([`<button class="btn btn-success btn-sm" onclick="completeInbound(${o.id})">完成入库</button>`]):'-'}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+function createInbound(){
+showModal('新增入库单',`
+<div class="form-row"><div class="form-group"><label>供应商</label><input id="fSupplier"></div><div class="form-group"><label>操作员</label><input id="fOperator"></div></div>
+<div class="form-group"><label>入库明细</label><div id="inboundItems"></div><button class="btn btn-info btn-sm" onclick="addInboundItem()" style="margin-top:8px">+ 添加明细</button></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveInbound()">提交</button>`);
+addInboundItem();
+}
+
+async function addInboundItem(){
+const goods=await api('/api/warehouse/goods/list');
+const locs=await api('/api/warehouse/location/list');
+const idx=document.querySelectorAll('.inbound-item').length;
+const div=document.createElement('div');
+div.className='inbound-item item-row';
+div.innerHTML=`<button class="remove-item" onclick="this.parentElement.remove()">&times;</button>
+<div class="form-row"><div class="form-group"><label>商品</label><select class="ii-goods">${(goods||[]).map(g=>`<option value="${g.id}">${g.name||g.sku||g.id}</option>`).join('')}</select></div><div class="form-group"><label>数量</label><input class="ii-qty" type="number"></div></div>
+<div class="form-group"><label>库位</label><select class="ii-loc">${(locs||[]).map(l=>`<option value="${l.id}">${l.zone||''}-${l.row||''}-${l.column||''}</option>`).join('')}</select></div>`;
+document.getElementById('inboundItems').appendChild(div);
+}
+
+async function saveInbound(){
+const items=[];
+document.querySelectorAll('.inbound-item').forEach(row=>{
+items.push({goodsId:parseInt(row.querySelector('.ii-goods').value),quantity:parseInt(row.querySelector('.ii-qty').value)||0,locationId:parseInt(row.querySelector('.ii-loc').value)});
+});
+const body={supplier:document.getElementById('fSupplier').value,operator:document.getElementById('fOperator').value,totalQuantity:items.reduce((s,i)=>s+i.quantity,0),totalValue:0,items};
+await api('/api/warehouse/inbound',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadInbound();
+}
+
+async function completeInbound(id){showConfirm('确定完成入库？',async()=>{await api('/api/warehouse/inbound/'+id+'/complete',{method:'POST'});loadInbound();})}
+
+// Outbound
+async function loadOutbound(){
+try{
+const list=await api('/api/warehouse/outbound/list');
+const tb=document.getElementById('outboundBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="7" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(o=>{
+const sc=o.status==='PENDING'?'orange':'green';
+const sl=o.status==='PENDING'?'待出库':'已出库';
+return `<tr><td>${o.id}</td><td>${o.orderNo||''}</td><td>${o.totalQuantity??''}</td><td>${badge(sl,sc)}</td><td>${o.operator||''}</td><td>${fmtDate(o.createdAt)}</td><td>${o.status==='PENDING'?actBtns([`<button class="btn btn-success btn-sm" onclick="completeOutbound(${o.id})">完成出库</button>`]):'-'}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+function createOutbound(){
+showModal('新增出库单',`
+<div class="form-group"><label>操作员</label><input id="fOutOperator"></div>
+<div class="form-group"><label>出库明细</label><div id="outboundItems"></div><button class="btn btn-info btn-sm" onclick="addOutboundItem()" style="margin-top:8px">+ 添加明细</button></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveOutbound()">提交</button>`);
+addOutboundItem();
+}
+
+async function addOutboundItem(){
+const goods=await api('/api/warehouse/goods/list');
+const locs=await api('/api/warehouse/location/list');
+const div=document.createElement('div');
+div.className='outbound-item item-row';
+div.innerHTML=`<button class="remove-item" onclick="this.parentElement.remove()">&times;</button>
+<div class="form-row"><div class="form-group"><label>商品</label><select class="oi-goods">${(goods||[]).map(g=>`<option value="${g.id}">${g.name||g.sku||g.id}</option>`).join('')}</select></div><div class="form-group"><label>数量</label><input class="oi-qty" type="number"></div></div>
+<div class="form-group"><label>库位</label><select class="oi-loc">${(locs||[]).map(l=>`<option value="${l.id}">${l.zone||''}-${l.row||''}-${l.column||''}</option>`).join('')}</select></div>`;
+document.getElementById('outboundItems').appendChild(div);
+}
+
+async function saveOutbound(){
+const items=[];
+document.querySelectorAll('.outbound-item').forEach(row=>{
+items.push({goodsId:parseInt(row.querySelector('.oi-goods').value),quantity:parseInt(row.querySelector('.oi-qty').value)||0,locationId:parseInt(row.querySelector('.oi-loc').value)});
+});
+const body={operator:document.getElementById('fOutOperator').value,items};
+await api('/api/warehouse/outbound',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadOutbound();
+}
+
+async function completeOutbound(id){showConfirm('确定完成出库？',async()=>{await api('/api/warehouse/outbound/'+id+'/complete',{method:'POST'});loadOutbound();})}
+
+// Sort Tasks
+async function loadSort(){
+try{
+const list=await api('/api/warehouse/sort/list');
+const tb=document.getElementById('sortBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="9" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(t=>{
+const sc=t.status==='COMPLETED'?'green':'orange';
+const sl=t.status==='COMPLETED'?'已完成':'待分拣';
+return `<tr><td>${t.id}</td><td>${t.orderId||''}</td><td>${t.goodsId||''}</td><td>${t.fromLocation||''}</td><td>${t.toLocation||''}</td><td>${t.quantity??''}</td><td>${badge(sl,sc)}</td><td>${fmtDate(t.createdAt)}</td><td>${t.status!=='COMPLETED'?actBtns([`<button class="btn btn-success btn-sm" onclick="completeSort(${t.id})">完成</button>`]):'-'}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+async function completeSort(id){showConfirm('确定完成该分拣任务？',async()=>{await api('/api/warehouse/sort/'+id+'/complete',{method:'POST'});loadSort();})}
+
+// Pack Tasks
+async function loadPack(){
+try{
+const list=await api('/api/warehouse/pack/list');
+const tb=document.getElementById('packBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="9" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(t=>{
+const sc=t.status==='COMPLETED'?'green':'orange';
+const sl=t.status==='COMPLETED'?'已完成':'待包装';
+return `<tr><td>${t.id}</td><td>${t.orderId||''}</td><td>${t.goodsId||''}</td><td>${t.quantity??''}</td><td>${t.packType||''}</td><td>${t.weight??''}</td><td>${badge(sl,sc)}</td><td>${fmtDate(t.createdAt)}</td><td>${t.status!=='COMPLETED'?actBtns([`<button class="btn btn-success btn-sm" onclick="completePack(${t.id})">完成</button>`]):'-'}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+async function completePack(id){showConfirm('确定完成该包装任务？',async()=>{await api('/api/warehouse/pack/'+id+'/complete',{method:'POST'});loadPack();})}
+
+// Alerts
+async function loadAlerts(){
+try{
+const list=await api('/api/warehouse/alert/list');
+const tb=document.getElementById('alertBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="8" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(a=>{
+const tc=a.alertType==='LOW_STOCK'?'orange':'red';
+const tl=a.alertType==='LOW_STOCK'?'库存不足':'缺货';
+const sc=a.status==='PENDING'?'orange':'green';
+const sl=a.status==='PENDING'?'待处理':'已处理';
+return `<tr><td>${a.id}</td><td>${a.goodsId||''}</td><td>${badge(tl,tc)}</td><td>${a.threshold??''}</td><td>${a.currentQuantity??''}</td><td>${badge(sl,sc)}</td><td>${fmtDate(a.createdAt)}</td><td>${a.status==='PENDING'?actBtns([`<button class="btn btn-success btn-sm" onclick="resolveAlert(${a.id})">处理</button>`]):'-'}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+async function checkAlerts(){await api('/api/warehouse/alert/check',{method:'POST'});loadAlerts();}
+
+function createAlert(){
+showModal('新增预警规则',`
+<div class="form-row"><div class="form-group"><label>商品ID</label><input id="fAlertGoodsId" type="number"></div><div class="form-group"><label>预警类型</label><select id="fAlertType"><option value="LOW_STOCK">库存不足</option><option value="OUT_OF_STOCK">缺货</option></select></div></div>
+<div class="form-group"><label>阈值</label><input id="fAlertThreshold" type="number">`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveAlert()">保存</button>`);
+}
+
+async function saveAlert(){
+const body={goodsId:parseInt(document.getElementById('fAlertGoodsId').value),alertType:document.getElementById('fAlertType').value,threshold:parseInt(document.getElementById('fAlertThreshold').value)||0};
+await api('/api/warehouse/alert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadAlerts();
+}
+
+async function resolveAlert(id){showConfirm('确定处理该预警？',async()=>{await api('/api/warehouse/alert/'+id+'/resolve',{method:'POST'});loadAlerts();})}
+
+// Declarations
+async function loadDeclarations(){
+try{
+const status=document.getElementById('declStatusFilter')?.value||'';
+let list;
+if(status){list=await api('/api/customs/declaration/status/'+status);}
+else{list=await api('/api/customs/declaration/list');}
+const tb=document.getElementById('declBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="9" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(d=>{
+const sm={PENDING:'待提交',SUBMITTED:'审核中',APPROVED:'已通过',REJECTED:'已驳回'};
+const sc={PENDING:'gray',SUBMITTED:'blue',APPROVED:'green',REJECTED:'red'};
+let btns='';
+if(d.status==='PENDING')btns=`<button class="btn btn-primary btn-sm" onclick="submitDecl(${d.id})">提交</button>`;
+if(d.status==='SUBMITTED')btns=`<button class="btn btn-success btn-sm" onclick="approveDecl(${d.id})">通过</button> <button class="btn btn-danger btn-sm" onclick="rejectDecl(${d.id})">驳回</button>`;
+return `<tr><td>${d.id}</td><td>${d.declarationNo||''}</td><td>${d.orderNo||''}</td><td>${d.buyerName||''}</td><td>${d.sellerName||''}</td><td>${d.totalValue??''}</td><td>${badge(sm[d.status]||d.status,sc[d.status]||'gray')}</td><td>${fmtDate(d.createdAt)}</td><td>${actBtns([btns])}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+function createDeclaration(){
+showModal('新增海关申报',`
+<div class="form-row"><div class="form-group"><label>订单号</label><input id="fDeclOrderNo"></div><div class="form-group"><label>买方姓名</label><input id="fDeclBuyer"></div></div>
+<div class="form-row"><div class="form-group"><label>买方身份证</label><input id="fDeclBuyerId"></div><div class="form-group"><label>卖方名称</label><input id="fDeclSeller"></div></div>
+<div class="form-row"><div class="form-group"><label>商品摘要</label><input id="fDeclSummary"></div><div class="form-group"><label>总价值</label><input id="fDeclValue" type="number" step="0.01"></div></div>
+<div class="form-group"><label>币种</label><select id="fDeclCurrency"><option value="CNY">CNY</option><option value="USD">USD</option><option value="EUR">EUR</option></select></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveDeclaration()">保存</button>`);
+}
+
+async function saveDeclaration(){
+const body={orderNo:document.getElementById('fDeclOrderNo').value,buyerName:document.getElementById('fDeclBuyer').value,buyerIdNo:document.getElementById('fDeclBuyerId').value,sellerName:document.getElementById('fDeclSeller').value,goodsSummary:document.getElementById('fDeclSummary').value,totalValue:parseFloat(document.getElementById('fDeclValue').value)||0,currency:document.getElementById('fDeclCurrency').value};
+await api('/api/customs/declaration',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadDeclarations();
+}
+
+async function submitDecl(id){showConfirm('确定提交申报？',async()=>{await api('/api/customs/declaration/'+id+'/submit',{method:'POST'});loadDeclarations();})}
+async function approveDecl(id){showConfirm('确定通过申报？',async()=>{await api('/api/customs/declaration/'+id+'/approve',{method:'POST'});loadDeclarations();})}
+function rejectDecl(id){
+showModal('驳回申报',`<div class="form-group"><label>驳回原因</label><input id="fRejectReason"></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-danger" onclick="doReject(${id})">驳回</button>`);
+}
+async function doReject(id){
+const reason=document.getElementById('fRejectReason').value;
+await api('/api/customs/declaration/'+id+'/reject?rejectReason='+encodeURIComponent(reason),{method:'POST'});
+closeModal();loadDeclarations();
+}
+
+// Documents
+async function loadDocuments(){
+try{
+const list=await api('/api/customs/document/list');
+const tb=document.getElementById('docBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="8" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(d=>{
+const sm={PENDING:'待比对',MATCH:'一致',MISMATCH:'不一致'};
+const sc={PENDING:'gray',MATCH:'green',MISMATCH:'red'};
+return `<tr><td>${d.id}</td><td>${d.orderNo||''}</td><td>${d.orderDocument||''}</td><td>${d.paymentDocument||''}</td><td>${d.logisticsDocument||''}</td><td>${badge(sm[d.compareStatus]||d.compareStatus,sc[d.compareStatus]||'gray')}</td><td>${fmtDate(d.createdAt)}</td><td>${d.compareStatus==='PENDING'?actBtns([`<button class="btn btn-primary btn-sm" onclick="compareDoc(${d.orderId})">比对</button>`]):'-'}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+function createDocument(){
+showModal('新增三单',`
+<div class="form-group"><label>订单ID</label><input id="fDocOrderId" type="number"></div>
+<div class="form-group"><label>订单号</label><input id="fDocOrderNo"></div>
+<div class="form-group"><label>订单单号</label><input id="fDocOrderDoc"></div>
+<div class="form-group"><label>支付单号</label><input id="fDocPayDoc"></div>
+<div class="form-group"><label>物流单号</label><input id="fDocLogDoc"></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveDocument()">保存</button>`);
+}
+
+async function saveDocument(){
+const body={orderId:parseInt(document.getElementById('fDocOrderId').value),orderNo:document.getElementById('fDocOrderNo').value,orderDocument:document.getElementById('fDocOrderDoc').value,paymentDocument:document.getElementById('fDocPayDoc').value,logisticsDocument:document.getElementById('fDocLogDoc').value};
+await api('/api/customs/document',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadDocuments();
+}
+
+async function compareDoc(orderId){showConfirm('确定执行三单比对？',async()=>{await api('/api/customs/document/compare/'+orderId,{method:'POST'});loadDocuments();})}
+
+// Orders
+async function loadOrders(){
+try{
+const stats=await api('/api/order/order/statistics');
+document.getElementById('orderStats').innerHTML=`
+<div class="stat-card"><div class="label">订单总数</div><div class="value blue">${stats?.totalOrders??0}</div></div>
+<div class="stat-card"><div class="label">总金额</div><div class="value green">${stats?.totalAmount??0}</div></div>
+<div class="stat-card"><div class="label">待支付</div><div class="value orange">${stats?.pendingPayment??0}</div></div>
+<div class="stat-card"><div class="label">已完成</div><div class="value green">${stats?.completedOrders??0}</div></div>`;
+}catch(e){}
+try{
+const list=await api('/api/order/order/list');
+const tb=document.getElementById('orderBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="9" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(o=>{
+const sm={PENDING:'待处理',PAID:'已支付',SHIPPED:'已发货',COMPLETED:'已完成',CANCELLED:'已取消'};
+const sc={PENDING:'orange',PAID:'blue',SHIPPED:'blue',COMPLETED:'green',CANCELLED:'red'};
+const psm={UNPAID:'未支付',PAID:'已支付',REFUNDED:'已退款'};
+const psc={UNPAID:'red',PAID:'green',REFUNDED:'orange'};
+const lsm={PENDING:'待发货',SHIPPED:'已发货',DELIVERED:'已送达'};
+const lsc={PENDING:'gray',SHIPPED:'blue',DELIVERED:'green'};
+return `<tr><td>${o.id}</td><td>${o.orderNo||''}</td><td>${o.buyerName||''}</td><td>${o.totalAmount??''}</td><td>${badge(sm[o.status]||o.status,sc[o.status]||'gray')}</td><td>${badge(psm[o.paymentStatus]||o.paymentStatus,psc[o.paymentStatus]||'gray')}</td><td>${badge(lsm[o.logisticsStatus]||o.logisticsStatus,lsc[o.logisticsStatus]||'gray')}</td><td>${fmtDate(o.createdAt)}</td><td>${actBtns([`<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(${o.id})">更新状态</button>`])}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+function createOrder(){
+showModal('新增订单',`
+<div class="form-row"><div class="form-group"><label>买方姓名</label><input id="fOrderBuyer"></div><div class="form-group"><label>买方身份证</label><input id="fOrderBuyerId"></div></div>
+<div class="form-row"><div class="form-group"><label>买方电话</label><input id="fOrderBuyerPhone"></div><div class="form-group"><label>总金额</label><input id="fOrderAmount" type="number" step="0.01"></div></div>
+<div class="form-group"><label>币种</label><select id="fOrderCurrency"><option value="CNY">CNY</option><option value="USD">USD</option></select></div>
+<div class="form-group"><label>订单明细</label><div id="orderItems"></div><button class="btn btn-info btn-sm" onclick="addOrderItem()" style="margin-top:8px">+ 添加明细</button></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveOrder()">提交</button>`);
+addOrderItem();
+}
+
+function addOrderItem(){
+const idx=document.querySelectorAll('.order-item').length;
+const div=document.createElement('div');
+div.className='order-item item-row';
+div.innerHTML=`<button class="remove-item" onclick="this.parentElement.remove()">&times;</button>
+<div class="form-row"><div class="form-group"><label>商品ID</label><input class="oi-gid" type="number"></div><div class="form-group"><label>商品名称</label><input class="oi-gname"></div></div>
+<div class="form-row"><div class="form-group"><label>SKU</label><input class="oi-sku"></div><div class="form-group"><label>数量</label><input class="oi-qty" type="number"></div></div>
+<div class="form-group"><label>单价</label><input class="oi-price" type="number" step="0.01">`;
+document.getElementById('orderItems').appendChild(div);
+}
+
+async function saveOrder(){
+const items=[];
+document.querySelectorAll('.order-item').forEach(row=>{
+items.push({goodsId:parseInt(row.querySelector('.oi-gid').value)||0,goodsName:row.querySelector('.oi-gname').value,sku:row.querySelector('.oi-sku').value,quantity:parseInt(row.querySelector('.oi-qty').value)||0,price:parseFloat(row.querySelector('.oi-price').value)||0});
+});
+const body={buyerName:document.getElementById('fOrderBuyer').value,buyerIdNo:document.getElementById('fOrderBuyerId').value,buyerPhone:document.getElementById('fOrderBuyerPhone').value,totalAmount:parseFloat(document.getElementById('fOrderAmount').value)||0,currency:document.getElementById('fOrderCurrency').value,items};
+await api('/api/order/order',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadOrders();
+}
+
+function updateOrderStatus(id){
+showModal('更新订单状态',`
+<div class="form-group"><label>订单状态</label><select id="fOrdStatus"><option value="PENDING">待处理</option><option value="PAID">已支付</option><option value="SHIPPED">已发货</option><option value="COMPLETED">已完成</option><option value="CANCELLED">已取消</option></select></div>
+<div class="form-group"><label>支付状态</label><select id="fOrdPayStatus"><option value="UNPAID">未支付</option><option value="PAID">已支付</option><option value="REFUNDED">已退款</option></select></div>
+<div class="form-group"><label>物流状态</label><select id="fOrdLogStatus"><option value="PENDING">待发货</option><option value="SHIPPED">已发货</option><option value="DELIVERED">已送达</option></select></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="doUpdateOrder(${id})">更新</button>`);
+}
+
+async function doUpdateOrder(id){
+const s=document.getElementById('fOrdStatus').value;
+const p=document.getElementById('fOrdPayStatus').value;
+const l=document.getElementById('fOrdLogStatus').value;
+await api('/api/order/order/'+id+'/status?status='+s,{method:'PUT'});
+await api('/api/order/order/'+id+'/payment-status?paymentStatus='+p,{method:'PUT'});
+await api('/api/order/order/'+id+'/logistics-status?logisticsStatus='+l,{method:'PUT'});
+closeModal();loadOrders();
+}
+
+// Payments
+async function loadPayments(){
+try{
+const list=await api('/api/order/payment/list');
+const tb=document.getElementById('payBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="8" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(p=>{
+const sm={PENDING:'待支付',COMPLETED:'已支付',FAILED:'支付失败'};
+const sc={PENDING:'orange',COMPLETED:'green',FAILED:'red'};
+return `<tr><td>${p.id}</td><td>${p.orderId||''}</td><td>${p.paymentNo||''}</td><td>${p.paymentAmount??''}</td><td>${p.paymentChannel||''}</td><td>${badge(sm[p.status]||p.status,sc[p.status]||'gray')}</td><td>${fmtDate(p.createdAt)}</td><td>${p.status==='PENDING'?actBtns([`<button class="btn btn-success btn-sm" onclick="processPayment(${p.orderId})">处理支付</button>`]):'-'}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+function createPayment(){
+showModal('新增支付',`
+<div class="form-row"><div class="form-group"><label>订单ID</label><input id="fPayOrderId" type="number"></div><div class="form-group"><label>订单号</label><input id="fPayOrderNo"></div></div>
+<div class="form-row"><div class="form-group"><label>支付金额</label><input id="fPayAmount" type="number" step="0.01"></div><div class="form-group"><label>支付渠道</label><select id="fPayChannel"><option value="ALIPAY">支付宝</option><option value="WECHAT">微信</option><option value="UNION_PAY">银联</option></select></div></div>`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="savePayment()">保存</button>`);
+}
+
+async function savePayment(){
+const body={orderId:parseInt(document.getElementById('fPayOrderId').value),orderNo:document.getElementById('fPayOrderNo').value,paymentAmount:parseFloat(document.getElementById('fPayAmount').value)||0,paymentChannel:document.getElementById('fPayChannel').value};
+await api('/api/order/payment',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadPayments();
+}
+
+async function processPayment(orderId){showConfirm('确定处理支付？',async()=>{await api('/api/order/payment/process/'+orderId,{method:'POST'});loadPayments();})}
+
+// Logistics
+async function loadLogistics(){
+try{
+const list=await api('/api/order/logistics/list');
+const tb=document.getElementById('logBody');
+if(!list||list.length===0){tb.innerHTML='<tr><td colspan="8" class="empty-msg">暂无数据</td></tr>';return;}
+tb.innerHTML=list.map(l=>{
+const sm={PENDING:'待发货',SHIPPED:'已发货',DELIVERED:'已送达'};
+const sc={PENDING:'gray',SHIPPED:'blue',DELIVERED:'green'};
+return `<tr><td>${l.id}</td><td>${l.orderId||''}</td><td>${l.trackingNo||''}</td><td>${l.logisticsCompany||''}</td><td>${l.receiverName||''}</td><td>${badge(sm[l.status]||l.status,sc[l.status]||'gray')}</td><td>${fmtDate(l.createdAt)}</td><td>${l.status==='PENDING'?actBtns([`<button class="btn btn-success btn-sm" onclick="shipOrder(${l.orderId})">发货</button>`]):'-'}</td></tr>`;
+}).join('');
+}catch(e){}
+}
+
+function createLogistics(){
+showModal('新增物流',`
+<div class="form-row"><div class="form-group"><label>订单ID</label><input id="fLogOrderId" type="number"></div><div class="form-group"><label>订单号</label><input id="fLogOrderNo"></div></div>
+<div class="form-group"><label>快递公司</label><input id="fLogCompany"></div>
+<div class="form-row"><div class="form-group"><label>收件人</label><input id="fLogReceiver"></div><div class="form-group"><label>电话</label><input id="fLogPhone"></div></div>
+<div class="form-group"><label>收件地址</label><input id="fLogAddr">`,
+`<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveLogistics()">保存</button>`);
+}
+
+async function saveLogistics(){
+const body={orderId:parseInt(document.getElementById('fLogOrderId').value),orderNo:document.getElementById('fLogOrderNo').value,logisticsCompany:document.getElementById('fLogCompany').value,receiverName:document.getElementById('fLogReceiver').value,receiverPhone:document.getElementById('fLogPhone').value,receiverAddress:document.getElementById('fLogAddr').value};
+await api('/api/order/logistics',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+closeModal();loadLogistics();
+}
+
+async function shipOrder(orderId){showConfirm('确定发货？',async()=>{await api('/api/order/logistics/ship/'+orderId,{method:'POST'});loadLogistics();})}
+
+// Security
+function renderSecurity(){
+const items=[
+{icon:'🛡️',title:'Gateway WAF防护',desc:'Web应用防火墙，拦截恶意请求'},
+{icon:'💉',title:'SQL注入检测',desc:'实时检测并拦截SQL注入攻击'},
+{icon:'✖️',title:'XSS攻击过滤',desc:'过滤跨站脚本攻击代码'},
+{icon:'⏱️',title:'请求频率限制',desc:'防止接口被恶意高频调用'},
+{icon:'🚫',title:'IP黑名单',desc:'自动封禁恶意IP地址'}
+];
+document.getElementById('securityCards').innerHTML=items.map(i=>`
+<div class="security-card"><div class="sec-icon">${i.icon}</div><div class="sec-info"><div class="sec-title">${i.title}</div><div class="sec-status"><span class="status-dot green"></span>运行中</div><div style="font-size:12px;color:#999;margin-top:4px">${i.desc}</div></div></div>`).join('');
+}
+
+init();
+</script>
+</body>
+</html>
