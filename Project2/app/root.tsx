@@ -23,8 +23,6 @@ export const loader: LoaderFunction = async () => {
 };
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const data = useLoaderData<typeof loader>();
-
   return (
     <html lang="zh-CN">
       <head>
@@ -34,17 +32,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <div className="flex min-h-screen bg-slate-100">
-          <Sidebar
-            currentUser={data.currentUser}
-            allUsers={data.allUsers}
-          />
-          <main className="flex-1 ml-64">
-            <div className="p-8">
-              {children}
-            </div>
-          </main>
-        </div>
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -52,6 +40,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AppContent() {
+  const data = useLoaderData<typeof loader>();
+
+  return (
+    <div className="flex min-h-screen bg-slate-100">
+      <Sidebar
+        currentUser={data.currentUser}
+        allUsers={data.allUsers}
+      />
+      <main className="flex-1 ml-64">
+        <div className="p-8">
+          <Outlet />
+        </div>
+      </main>
+    </div>
+  );
+}
+
 export default function App() {
-  return <Outlet />;
+  return <AppContent />;
 }

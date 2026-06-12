@@ -72,7 +72,10 @@ export async function getWorkById(id: string) {
       user: { select: { id: true, name: true, email: true, role: true } },
       infringements: {
         orderBy: { detectedAt: "desc" },
-        take: 10
+        take: 10,
+        include: {
+          evidence: true
+        }
       },
       licenses: {
         orderBy: { createdAt: "desc" },
