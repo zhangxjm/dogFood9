@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudGuard - 金融机构实时反欺诈交易系统</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">🛡️</div>
+                <div class="logo-text">
+                    <h1>FraudGuard</h1>
+                    <p>实时反欺诈系统</p>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">监控仪表盘</span>
+                </a>
+                <a href="#transactions" class="nav-item" data-page="transactions">
+                    <span class="nav-icon">💳</span>
+                    <span class="nav-label">交易监控</span>
+                </a>
+                <a href="#alerts" class="nav-item" data-page="alerts">
+                    <span class="nav-icon">⚠️</span>
+                    <span class="nav-label">风险告警</span>
+                    <span class="nav-badge" id="alertBadge">0</span>
+                </a>
+                <a href="#rules" class="nav-item" data-page="rules">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">规则引擎</span>
+                </a>
+                <a href="#users" class="nav-item" data-page="users">
+                    <span class="nav-icon">👤</span>
+                    <span class="nav-label">用户管理</span>
+                </a>
+                <a href="#blacklist" class="nav-item" data-page="blacklist">
+                    <span class="nav-icon">🚫</span>
+                    <span class="nav-label">黑名单管理</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <div class="status-item">
+                        <span class="status-dot status-running" id="streamStatusDot"></span>
+                        <span>流计算 <span id="streamStatusText">运行中</span></span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-dot status-running" id="mockStatusDot" style="display:none;"></span>
+                        <span id="mockStatusText"></span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h2 id="pageTitle">监控仪表盘</h2>
+                    <p class="page-subtitle">实时反欺诈交易监控平台</p>
+                </div>
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="generateMockTxn()">
+                            ➕ 模拟交易
+                        </button>
+                        <button class="btn btn-secondary" onclick="toggleMockGenerator()">
+                            <span id="mockBtnText">▶ 启动模拟</span>
+                        </button>
+                    </div>
+                    <div class="user-profile">
+                        <div class="avatar">管</div>
+                        <div class="user-info">
+                            <span class="user-name">管理员</span>
+                            <span class="user-role">系统管理员</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <div id="page-dashboard" class="page active">
+                    <div class="stats-grid">
+                        <div class="stat-card stat-primary">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-content">
+                                <h3 id="statTotalTxn">0</h3>
+                                <p>今日交易总数</p>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-success">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-content">
+                                <h3 id="statApproved">0</h3>
+                                <p>已通过交易</p>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-danger">
+                            <div class="stat-icon">❌</div>
+                            <div class="stat-content">
+                                <h3 id="statRejected">0</h3>
+                                <p>已拦截交易</p>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-warning">
+                            <div class="stat-icon">⏳</div>
+                            <div class="stat-content">
+                                <h3 id="statPending">0</h3>
+                                <p>待审核交易</p>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-info">
+                            <div class="stat-icon">⚡</div>
+                            <div class="stat-content">
+                                <h3 id="statThroughput">0</h3>
+                                <p>处理速率 TPS</p>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-purple">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-content">
+                                <h3 id="statUsers">0</h3>
+                                <p>用户总数</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-section">
+                        <div class="chart-card">
+                            <h3>风险分布</h3>
+                            <div class="risk-distribution">
+                                <div class="risk-bar">
+                                    <div class="risk-bar-item high" id="riskHighBar" style="width:0%">
+                                        <span class="risk-bar-label">高风险</span>
+                                    </div>
+                                    <span class="risk-bar-value" id="riskHighValue">0</span>
+                                </div>
+                                <div class="risk-bar">
+                                    <div class="risk-bar-item medium" id="riskMediumBar" style="width:0%">
+                                        <span class="risk-bar-label">中风险</span>
+                                    </div>
+                                    <span class="risk-bar-value" id="riskMediumValue">0</span>
+                                </div>
+                                <div class="risk-bar">
+                                    <div class="risk-bar-item low" id="riskLowBar" style="width:0%">
+                                        <span class="risk-bar-label">低风险</span>
+                                    </div>
+                                    <span class="risk-bar-value" id="riskLowValue">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <h3>系统状态</h3>
+                            <div class="system-metrics">
+                                <div class="metric-item">
+                                    <span class="metric-label">流计算队列</span>
+                                    <span class="metric-value" id="metricQueue">0</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">已处理交易</span>
+                                    <span class="metric-value" id="metricProcessed">0</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">处理速率</span>
+                                    <span class="metric-value" id="metricTps">0 TPS</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">黑名单条目</span>
+                                    <span class="metric-value" id="metricBlacklist">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-section">
+                        <div class="data-card">
+                            <div class="card-header">
+                                <h3>最新交易</h3>
+                                <a href="#transactions" class="view-all">查看全部 →</a>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table" id="recentTransactionsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>交易ID</th>
+                                            <th>用户</th>
+                                            <th>金额</th>
+                                            <th>商户</th>
+                                            <th>风险等级</th>
+                                            <th>状态</th>
+                                            <th>时间</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recentTransactionsBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="data-card">
+                            <div class="card-header">
+                                <h3>最新告警</h3>
+                                <a href="#alerts" class="view-all">查看全部 →</a>
+                            </div>
+                            <div class="alert-list" id="recentAlertsList">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-transactions" class="page">
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>状态筛选:</label>
+                            <select id="txnStatusFilter" onchange="loadTransactions()">
+                                <option value="">全部状态</option>
+                                <option value="APPROVED">已通过</option>
+                                <option value="REJECTED">已拒绝</option>
+                                <option value="PENDING">待审核</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>风险等级:</label>
+                            <select id="txnRiskFilter" onchange="loadTransactions()">
+                                <option value="">全部等级</option>
+                                <option value="HIGH">高风险</option>
+                                <option value="MEDIUM">中风险</option>
+                                <option value="LOW">低风险</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>用户ID:</label>
+                            <input type="text" id="txnUserIdFilter" placeholder="输入用户ID" onkeyup="if(event.key==='Enter')loadTransactions()">
+                        </div>
+                        <button class="btn btn-primary" onclick="loadTransactions()">查询</button>
+                    </div>
+
+                    <div class="data-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>交易ID</th>
+                                        <th>用户ID</th>
+                                        <th>金额</th>
+                                        <th>商户</th>
+                                        <th>交易类型</th>
+                                        <th>风险评分</th>
+                                        <th>风险等级</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="btn btn-sm" onclick="prevPage()" id="prevBtn">上一页</button>
+                            <span id="pageInfo">第 1 页</span>
+                            <button class="btn btn-sm" onclick="nextPage()" id="nextBtn">下一页</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-alerts" class="page">
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>状态:</label>
+                            <select id="alertStatusFilter" onchange="loadAlerts()">
+                                <option value="PENDING">待处理</option>
+                                <option value="HANDLED">已处理</option>
+                                <option value="DISMISSED">已忽略</option>
+                                <option value="">全部</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>级别:</label>
+                            <select id="alertLevelFilter" onchange="loadAlerts()">
+                                <option value="">全部级别</option>
+                                <option value="CRITICAL">严重</option>
+                                <option value="HIGH">高</option>
+                                <option value="MEDIUM">中</option>
+                                <option value="LOW">低</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="data-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>告警ID</th>
+                                        <th>交易ID</th>
+                                        <th>用户ID</th>
+                                        <th>告警类型</th>
+                                        <th>级别</th>
+                                        <th>风险评分</th>
+                                        <th>描述</th>
+                                        <th>状态</th>
+                                        <th>创建时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alertsBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="btn btn-sm" onclick="prevAlertsPage()" id="prevAlertsBtn">上一页</button>
+                            <span id="alertsPageInfo">第 1 页</span>
+                            <button class="btn btn-sm" onclick="nextAlertsPage()" id="nextAlertsBtn">下一页</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-rules" class="page">
+                    <div class="filter-bar">
+                        <h3>风险规则管理</h3>
+                        <div class="filter-group">
+                            <button class="btn btn-primary" onclick="showAddRuleModal()">➕ 新增规则</button>
+                        </div>
+                    </div>
+
+                    <div class="rules-grid" id="rulesGrid">
+                    </div>
+                </div>
+
+                <div id="page-users" class="page">
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>搜索:</label>
+                            <input type="text" id="userSearch" placeholder="输入用户名" onkeyup="if(event.key==='Enter')loadUsers()">
+                        </div>
+                        <button class="btn btn-primary" onclick="loadUsers()">查询</button>
+                    </div>
+
+                    <div class="data-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>用户ID</th>
+                                        <th>姓名</th>
+                                        <th>账号</th>
+                                        <th>账户类型</th>
+                                        <th>风险等级</th>
+                                        <th>账户状态</th>
+                                        <th>余额</th>
+                                        <th>注册城市</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <button class="btn btn-sm" onclick="prevUsersPage()" id="prevUsersBtn">上一页</button>
+                            <span id="usersPageInfo">第 1 页</span>
+                            <button class="btn btn-sm" onclick="nextUsersPage()" id="nextUsersBtn">下一页</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-blacklist" class="page">
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>类型:</label>
+                            <select id="blacklistTypeFilter" onchange="loadBlacklist()">
+                                <option value="">全部类型</option>
+                                <option value="IP">IP地址</option>
+                                <option value="CARD">卡号</option>
+                                <option value="ACCOUNT">账户</option>
+                                <option value="USER">用户</option>
+                                <option value="MERCHANT">商户</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="showAddBlacklistModal()">➕ 添加黑名单</button>
+                    </div>
+
+                    <div class="data-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>类型</th>
+                                        <th>值</th>
+                                        <th>描述</th>
+                                        <th>风险级别</th>
+                                        <th>来源</th>
+                                        <th>添加时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blacklistBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">详情</h3>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+            <div class="modal-footer" id="modalFooter">
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

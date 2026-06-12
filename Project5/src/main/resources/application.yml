@@ -1,0 +1,66 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: fraud-guard-system
+  datasource:
+    url: jdbc:sqlite:./data/fraud_guard.db?busy_timeout=30000&journal_mode=WAL&synchronous=NORMAL
+    driver-class-name: org.sqlite.JDBC
+    username: admin
+    password: fraudguard2024
+    hikari:
+      maximum-pool-size: 1
+      minimum-idle: 1
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000, expireAfterWrite=10m
+
+fraudguard:
+  stream:
+    enabled: true
+    thread-pool-size: 2
+    queue-capacity: 10000
+  risk:
+    high-risk-threshold: 80
+    medium-risk-threshold: 50
+  rules:
+    max-transaction-amount: 500000
+    daily-transaction-limit: 50
+    velocity-window-seconds: 60
+    max-velocity-count: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.fraudguard: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
