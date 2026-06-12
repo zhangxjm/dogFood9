@@ -1,0 +1,45 @@
+============================================
+  Agricultural Digital Twin System
+  Port Allocation List
+============================================
+
+Web Application:
+- Port 8501 : Streamlit Web UI (Main application interface)
+
+Message Queue (Docker):
+- Port 2181 : Zookeeper client port (Kafka coordination)
+- Port 9092 : Kafka internal broker (Docker network)
+- Port 9093 : Kafka external broker (Host access)
+- Port 8080 : Kafka UI (Web interface for Kafka management)
+
+Database:
+- SQLite file-based database (no network port)
+  Location: ./agri_db.sqlite3
+
+============================================
+  Service Access URLs
+============================================
+
+Main Application:
+  http://localhost:8501
+
+Kafka Management UI (requires Docker):
+  http://localhost:8080
+
+============================================
+  Docker Container Names
+============================================
+
+- agri-zookeeper  : Zookeeper service
+- agri-kafka      : Kafka message broker
+- agri-kafka-ui   : Kafka web UI
+
+============================================
+  Kafka Topics
+============================================
+
+- sensor_data         : Sensor data stream (soil, weather, growth)
+- decision_commands   : General decision commands
+- irrigation_commands : Irrigation control commands
+- fertilizer_commands : Fertilizer control commands
+- pest_alerts         : Pest and disease warning alerts
