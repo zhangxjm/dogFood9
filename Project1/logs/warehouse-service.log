@@ -1,4 +1,4 @@
-2026-06-12 20:41:36.642  INFO 16996 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
+2026-06-12 22:07:47.537  INFO 49579 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -8,118 +8,20 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-06-12 20:41:36.724  INFO 16996 --- [           main] c.bonded.warehouse.WarehouseApplication  : Starting WarehouseApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 16996 (/Users/darian/projects/dogFood9/Project1/warehouse-service/target/warehouse-service-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
-2026-06-12 20:41:36.724  INFO 16996 --- [           main] c.bonded.warehouse.WarehouseApplication  : The following 1 profile is active: "simple"
-2026-06-12 20:41:37.217  INFO 16996 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=0b6bb167-0a18-3b5e-a92c-dcb6b963520a
-2026-06-12 20:41:37.402  INFO 16996 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9001 (http)
-2026-06-12 20:41:37.407  INFO 16996 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-06-12 20:41:37.407  INFO 16996 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-06-12 20:41:37.446  INFO 16996 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-06-12 20:41:37.446  INFO 16996 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 700 ms
-2026-06-12 20:41:37.554  INFO 16996 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-06-12 20:41:37.986  INFO 16996 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-06-12 20:41:38.153  INFO 16996 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
-2026-06-12 20:41:38.288  INFO 16996 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
-2026-06-12 20:41:38.322  INFO 16996 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9001 (http) with context path ''
-2026-06-12 20:41:38.335  INFO 16996 --- [           main] c.bonded.warehouse.WarehouseApplication  : Started WarehouseApplication in 1.946 seconds (JVM running for 2.174)
-2026-06-12 20:45:28.930  INFO 16996 --- [nio-9001-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-06-12 20:45:28.930  INFO 16996 --- [nio-9001-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-06-12 20:45:28.933  INFO 16996 --- [nio-9001-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
-2026-06-12 21:27:41.903 ERROR 16996 --- [nio-9001-exec-4] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed; nested exception is org.springframework.jdbc.UncategorizedSQLException: PreparedStatementCallback; uncategorized SQLException for SQL [INSERT INTO inbound_order(order_no,supplier,total_quantity,total_value,status,operator,create_time,complete_time) VALUES(?,?,?,?,?,?,?,?)]; SQL state [null]; error code [19]; [SQLITE_CONSTRAINT_NOTNULL] A NOT NULL constraint failed (NOT NULL constraint failed: inbound_order.order_no); nested exception is org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_NOTNULL] A NOT NULL constraint failed (NOT NULL constraint failed: inbound_order.order_no)] with root cause
-
-org.sqlite.SQLiteException: [SQLITE_CONSTRAINT_NOTNULL] A NOT NULL constraint failed (NOT NULL constraint failed: inbound_order.order_no)
-	at org.sqlite.core.DB.newSQLException(DB.java:1179) ~[sqlite-jdbc-3.45.1.0.jar!/:na]
-	at org.sqlite.core.DB.newSQLException(DB.java:1190) ~[sqlite-jdbc-3.45.1.0.jar!/:na]
-	at org.sqlite.core.DB.execute(DB.java:985) ~[sqlite-jdbc-3.45.1.0.jar!/:na]
-	at org.sqlite.core.DB.executeUpdate(DB.java:1054) ~[sqlite-jdbc-3.45.1.0.jar!/:na]
-	at org.sqlite.jdbc3.JDBC3PreparedStatement.lambda$executeLargeUpdate$2(JDBC3PreparedStatement.java:129) ~[sqlite-jdbc-3.45.1.0.jar!/:na]
-	at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:454) ~[sqlite-jdbc-3.45.1.0.jar!/:na]
-	at org.sqlite.jdbc3.JDBC3PreparedStatement.executeLargeUpdate(JDBC3PreparedStatement.java:124) ~[sqlite-jdbc-3.45.1.0.jar!/:na]
-	at org.sqlite.jdbc3.JDBC3PreparedStatement.executeUpdate(JDBC3PreparedStatement.java:105) ~[sqlite-jdbc-3.45.1.0.jar!/:na]
-	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeUpdate(ProxyPreparedStatement.java:61) ~[HikariCP-4.0.3.jar!/:na]
-	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeUpdate(HikariProxyPreparedStatement.java) ~[HikariCP-4.0.3.jar!/:na]
-	at org.springframework.jdbc.core.JdbcTemplate.lambda$update$2(JdbcTemplate.java:967) ~[spring-jdbc-5.3.31.jar!/:5.3.31]
-	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:650) ~[spring-jdbc-5.3.31.jar!/:5.3.31]
-	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:962) ~[spring-jdbc-5.3.31.jar!/:5.3.31]
-	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:1017) ~[spring-jdbc-5.3.31.jar!/:5.3.31]
-	at org.springframework.jdbc.core.JdbcTemplate.update(JdbcTemplate.java:1027) ~[spring-jdbc-5.3.31.jar!/:5.3.31]
-	at com.bonded.warehouse.mapper.InboundOrderMapper.insert(InboundOrderMapper.java:47) ~[classes!/:1.0.0]
-	at com.bonded.warehouse.mapper.InboundOrderMapper$$FastClassBySpringCGLIB$$d56878b9.invoke(<generated>) ~[classes!/:1.0.0]
-	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218) ~[spring-core-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:792) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:137) ~[spring-tx-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:707) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at com.bonded.warehouse.mapper.InboundOrderMapper$$EnhancerBySpringCGLIB$$1cb3aeef.insert(<generated>) ~[classes!/:1.0.0]
-	at com.bonded.warehouse.service.InboundService.create(InboundService.java:48) ~[classes!/:1.0.0]
-	at com.bonded.warehouse.service.InboundService$$FastClassBySpringCGLIB$$70c2af5f.invoke(<generated>) ~[classes!/:1.0.0]
-	at org.springframework.cglib.proxy.MethodProxy.invoke(MethodProxy.java:218) ~[spring-core-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.invokeJoinpoint(CglibAopProxy.java:792) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:163) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionInterceptor$1.proceedWithInvocation(TransactionInterceptor.java:123) ~[spring-tx-5.3.31.jar!/:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:388) ~[spring-tx-5.3.31.jar!/:5.3.31]
-	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:186) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$CglibMethodInvocation.proceed(CglibAopProxy.java:762) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:707) ~[spring-aop-5.3.31.jar!/:5.3.31]
-	at com.bonded.warehouse.service.InboundService$$EnhancerBySpringCGLIB$$5041ac0b.create(<generated>) ~[classes!/:1.0.0]
-	at com.bonded.warehouse.controller.InboundController.create(InboundController.java:57) ~[classes!/:1.0.0]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
-	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:117) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:895) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:808) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1072) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:965) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at javax.servlet.http.HttpServlet.service(HttpServlet.java:555) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883) ~[spring-webmvc-5.3.31.jar!/:5.3.31]
-	at javax.servlet.http.HttpServlet.service(HttpServlet.java:623) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:209) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-9.0.83.jar!/:na]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.springframework.boot.actuate.metrics.web.servlet.WebMvcMetricsFilter.doFilterInternal(WebMvcMetricsFilter.java:96) ~[spring-boot-actuator-2.7.18.jar!/:2.7.18]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:117) ~[spring-web-5.3.31.jar!/:5.3.31]
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:178) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:153) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:168) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:481) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:130) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:342) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:390) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:928) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1794) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61) ~[tomcat-embed-core-9.0.83.jar!/:na]
-	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
-
+2026-06-12 22:07:47.627  INFO 49579 --- [           main] c.bonded.warehouse.WarehouseApplication  : Starting WarehouseApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 49579 (/Users/darian/projects/dogFood9/Project1/warehouse-service/target/warehouse-service-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
+2026-06-12 22:07:47.627  INFO 49579 --- [           main] c.bonded.warehouse.WarehouseApplication  : The following 1 profile is active: "simple"
+2026-06-12 22:07:48.094  INFO 49579 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=0b6bb167-0a18-3b5e-a92c-dcb6b963520a
+2026-06-12 22:07:48.272  INFO 49579 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9001 (http)
+2026-06-12 22:07:48.277  INFO 49579 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-12 22:07:48.277  INFO 49579 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-06-12 22:07:48.318  INFO 49579 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-12 22:07:48.318  INFO 49579 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 668 ms
+2026-06-12 22:07:48.417  INFO 49579 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-12 22:07:51.777  INFO 49579 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-12 22:07:51.921  INFO 49579 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-06-12 22:07:52.050  INFO 49579 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2026-06-12 22:07:52.081  INFO 49579 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9001 (http) with context path ''
+2026-06-12 22:07:52.095  INFO 49579 --- [           main] c.bonded.warehouse.WarehouseApplication  : Started WarehouseApplication in 4.81 seconds (JVM running for 5.02)
+2026-06-12 22:07:57.150  INFO 49579 --- [nio-9001-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-12 22:07:57.150  INFO 49579 --- [nio-9001-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-12 22:07:57.150  INFO 49579 --- [nio-9001-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
