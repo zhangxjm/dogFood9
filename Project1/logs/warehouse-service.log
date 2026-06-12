@@ -1,4 +1,4 @@
-2026-06-12 22:50:37.357  INFO 63617 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
+2026-06-12 23:24:51.473  INFO 75090 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -8,20 +8,20 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-06-12 22:50:37.490  INFO 63617 --- [           main] c.bonded.warehouse.WarehouseApplication  : Starting WarehouseApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 63617 (/Users/darian/projects/dogFood9/Project1/warehouse-service/target/warehouse-service-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
-2026-06-12 22:50:37.490  INFO 63617 --- [           main] c.bonded.warehouse.WarehouseApplication  : The following 1 profile is active: "simple"
-2026-06-12 22:50:38.642  INFO 63617 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=0b6bb167-0a18-3b5e-a92c-dcb6b963520a
-2026-06-12 22:50:39.004  INFO 63617 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9001 (http)
-2026-06-12 22:50:39.009  INFO 63617 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-06-12 22:50:39.010  INFO 63617 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-06-12 22:50:39.100  INFO 63617 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-06-12 22:50:39.100  INFO 63617 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1481 ms
-2026-06-12 22:50:39.323  INFO 63617 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-06-12 22:50:42.833  INFO 63617 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-06-12 22:50:43.057  INFO 63617 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
-2026-06-12 22:50:43.481  INFO 63617 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
-2026-06-12 22:50:43.528  INFO 63617 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9001 (http) with context path ''
-2026-06-12 22:50:43.544  INFO 63617 --- [           main] c.bonded.warehouse.WarehouseApplication  : Started WarehouseApplication in 6.616 seconds (JVM running for 6.914)
-2026-06-12 22:50:51.725  INFO 63617 --- [nio-9001-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-06-12 22:50:51.725  INFO 63617 --- [nio-9001-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-06-12 22:50:51.727  INFO 63617 --- [nio-9001-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2026-06-12 23:24:51.590  INFO 75090 --- [           main] c.bonded.warehouse.WarehouseApplication  : Starting WarehouseApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 75090 (/Users/darian/projects/dogFood9/Project1/warehouse-service/target/warehouse-service-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
+2026-06-12 23:24:51.591  INFO 75090 --- [           main] c.bonded.warehouse.WarehouseApplication  : The following 1 profile is active: "simple"
+2026-06-12 23:24:52.145  INFO 75090 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=0b6bb167-0a18-3b5e-a92c-dcb6b963520a
+2026-06-12 23:24:52.347  INFO 75090 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9001 (http)
+2026-06-12 23:24:52.352  INFO 75090 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-12 23:24:52.352  INFO 75090 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-06-12 23:24:52.391  INFO 75090 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-12 23:24:52.391  INFO 75090 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 768 ms
+2026-06-12 23:24:52.498  INFO 75090 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-12 23:24:54.264  INFO 75090 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-12 23:24:54.406  INFO 75090 --- [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-06-12 23:24:54.532  INFO 75090 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoint(s) beneath base path '/actuator'
+2026-06-12 23:24:54.564  INFO 75090 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9001 (http) with context path ''
+2026-06-12 23:24:54.576  INFO 75090 --- [           main] c.bonded.warehouse.WarehouseApplication  : Started WarehouseApplication in 3.343 seconds (JVM running for 3.591)
+2026-06-12 23:25:06.250  INFO 75090 --- [nio-9001-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-12 23:25:06.250  INFO 75090 --- [nio-9001-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-12 23:25:06.251  INFO 75090 --- [nio-9001-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

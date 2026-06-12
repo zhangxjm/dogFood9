@@ -212,7 +212,7 @@ document.getElementById('page-document').innerHTML=`
 document.getElementById('page-order').innerHTML=`
 <h2>订单管理</h2>
 <div class="stat-cards" id="orderStats"></div>
-<div class="card"><div class="card-header"><h3>订单列表</h3><button class="btn btn-primary" onclick="createOrder()">+ 新增订单</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>单号</th><th>买方</th><th>金额</th><th>状态</th><th>支付状态</th><th>物流状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="orderBody"></tbody></table></div></div>`;
+<div class="card"><div class="card-header"><h3>订单列表</h3><button class="btn btn-primary" onclick="createOrder()">+ 新增订单</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>单号</th><th>买方</th><th>金额</th><th>订单状态</th><th>支付状态</th><th>物流状态</th><th>清关状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="orderBody"></tbody></table></div></div>`;
 document.getElementById('page-payment').innerHTML=`
 <h2>支付管理</h2>
 <div class="card"><div class="card-header"><h3>支付列表</h3><button class="btn btn-primary" onclick="createPayment()">+ 新增支付</button></div><div class="table-wrap"><table><thead><tr><th>ID</th><th>订单</th><th>支付号</th><th>金额</th><th>渠道</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody id="payBody"></tbody></table></div></div>`;
@@ -605,13 +605,15 @@ const list=await api('/api/order/order/list');
 const tb=document.getElementById('orderBody');
 if(!list||list.length===0){tb.innerHTML='<tr><td colspan="9" class="empty-msg">暂无数据</td></tr>';return;}
 tb.innerHTML=list.map(o=>{
-const sm={PENDING:'待支付',PAID:'已支付',SHIPPED:'已发货',COMPLETED:'已完成',CANCELLED:'已取消','待支付':'待支付','已支付':'已支付','已发货':'已发货','已完成':'已完成','已取消':'已取消'};
-const sc={PENDING:'orange',PAID:'blue',SHIPPED:'blue',COMPLETED:'green',CANCELLED:'red','待支付':'orange','已支付':'blue','已发货':'blue','已完成':'green','已取消':'red'};
-const psm={UNPAID:'未支付',PAID:'已支付',REFUNDED:'已退款','未支付':'未支付','已支付':'已支付','已退款':'已退款'};
-const psc={UNPAID:'red',PAID:'green',REFUNDED:'orange','未支付':'red','已支付':'green','已退款':'orange'};
-const lsm={PENDING:'未发货',SHIPPED:'已发货',DELIVERED:'已签收','未发货':'未发货','已发货':'已发货','运输中':'运输中','已签收':'已签收'};
-const lsc={PENDING:'gray',SHIPPED:'blue',DELIVEREDED:'green','未发货':'gray','已发货':'blue','运输中':'blue','已签收':'green'};
-return `<tr><td>${o.id}</td><td>${o.orderNo||''}</td><td>${o.buyerName||''}</td><td>${o.totalAmount??''}</td><td>${badge(sm[o.status]||o.status,sc[o.status]||'gray')}</td><td>${badge(psm[o.paymentStatus]||o.paymentStatus,psc[o.paymentStatus]||'gray')}</td><td>${badge(lsm[o.logisticsStatus]||o.logisticsStatus,lsc[o.logisticsStatus]||'gray')}</td><td>${fmtDate(o.createdAt)}</td><td>${actBtns([`<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(${o.id})">更新状态</button>`])}</td></tr>`;
+const sm={'待支付':'待支付','已支付':'已支付','已发货':'已发货','已完成':'已完成','已取消':'已取消'};
+const sc={'待支付':'orange','已支付':'blue','已发货':'blue','已完成':'green','已取消':'red'};
+const psm={'未支付':'未支付','已支付':'已支付','已退款':'已退款'};
+const psc={'未支付':'red','已支付':'green','已退款':'orange'};
+const lsm={'未发货':'未发货','已发货':'已发货','运输中':'运输中','已签收':'已签收'};
+const lsc={'未发货':'gray','已发货':'blue','运输中':'blue','已签收':'green'};
+const csm={'未申报':'未申报','已申报':'已申报','已放行':'已放行'};
+const csc={'未申报':'gray','已申报':'blue','已放行':'green'};
+return `<tr><td>${o.id}</td><td>${o.orderNo||''}</td><td>${o.buyerName||''}</td><td>${o.totalAmount??''}</td><td>${badge(sm[o.status]||o.status,sc[o.status]||'gray')}</td><td>${badge(psm[o.paymentStatus]||o.paymentStatus,psc[o.paymentStatus]||'gray')}</td><td>${badge(lsm[o.logisticsStatus]||o.logisticsStatus,lsc[o.logisticsStatus]||'gray')}</td><td>${badge(csm[o.customsStatus]||o.customsStatus,csc[o.customsStatus]||'gray')}</td><td>${fmtDate(o.createdAt)}</td><td>${actBtns([`<button class="btn btn-primary btn-sm" onclick="updateOrderStatus(${o.id})">更新状态</button>`])}</td></tr>`;
 }).join('');
 }catch(e){}
 }
@@ -647,11 +649,36 @@ await api('/api/order/order',{method:'POST',headers:{'Content-Type':'application
 closeModal();loadOrders();
 }
 
-function updateOrderStatus(id){
+async function updateOrderStatus(id){
+const order=await api('/api/order/order/'+id);
+const s=order?.status||'待支付';
+const p=order?.paymentStatus||'未支付';
+const l=order?.logisticsStatus||'未发货';
+const c=order?.customsStatus||'未申报';
 showModal('更新订单状态',`
-<div class="form-group"><label>订单状态</label><select id="fOrdStatus"><option value="待支付">待支付</option><option value="已支付">已支付</option><option value="已发货">已发货</option><option value="已完成">已完成</option><option value="已取消">已取消</option></select></div>
-<div class="form-group"><label>支付状态</label><select id="fOrdPayStatus"><option value="未支付">未支付</option><option value="已支付">已支付</option><option value="已退款">已退款</option></select></div>
-<div class="form-group"><label>物流状态</label><select id="fOrdLogStatus"><option value="未发货">未发货</option><option value="已发货">已发货</option><option value="运输中">运输中</option><option value="已签收">已签收</option></select></div>`,
+<div class="form-group"><label>订单状态</label><select id="fOrdStatus">
+<option value="待支付" ${s==='待支付'?'selected':''}>待支付</option>
+<option value="已支付" ${s==='已支付'?'selected':''}>已支付</option>
+<option value="已发货" ${s==='已发货'?'selected':''}>已发货</option>
+<option value="已完成" ${s==='已完成'?'selected':''}>已完成</option>
+<option value="已取消" ${s==='已取消'?'selected':''}>已取消</option>
+</select></div>
+<div class="form-group"><label>支付状态</label><select id="fOrdPayStatus">
+<option value="未支付" ${p==='未支付'?'selected':''}>未支付</option>
+<option value="已支付" ${p==='已支付'?'selected':''}>已支付</option>
+<option value="已退款" ${p==='已退款'?'selected':''}>已退款</option>
+</select></div>
+<div class="form-group"><label>物流状态</label><select id="fOrdLogStatus">
+<option value="未发货" ${l==='未发货'?'selected':''}>未发货</option>
+<option value="已发货" ${l==='已发货'?'selected':''}>已发货</option>
+<option value="运输中" ${l==='运输中'?'selected':''}>运输中</option>
+<option value="已签收" ${l==='已签收'?'selected':''}>已签收</option>
+</select></div>
+<div class="form-group"><label>清关状态</label><select id="fOrdCusStatus">
+<option value="未申报" ${c==='未申报'?'selected':''}>未申报</option>
+<option value="已申报" ${c==='已申报'?'selected':''}>已申报</option>
+<option value="已放行" ${c==='已放行'?'selected':''}>已放行</option>
+</select></div>`,
 `<button class="btn btn-info" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="doUpdateOrder(${id})">更新</button>`);
 }
 
@@ -659,10 +686,15 @@ async function doUpdateOrder(id){
 const s=document.getElementById('fOrdStatus').value;
 const p=document.getElementById('fOrdPayStatus').value;
 const l=document.getElementById('fOrdLogStatus').value;
-await api('/api/order/order/'+id+'/status?status='+s,{method:'PUT'});
-await api('/api/order/order/'+id+'/payment-status?paymentStatus='+p,{method:'PUT'});
-await api('/api/order/order/'+id+'/logistics-status?logisticsStatus='+l,{method:'PUT'});
-closeModal();loadOrders();
+const c=document.getElementById('fOrdCusStatus').value;
+const errs=[];
+try{await api('/api/order/order/'+id+'/status',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:s})});}catch(e){errs.push('订单状态');}
+try{await api('/api/order/order/'+id+'/payment-status',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({paymentStatus:p})});}catch(e){errs.push('支付状态');}
+try{await api('/api/order/order/'+id+'/logistics-status',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({logisticsStatus:l})});}catch(e){errs.push('物流状态');}
+try{await api('/api/order/order/'+id+'/customs-status',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({customsStatus:c})});}catch(e){errs.push('清关状态');}
+closeModal();
+if(errs.length>0){alert('以下状态更新失败：'+errs.join('、'));}
+loadOrders();
 }
 
 // Payments

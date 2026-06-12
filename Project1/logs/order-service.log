@@ -1,4 +1,4 @@
-2026-06-12 22:50:37.371  INFO 63619 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
+2026-06-12 23:24:51.309  INFO 74725 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -8,19 +8,19 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-06-12 22:50:37.595  INFO 63619 --- [           main] com.bonded.order.OrderApplication        : Starting OrderApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 63619 (/Users/darian/projects/dogFood9/Project1/order-service/target/order-service-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
-2026-06-12 22:50:37.595  INFO 63619 --- [           main] com.bonded.order.OrderApplication        : The following 1 profile is active: "simple"
-2026-06-12 22:50:38.633  INFO 63619 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=fbd7dc21-e25a-3bf8-9d96-dd03efd3d7de
-2026-06-12 22:50:38.981  INFO 63619 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9003 (http)
-2026-06-12 22:50:38.989  INFO 63619 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-06-12 22:50:38.990  INFO 63619 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-06-12 22:50:39.054  INFO 63619 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-06-12 22:50:39.054  INFO 63619 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1423 ms
-2026-06-12 22:50:39.324  INFO 63619 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-06-12 22:50:42.702  INFO 63619 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-06-12 22:50:43.107  INFO 63619 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2026-06-12 22:50:43.139  INFO 63619 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9003 (http) with context path ''
-2026-06-12 22:50:43.159  INFO 63619 --- [           main] com.bonded.order.OrderApplication        : Started OrderApplication in 6.129 seconds (JVM running for 6.528)
-2026-06-12 22:50:51.947  INFO 63619 --- [nio-9003-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-06-12 22:50:51.948  INFO 63619 --- [nio-9003-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-06-12 22:50:51.954  INFO 63619 --- [nio-9003-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 5 ms
+2026-06-12 23:24:51.432  INFO 74725 --- [           main] com.bonded.order.OrderApplication        : Starting OrderApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 74725 (/Users/darian/projects/dogFood9/Project1/order-service/target/order-service-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
+2026-06-12 23:24:51.432  INFO 74725 --- [           main] com.bonded.order.OrderApplication        : The following 1 profile is active: "simple"
+2026-06-12 23:24:52.014  INFO 74725 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=fbd7dc21-e25a-3bf8-9d96-dd03efd3d7de
+2026-06-12 23:24:52.217  INFO 74725 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9003 (http)
+2026-06-12 23:24:52.223  INFO 74725 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-12 23:24:52.223  INFO 74725 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-06-12 23:24:52.270  INFO 74725 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-12 23:24:52.270  INFO 74725 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 809 ms
+2026-06-12 23:24:52.391  INFO 74725 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-12 23:24:53.580  INFO 74725 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-12 23:24:53.838  INFO 74725 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-06-12 23:24:53.866  INFO 74725 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9003 (http) with context path ''
+2026-06-12 23:24:53.881  INFO 74725 --- [           main] com.bonded.order.OrderApplication        : Started OrderApplication in 2.866 seconds (JVM running for 3.088)
+2026-06-12 23:25:06.411  INFO 74725 --- [nio-9003-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-12 23:25:06.411  INFO 74725 --- [nio-9003-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-12 23:25:06.412  INFO 74725 --- [nio-9003-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

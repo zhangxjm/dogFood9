@@ -73,30 +73,46 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/status")
-    public Result<Void> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String status = body.get("status");
+    public Result<Void> updateStatus(@PathVariable Long id,
+                                     @RequestParam(required = false) String status,
+                                     @RequestBody(required = false) Map<String, String> body) {
+        if (status == null && body != null) {
+            status = body.get("status");
+        }
         boolean ok = orderService.updateStatus(id, status);
         return ok ? Result.success() : Result.fail("更新订单状态失败");
     }
 
     @PutMapping("/{id}/payment-status")
-    public Result<Void> updatePaymentStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String status = body.get("paymentStatus");
-        boolean ok = orderService.updatePaymentStatus(id, status);
+    public Result<Void> updatePaymentStatus(@PathVariable Long id,
+                                            @RequestParam(required = false) String paymentStatus,
+                                            @RequestBody(required = false) Map<String, String> body) {
+        if (paymentStatus == null && body != null) {
+            paymentStatus = body.get("paymentStatus");
+        }
+        boolean ok = orderService.updatePaymentStatus(id, paymentStatus);
         return ok ? Result.success() : Result.fail("更新支付状态失败");
     }
 
     @PutMapping("/{id}/logistics-status")
-    public Result<Void> updateLogisticsStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String status = body.get("logisticsStatus");
-        boolean ok = orderService.updateLogisticsStatus(id, status);
+    public Result<Void> updateLogisticsStatus(@PathVariable Long id,
+                                              @RequestParam(required = false) String logisticsStatus,
+                                              @RequestBody(required = false) Map<String, String> body) {
+        if (logisticsStatus == null && body != null) {
+            logisticsStatus = body.get("logisticsStatus");
+        }
+        boolean ok = orderService.updateLogisticsStatus(id, logisticsStatus);
         return ok ? Result.success() : Result.fail("更新物流状态失败");
     }
 
     @PutMapping("/{id}/customs-status")
-    public Result<Void> updateCustomsStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String status = body.get("customsStatus");
-        boolean ok = orderService.updateCustomsStatus(id, status);
+    public Result<Void> updateCustomsStatus(@PathVariable Long id,
+                                            @RequestParam(required = false) String customsStatus,
+                                            @RequestBody(required = false) Map<String, String> body) {
+        if (customsStatus == null && body != null) {
+            customsStatus = body.get("customsStatus");
+        }
+        boolean ok = orderService.updateCustomsStatus(id, customsStatus);
         return ok ? Result.success() : Result.fail("更新清关状态失败");
     }
 
