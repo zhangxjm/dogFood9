@@ -1,0 +1,292 @@
+syntax = "proto3";
+
+package firefighting;
+
+option go_package = "fire-fighting-twin/api/gen/firefighting";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+
+message Building {
+  int64 id = 1;
+  string name = 2;
+  string address = 3;
+  int32 floors = 4;
+  string model_url = 5;
+  double center_lng = 6;
+  double center_lat = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+message WaterSource {
+  int64 id = 1;
+  int64 building_id = 2;
+  string name = 3;
+  string type = 4;
+  double capacity = 5;
+  double pressure = 6;
+  string status = 7;
+  double location_x = 8;
+  double location_y = 9;
+  double location_z = 10;
+  string floor = 11;
+  string updated_at = 12;
+}
+
+message FirePassage {
+  int64 id = 1;
+  int64 building_id = 2;
+  string name = 3;
+  string type = 4;
+  double width = 5;
+  string status = 6;
+  double start_x = 7;
+  double start_y = 8;
+  double start_z = 9;
+  double end_x = 10;
+  double end_y = 11;
+  double end_z = 12;
+  string floor = 13;
+  string updated_at = 14;
+}
+
+message Personnel {
+  int64 id = 1;
+  int64 building_id = 2;
+  string name = 3;
+  string phone = 4;
+  double location_x = 5;
+  double location_y = 6;
+  double location_z = 7;
+  string floor = 8;
+  string status = 9;
+  string detected_at = 10;
+  string updated_at = 11;
+}
+
+message RescuePlan {
+  int64 id = 1;
+  int64 building_id = 2;
+  string name = 3;
+  string description = 4;
+  string strategy = 5;
+  string status = 6;
+  int32 estimated_time = 7;
+  int32 personnel_required = 8;
+  string created_at = 9;
+  string updated_at = 10;
+}
+
+message RescueUnit {
+  int64 id = 1;
+  string name = 2;
+  string type = 3;
+  int32 personnel_count = 4;
+  string equipment = 5;
+  string status = 6;
+  double location_lng = 7;
+  double location_lat = 8;
+  string updated_at = 9;
+}
+
+message FireEvent {
+  int64 id = 1;
+  int64 building_id = 2;
+  double location_x = 3;
+  double location_y = 4;
+  double location_z = 5;
+  string floor = 6;
+  string severity = 7;
+  double temperature = 8;
+  double spread_rate = 9;
+  string status = 10;
+  string detected_at = 11;
+  string updated_at = 12;
+}
+
+message Command {
+  int64 id = 1;
+  int64 building_id = 2;
+  string from_unit = 3;
+  string to_unit = 4;
+  string content = 5;
+  string priority = 6;
+  string status = 7;
+  string created_at = 8;
+}
+
+message Resource {
+  int64 id = 1;
+  string name = 2;
+  string type = 3;
+  int32 quantity = 4;
+  string status = 5;
+  double location_lng = 6;
+  double location_lat = 7;
+  string updated_at = 8;
+}
+
+message SystemStatus {
+  int64 total_buildings = 1;
+  int64 active_fires = 2;
+  int64 trapped_personnel = 3;
+  int64 active_commands = 4;
+  int64 available_units = 5;
+  double avg_response_time = 6;
+  string uptime = 7;
+}
+
+message SimulationStep {
+  int32 step = 1;
+  double time_seconds = 2;
+  string description = 3;
+  repeated Personnel affected_personnel = 4;
+  double fire_spread_area = 5;
+  double rescue_progress = 6;
+}
+
+message GetBuildingRequest { int64 id = 1; }
+message ListBuildingsRequest { int32 page_size = 1; string page_token = 2; }
+message ListBuildingsResponse { repeated Building buildings = 1; string next_page_token = 2; }
+message CreateBuildingRequest { Building building = 1; }
+message UpdateBuildingRequest { int64 id = 1; Building building = 2; }
+
+message ListWaterSourcesRequest { int64 building_id = 1; }
+message ListWaterSourcesResponse { repeated WaterSource water_sources = 1; }
+message UpdateWaterSourceStatusRequest { int64 id = 1; string status = 2; }
+
+message ListFirePassagesRequest { int64 building_id = 1; }
+message ListFirePassagesResponse { repeated FirePassage fire_passages = 1; }
+message UpdatePassageStatusRequest { int64 id = 1; string status = 2; }
+
+message ListPersonnelRequest { int64 building_id = 1; }
+message ListPersonnelResponse { repeated Personnel personnel = 1; }
+message UpdatePersonnelLocationRequest { int64 id = 1; double location_x = 2; double location_y = 3; double location_z = 4; }
+
+message ListRescuePlansRequest { int64 building_id = 1; }
+message ListRescuePlansResponse { repeated RescuePlan rescue_plans = 1; }
+message CreateRescuePlanRequest { RescuePlan rescue_plan = 1; }
+message SimulateRescuePlanRequest { int64 id = 1; }
+message SimulateRescuePlanResponse { repeated SimulationStep steps = 1; double total_time = 2; double success_rate = 3; }
+
+message ListRescueUnitsRequest { string status = 1; }
+message ListRescueUnitsResponse { repeated RescueUnit rescue_units = 1; }
+message ScheduleForceRequest { int64 building_id = 1; repeated int64 unit_ids = 2; string strategy = 3; }
+message ScheduleForceResponse { repeated RescueUnit dispatched_units = 1; string plan_summary = 2; }
+
+message GetFireSituationRequest { int64 building_id = 1; }
+message FireSituation { repeated FireEvent active_fires = 1; double total_area = 2; string threat_level = 3; repeated string recommended_actions = 4; }
+message ReportFireEventRequest { FireEvent fire_event = 1; }
+
+message SendCommandRequest { int64 building_id = 1; string from_unit = 2; string to_unit = 3; string content = 4; string priority = 5; }
+message ListCommandsRequest { int64 building_id = 1; }
+message ListCommandsResponse { repeated Command commands = 1; }
+
+message ListResourcesRequest { string type = 1; }
+message ListResourcesResponse { repeated Resource resources = 1; }
+message DispatchResourceRequest { int64 id = 1; double target_lng = 2; double target_lat = 3; }
+
+message GetSystemStatusRequest {}
+message GetTracesRequest { string service = 1; int32 limit = 2; }
+message TraceInfo { string trace_id = 1; string service = 2; string operation = 3; double duration_ms = 4; string status = 5; }
+message TracesResponse { repeated TraceInfo traces = 1; }
+
+service BuildingService {
+  rpc GetBuilding(GetBuildingRequest) returns (Building) {
+    option (google.api.http) = { get: "/api/v1/buildings/{id}" };
+  }
+  rpc ListBuildings(ListBuildingsRequest) returns (ListBuildingsResponse) {
+    option (google.api.http) = { get: "/api/v1/buildings" };
+  }
+  rpc CreateBuilding(CreateBuildingRequest) returns (Building) {
+    option (google.api.http) = { post: "/api/v1/buildings" body: "building" };
+  }
+  rpc UpdateBuilding(UpdateBuildingRequest) returns (Building) {
+    option (google.api.http) = { put: "/api/v1/buildings/{id}" body: "building" };
+  }
+}
+
+service WaterSourceService {
+  rpc ListWaterSources(ListWaterSourcesRequest) returns (ListWaterSourcesResponse) {
+    option (google.api.http) = { get: "/api/v1/buildings/{building_id}/water-sources" };
+  }
+  rpc UpdateWaterSourceStatus(UpdateWaterSourceStatusRequest) returns (WaterSource) {
+    option (google.api.http) = { put: "/api/v1/water-sources/{id}/status" body: "*" };
+  }
+}
+
+service FirePassageService {
+  rpc ListFirePassages(ListFirePassagesRequest) returns (ListFirePassagesResponse) {
+    option (google.api.http) = { get: "/api/v1/buildings/{building_id}/fire-passages" };
+  }
+  rpc UpdatePassageStatus(UpdatePassageStatusRequest) returns (FirePassage) {
+    option (google.api.http) = { put: "/api/v1/fire-passages/{id}/status" body: "*" };
+  }
+}
+
+service PersonnelService {
+  rpc ListPersonnel(ListPersonnelRequest) returns (ListPersonnelResponse) {
+    option (google.api.http) = { get: "/api/v1/buildings/{building_id}/personnel" };
+  }
+  rpc UpdatePersonnelLocation(UpdatePersonnelLocationRequest) returns (Personnel) {
+    option (google.api.http) = { put: "/api/v1/personnel/{id}/location" body: "*" };
+  }
+}
+
+service RescuePlanService {
+  rpc ListRescuePlans(ListRescuePlansRequest) returns (ListRescuePlansResponse) {
+    option (google.api.http) = { get: "/api/v1/buildings/{building_id}/rescue-plans" };
+  }
+  rpc CreateRescuePlan(CreateRescuePlanRequest) returns (RescuePlan) {
+    option (google.api.http) = { post: "/api/v1/buildings/{rescue_plan.building_id}/rescue-plans" body: "rescue_plan" };
+  }
+  rpc SimulateRescuePlan(SimulateRescuePlanRequest) returns (SimulateRescuePlanResponse) {
+    option (google.api.http) = { post: "/api/v1/rescue-plans/{id}/simulate" body: "*" };
+  }
+}
+
+service ForceScheduleService {
+  rpc ListRescueUnits(ListRescueUnitsRequest) returns (ListRescueUnitsResponse) {
+    option (google.api.http) = { get: "/api/v1/rescue-units" };
+  }
+  rpc ScheduleForce(ScheduleForceRequest) returns (ScheduleForceResponse) {
+    option (google.api.http) = { post: "/api/v1/rescue-units/schedule" body: "*" };
+  }
+}
+
+service FireSituationService {
+  rpc GetFireSituation(GetFireSituationRequest) returns (FireSituation) {
+    option (google.api.http) = { get: "/api/v1/buildings/{building_id}/fire-situation" };
+  }
+  rpc ReportFireEvent(ReportFireEventRequest) returns (FireEvent) {
+    option (google.api.http) = { post: "/api/v1/fire-events" body: "fire_event" };
+  }
+}
+
+service CommandService {
+  rpc SendCommand(SendCommandRequest) returns (Command) {
+    option (google.api.http) = { post: "/api/v1/commands" body: "*" };
+  }
+  rpc ListCommands(ListCommandsRequest) returns (ListCommandsResponse) {
+    option (google.api.http) = { get: "/api/v1/buildings/{building_id}/commands" };
+  }
+}
+
+service ResourceService {
+  rpc ListResources(ListResourcesRequest) returns (ListResourcesResponse) {
+    option (google.api.http) = { get: "/api/v1/resources" };
+  }
+  rpc DispatchResource(DispatchResourceRequest) returns (Resource) {
+    option (google.api.http) = { post: "/api/v1/resources/{id}/dispatch" body: "*" };
+  }
+}
+
+service MonitorService {
+  rpc GetSystemStatus(GetSystemStatusRequest) returns (SystemStatus) {
+    option (google.api.http) = { get: "/api/v1/monitor/status" };
+  }
+  rpc GetTraces(GetTracesRequest) returns (TracesResponse) {
+    option (google.api.http) = { get: "/api/v1/monitor/traces" };
+  }
+}

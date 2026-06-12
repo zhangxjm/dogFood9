@@ -1,0 +1,32 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    container_name: fft-jaeger
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+      - "14268:14268"
+    networks:
+      - fft-network
+    restart: unless-stopped
+
+  redis:
+    image: redis/redis-stack-server:7.2.0-v10
+    container_name: fft-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - fft-network
+    restart: unless-stopped
+
+networks:
+  fft-network:
+    driver: bridge
+
+volumes:
+  redis-data:
