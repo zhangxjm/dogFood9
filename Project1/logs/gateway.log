@@ -1,4 +1,4 @@
-2026-06-12 21:10:03.446  INFO 27025 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
+2026-06-12 22:50:37.690  INFO 63620 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -8,31 +8,24 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-06-12 21:10:03.546  INFO 27025 --- [           main] com.bonded.gateway.GatewayApplication    : Starting GatewayApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 27025 (/Users/darian/projects/dogFood9/Project1/gateway/target/gateway-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
-2026-06-12 21:10:03.547  INFO 27025 --- [           main] com.bonded.gateway.GatewayApplication    : The following 1 profile is active: "simple"
-2026-06-12 21:10:04.250  INFO 27025 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=bb4f8315-d0c7-3ded-a095-51f420e36461
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [After]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Before]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Between]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Cookie]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Header]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Host]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Method]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Path]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Query]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [ReadBody]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [RemoteAddr]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [XForwardedRemoteAddr]
-2026-06-12 21:10:04.658  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Weight]
-2026-06-12 21:10:04.659  INFO 27025 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [CloudFoundryRouteService]
-2026-06-12 21:10:04.873  INFO 27025 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2026-06-12 21:10:04.993  INFO 27025 --- [           main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 9000
-2026-06-12 21:10:05.029  INFO 27025 --- [           main] com.bonded.gateway.GatewayApplication    : Started GatewayApplication in 3.266 seconds (JVM running for 3.511)
-2026-06-12 21:10:11.725 ERROR 27025 --- [ctor-http-nio-2] i.n.r.d.DnsServerAddressStreamProviders  : Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
-2026-06-12 21:10:42.805  WARN 27025 --- [ctor-http-nio-3] com.bonded.gateway.filter.WafFilter      : WAF: Attack pattern detected from IP 0:0:0:0:0:0:0:1: /api/warehouse/goods/list?id=1 UNION SELECT 1,2,3--
-2026-06-12 21:10:42.826  WARN 27025 --- [ctor-http-nio-4] com.bonded.gateway.filter.WafFilter      : WAF: Attack pattern detected from IP 0:0:0:0:0:0:0:1: /api/warehouse/goods/list?id=1 OR 1=1
-2026-06-12 21:10:42.843  WARN 27025 --- [ctor-http-nio-5] com.bonded.gateway.filter.WafFilter      : WAF: Attack pattern detected from IP 0:0:0:0:0:0:0:1: /api/warehouse/goods/list?name=<script>alert(1)</script>
-2026-06-12 21:10:42.858  WARN 27025 --- [ctor-http-nio-6] com.bonded.gateway.filter.WafFilter      : WAF: Attack pattern detected from IP 0:0:0:0:0:0:0:1: /api/warehouse/goods/list?name=javascript:alert(1)
-2026-06-12 21:10:42.871  WARN 27025 --- [ctor-http-nio-7] com.bonded.gateway.filter.WafFilter      : WAF: Attack pattern detected from IP 0:0:0:0:0:0:0:1: /api/warehouse/goods/list?path=../../etc/passwd
-2026-06-12 21:10:42.883  WARN 27025 --- [ctor-http-nio-8] com.bonded.gateway.filter.WafFilter      : WAF: Attack pattern detected from IP 0:0:0:0:0:0:0:1: /api/warehouse/goods/list?id=1;ls
-2026-06-12 21:10:42.908  WARN 27025 --- [ctor-http-nio-2] com.bonded.gateway.filter.WafFilter      : WAF: Attack pattern detected from IP 0:0:0:0:0:0:0:1: /api/warehouse/goods/list?id=1&& rm -rf /
+2026-06-12 22:50:37.950  INFO 63620 --- [           main] com.bonded.gateway.GatewayApplication    : Starting GatewayApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 63620 (/Users/darian/projects/dogFood9/Project1/gateway/target/gateway-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
+2026-06-12 22:50:37.950  INFO 63620 --- [           main] com.bonded.gateway.GatewayApplication    : The following 1 profile is active: "simple"
+2026-06-12 22:50:39.010  INFO 63620 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=bb4f8315-d0c7-3ded-a095-51f420e36461
+2026-06-12 22:50:39.634  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [After]
+2026-06-12 22:50:39.634  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Before]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Between]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Cookie]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Header]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Host]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Method]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Path]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Query]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [ReadBody]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [RemoteAddr]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Weight]
+2026-06-12 22:50:39.635  INFO 63620 --- [           main] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2026-06-12 22:50:39.772  INFO 63620 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-06-12 22:50:39.931  INFO 63620 --- [           main] o.s.b.web.embedded.netty.NettyWebServer  : Netty started on port 9000
+2026-06-12 22:50:39.975  INFO 63620 --- [           main] com.bonded.gateway.GatewayApplication    : Started GatewayApplication in 2.844 seconds (JVM running for 3.344)
+2026-06-12 22:50:52.159 ERROR 63620 --- [ctor-http-nio-2] i.n.r.d.DnsServerAddressStreamProviders  : Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library

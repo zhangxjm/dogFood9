@@ -1,4 +1,4 @@
-2026-06-12 20:41:39.967  INFO 17535 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
+2026-06-12 22:50:37.410  INFO 63618 --- [           main] c.a.n.client.env.SearchableProperties    : properties search order:PROPERTIES->JVM->ENV->DEFAULT_SETTING
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -8,20 +8,19 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::               (v2.7.18)
 
-2026-06-12 20:41:40.047  INFO 17535 --- [           main] com.bonded.customs.CustomsApplication    : Starting CustomsApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 17535 (/Users/darian/projects/dogFood9/Project1/customs-service/target/customs-service-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
-2026-06-12 20:41:40.047  INFO 17535 --- [           main] com.bonded.customs.CustomsApplication    : The following 1 profile is active: "simple"
-2026-06-12 20:41:40.509  INFO 17535 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=11018ea7-1b66-3e57-8230-5ff021a88580
-2026-06-12 20:41:40.681  INFO 17535 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9002 (http)
-2026-06-12 20:41:40.689  INFO 17535 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2026-06-12 20:41:40.690  INFO 17535 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
-2026-06-12 20:41:40.725  INFO 17535 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2026-06-12 20:41:40.725  INFO 17535 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 653 ms
-2026-06-12 20:41:40.826  INFO 17535 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2026-06-12 20:41:41.183  INFO 17535 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2026-06-12 20:41:41.488  INFO 17535 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
-2026-06-12 20:41:41.514  INFO 17535 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9002 (http) with context path ''
-2026-06-12 20:41:41.526  INFO 17535 --- [           main] com.bonded.customs.CustomsApplication    : Started CustomsApplication in 1.752 seconds (JVM running for 2.072)
-2026-06-12 20:45:29.116  INFO 17535 --- [nio-9002-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-06-12 20:45:29.116  INFO 17535 --- [nio-9002-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2026-06-12 20:45:29.121  INFO 17535 --- [nio-9002-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 5 ms
-2026-06-12 21:11:10.870  WARN 17535 --- [nio-9002-exec-4] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Unexpected character ('C' (code 67)): was expecting a colon to separate field name and value; nested exception is com.fasterxml.jackson.core.JsonParseException: Unexpected character ('C' (code 67)): was expecting a colon to separate field name and value<EOL> at [Source: (org.springframework.util.StreamUtils$NonClosingInputStream); line: 5, column: 13]]
+2026-06-12 22:50:37.575  INFO 63618 --- [           main] com.bonded.customs.CustomsApplication    : Starting CustomsApplication v1.0.0 using Java 17.0.19 on Mac.bbrouter with PID 63618 (/Users/darian/projects/dogFood9/Project1/customs-service/target/customs-service-1.0.0.jar started by darian in /Users/darian/projects/dogFood9/Project1)
+2026-06-12 22:50:37.576  INFO 63618 --- [           main] com.bonded.customs.CustomsApplication    : The following 1 profile is active: "simple"
+2026-06-12 22:50:38.577  INFO 63618 --- [           main] o.s.cloud.context.scope.GenericScope     : BeanFactory id=11018ea7-1b66-3e57-8230-5ff021a88580
+2026-06-12 22:50:38.981  INFO 63618 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port(s): 9002 (http)
+2026-06-12 22:50:38.987  INFO 63618 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-06-12 22:50:38.987  INFO 63618 --- [           main] org.apache.catalina.core.StandardEngine  : Starting Servlet engine: [Apache Tomcat/9.0.83]
+2026-06-12 22:50:39.050  INFO 63618 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-06-12 22:50:39.050  INFO 63618 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1385 ms
+2026-06-12 22:50:39.287  INFO 63618 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-06-12 22:50:42.574  INFO 63618 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-06-12 22:50:42.889  INFO 63618 --- [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2026-06-12 22:50:42.925  INFO 63618 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port(s): 9002 (http) with context path ''
+2026-06-12 22:50:42.939  INFO 63618 --- [           main] com.bonded.customs.CustomsApplication    : Started CustomsApplication in 5.916 seconds (JVM running for 6.308)
+2026-06-12 22:50:51.836  INFO 63618 --- [nio-9002-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-12 22:50:51.836  INFO 63618 --- [nio-9002-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-06-12 22:50:51.845  INFO 63618 --- [nio-9002-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 9 ms
