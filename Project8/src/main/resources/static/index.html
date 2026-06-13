@@ -288,6 +288,7 @@ updateClock();
 var overviewData = null;
 var devicesData = [];
 var alarmsData = [];
+var deviceSelectInitialized = false;
 
 function fetchOverview() {
   fetch('/api/control/overview').then(function(r) { return r.json(); })
@@ -302,7 +303,10 @@ function fetchDevices() {
     .then(function(d) {
       devicesData = d || [];
       renderDevices(devicesData);
-      renderDeviceSelect(devicesData);
+      if (!deviceSelectInitialized) {
+        renderDeviceSelect(devicesData);
+        deviceSelectInitialized = true;
+      }
     }).catch(function() {});
 }
 
