@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>工业设备全生命周期管理系统</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="logo-icon">⚙️</span>
+        <span class="logo-text">设备管理系统</span>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-item active" data-page="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">数据概览</span>
+        </div>
+        <div class="nav-item" data-page="equipment">
+          <span class="nav-icon">🔧</span>
+          <span class="nav-text">设备管理</span>
+        </div>
+        <div class="nav-item" data-page="maintenance">
+          <span class="nav-icon">📅</span>
+          <span class="nav-text">维保计划</span>
+        </div>
+        <div class="nav-item" data-page="workorders">
+          <span class="nav-icon">📋</span>
+          <span class="nav-text">运维工单</span>
+        </div>
+        <div class="nav-item" data-page="inventory">
+          <span class="nav-icon">📦</span>
+          <span class="nav-text">备件库存</span>
+        </div>
+        <div class="nav-item" data-page="health">
+          <span class="nav-icon">❤️</span>
+          <span class="nav-text">健康评估</span>
+        </div>
+        <div class="nav-item" data-page="system">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-text">系统管理</span>
+        </div>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="header">
+        <div class="header-title" id="pageTitle">数据概览</div>
+        <div class="header-info">
+          <div class="system-status">
+            <span class="status-dot"></span>
+            <span>系统运行正常</span>
+          </div>
+          <div class="user-info">
+            <div class="user-avatar">管</div>
+            <span>系统管理员</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <div id="page-dashboard" class="page active">
+          <div class="page-header">
+            <h1 class="page-title">数据概览</h1>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="batchHealthCheck()">
+                🔄 批量健康检查
+              </button>
+              <button class="btn btn-success" onclick="generateAutoPlans()">
+                ⚡ 自动生成维保计划
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-grid" id="statsGrid">
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">设备状态分布</div>
+              </div>
+              <div class="card-body" id="equipmentStatusChart">
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">工单状态统计</div>
+              </div>
+              <div class="card-body" id="workOrderChart">
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">设备健康度分布</div>
+              </div>
+              <div class="card-body" id="healthDistribution">
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">库存预警</div>
+              </div>
+              <div class="card-body" id="inventoryAlert">
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">最近活动</div>
+            </div>
+            <div class="card-body" id="recentActivity">
+            </div>
+          </div>
+        </div>
+
+        <div id="page-equipment" class="page">
+          <div class="page-header">
+            <h1 class="page-title">设备管理</h1>
+            <button class="btn btn-primary" onclick="showEquipmentModal()">
+              ➕ 新增设备
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-item">
+              <label>设备状态：</label>
+              <select id="equipStatusFilter" onchange="loadEquipment()">
+                <option value="">全部</option>
+                <option value="purchased">已采购</option>
+                <option value="installed">已安装</option>
+                <option value="running">运行中</option>
+                <option value="maintenance">维保中</option>
+                <option value="fault">故障</option>
+                <option value="scrapped">已报废</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label>设备类别：</label>
+              <select id="equipCategoryFilter" onchange="loadEquipment()">
+                <option value="">全部</option>
+                <option value="金属加工">金属加工</option>
+                <option value="自动化">自动化</option>
+                <option value="动力设备">动力设备</option>
+                <option value="塑料成型">塑料成型</option>
+                <option value="物流设备">物流设备</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label>搜索：</label>
+              <input type="text" id="equipKeyword" placeholder="设备名称/编号/厂商" onkeyup="if(event.key==='Enter')loadEquipment()">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="loadEquipment()">🔍 查询</button>
+          </div>
+
+          <div class="card">
+            <div class="card-body" style="padding:0;">
+              <table class="data-table" id="equipmentTable">
+                <thead>
+                  <tr>
+                    <th>设备编号</th>
+                    <th>设备名称</th>
+                    <th>类别</th>
+                    <th>型号</th>
+                    <th>位置</th>
+                    <th>状态</th>
+                    <th>健康度</th>
+                    <th>采购日期</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="equipmentTbody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="pagination" id="equipmentPagination">
+          </div>
+        </div>
+
+        <div id="page-maintenance" class="page">
+          <div class="page-header">
+            <h1 class="page-title">维保计划</h1>
+            <button class="btn btn-primary" onclick="showMaintenanceModal()">
+              ➕ 新增计划
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-item">
+              <label>状态：</label>
+              <select id="planStatusFilter" onchange="loadMaintenancePlans()">
+                <option value="">全部</option>
+                <option value="1">启用中</option>
+                <option value="0">已停用</option>
+              </select>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="loadMaintenancePlans()">🔍 查询</button>
+          </div>
+
+          <div class="card">
+            <div class="card-body" style="padding:0;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>计划名称</th>
+                    <th>关联设备</th>
+                    <th>计划类型</th>
+                    <th>执行频率</th>
+                    <th>下次执行</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="maintenanceTbody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="pagination" id="maintenancePagination">
+          </div>
+        </div>
+
+        <div id="page-workorders" class="page">
+          <div class="page-header">
+            <h1 class="page-title">运维工单</h1>
+            <button class="btn btn-primary" onclick="showWorkOrderModal()">
+              ➕ 新增工单
+            </button>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-item">
+              <label>工单状态：</label>
+              <select id="woStatusFilter" onchange="loadWorkOrders()">
+                <option value="">全部</option>
+                <option value="pending">待处理</option>
+                <option value="assigned">已派单</option>
+                <option value="in_progress">处理中</option>
+                <option value="completed">已完成</option>
+                <option value="cancelled">已取消</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label>优先级：</label>
+              <select id="woPriorityFilter" onchange="loadWorkOrders()">
+                <option value="">全部</option>
+                <option value="urgent">紧急</option>
+                <option value="high">高</option>
+                <option value="normal">普通</option>
+                <option value="low">低</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label>工单类型：</label>
+              <select id="woTypeFilter" onchange="loadWorkOrders()">
+                <option value="">全部</option>
+                <option value="maintenance">维保</option>
+                <option value="repair">维修</option>
+                <option value="inspection">巡检</option>
+                <option value="upgrade">升级</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body" style="padding:0;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>工单号</th>
+                    <th>标题</th>
+                    <th>关联设备</th>
+                    <th>类型</th>
+                    <th>优先级</th>
+                    <th>状态</th>
+                    <th>负责人</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="workOrderTbody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="pagination" id="workOrderPagination">
+          </div>
+        </div>
+
+        <div id="page-inventory" class="page">
+          <div class="page-header">
+            <h1 class="page-title">备件库存</h1>
+            <div class="btn-group">
+              <button class="btn btn-success" onclick="showPurchaseSuggestion()">
+                💡 采购建议
+              </button>
+              <button class="btn btn-primary" onclick="showPartModal()">
+                ➕ 新增备件
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="filter-item">
+              <label>库存状态：</label>
+              <select id="stockStatusFilter" onchange="loadSpareParts()">
+                <option value="">全部</option>
+                <option value="low">库存不足</option>
+                <option value="normal">正常</option>
+                <option value="overstock">库存过高</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label>搜索：</label>
+              <input type="text" id="partKeyword" placeholder="备件名称/编号/规格" onkeyup="if(event.key==='Enter')loadSpareParts()">
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="loadSpareParts()">🔍 查询</button>
+          </div>
+
+          <div class="card">
+            <div class="card-body" style="padding:0;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>备件编号</th>
+                    <th>备件名称</th>
+                    <th>规格</th>
+                    <th>单位</th>
+                    <th>库存数量</th>
+                    <th>库存状态</th>
+                    <th>单价</th>
+                    <th>位置</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="partsTbody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="pagination" id="partsPagination">
+          </div>
+        </div>
+
+        <div id="page-health" class="page">
+          <div class="page-header">
+            <h1 class="page-title">健康评估</h1>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="batchHealthCheck()">
+                🔄 批量健康检查
+              </button>
+            </div>
+          </div>
+
+          <div class="stats-grid" id="healthStats">
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">设备健康度排行</div>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>设备名称</th>
+                    <th>设备编号</th>
+                    <th>健康度</th>
+                    <th>运行状态</th>
+                    <th>风险等级</th>
+                    <th>最近检查时间</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="healthTableBody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-system" class="page">
+          <div class="page-header">
+            <h1 class="page-title">系统管理</h1>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">系统信息</div>
+            </div>
+            <div class="card-body">
+              <div class="detail-grid" id="systemInfo">
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">端口列表</div>
+            </div>
+            <div class="card-body">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>服务名称</th>
+                    <th>端口号</th>
+                    <th>说明</th>
+                  </tr>
+                </thead>
+                <tbody id="portList">
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">消息队列状态</div>
+            </div>
+            <div class="card-body" id="queueStats">
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">系统操作</div>
+            </div>
+            <div class="card-body">
+              <div class="btn-group">
+                <button class="btn btn-primary" onclick="batchHealthCheck()">
+                  🔄 批量健康检查
+                </button>
+                <button class="btn btn-success" onclick="generateAutoPlans()">
+                  ⚡ 自动生成维保计划
+                </button>
+                <button class="btn btn-warning" onclick="testSentryError()">
+                  🐛 测试错误监控
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modalContent">
+    </div>
+  </div>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

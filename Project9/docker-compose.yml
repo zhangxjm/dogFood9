@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: equipment-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --appendfsync everysec
+    volumes:
+      - redis-data:/data
+    networks:
+      - equipment-network
+
+volumes:
+  redis-data:
+
+networks:
+  equipment-network:
+    driver: bridge
