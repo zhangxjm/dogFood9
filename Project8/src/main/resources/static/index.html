@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能电网分布式无功补偿控制系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#1a1a2e;--card:#16213e;--accent:#0f3460;--alert:#e94560;
+  --highlight:#00d2ff;--text:#e0e0e0;--text-dim:#8892a4;
+  --success:#00c853;--warning:#ffc107;--info:#2196f3;--orange:#ff9800;
+  --radius:10px;--shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+body{font-family:"Microsoft YaHei","PingFang SC","Helvetica Neue",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.top-nav{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#0f3460,#16213e);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--accent);box-shadow:var(--shadow)}
+.top-nav h1{font-size:20px;color:var(--highlight);letter-spacing:2px;font-weight:700}
+.top-nav .nav-right{display:flex;align-items:center;gap:20px}
+.clock{font-size:15px;color:var(--text-dim);font-variant-numeric:tabular-nums}
+.status-indicator{display:flex;align-items:center;gap:8px;font-size:13px}
+.status-dot{width:10px;height:10px;border-radius:50%;background:var(--success);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(0,200,83,0.5)}50%{box-shadow:0 0 0 6px rgba(0,200,83,0)}}
+.main-content{padding:20px 24px;max-width:1600px;margin:0 auto}
+.cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.overview-card{background:var(--card);border-radius:var(--radius);padding:20px 22px;border:1px solid rgba(255,255,255,0.05);box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
+.overview-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,0.5)}
+.overview-card .card-label{font-size:13px;color:var(--text-dim);margin-bottom:8px}
+.overview-card .card-value{font-size:28px;font-weight:700;color:var(--highlight)}
+.overview-card .card-sub{font-size:12px;color:var(--text-dim);margin-top:6px}
+.overview-card.alert-card .card-value{color:var(--alert)}
+.section{background:var(--card);border-radius:var(--radius);padding:22px 24px;margin-bottom:20px;border:1px solid rgba(255,255,255,0.05);box-shadow:var(--shadow)}
+.section-title{font-size:16px;font-weight:600;color:var(--highlight);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
+.section-title .title-text{display:flex;align-items:center;gap:8px}
+.section-title .title-text::before{content:"";width:4px;height:18px;background:var(--highlight);border-radius:2px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--accent);color:var(--highlight);padding:10px 12px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background .3s}
+tr:hover td{background:rgba(0,210,255,0.04)}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.status-online{background:rgba(0,200,83,0.15);color:var(--success)}
+.status-offline{background:rgba(136,146,164,0.15);color:var(--text-dim)}
+.status-fault{background:rgba(233,69,96,0.15);color:var(--alert)}
+.status-maintenance{background:rgba(255,193,7,0.15);color:var(--warning)}
+.status-standby{background:rgba(0,210,255,0.15);color:var(--highlight)}
+.voltage-out-of-range{background:rgba(233,69,96,0.1) !important}
+.voltage-out-of-range td{color:var(--alert) !important;font-weight:600}
+.btn{padding:8px 18px;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:600;transition:all .2s;font-family:inherit}
+.btn-primary{background:var(--accent);color:var(--highlight)}
+.btn-primary:hover{background:#1a4a8a;box-shadow:0 0 12px rgba(0,210,255,0.3)}
+.btn-danger{background:rgba(233,69,96,0.2);color:var(--alert)}
+.btn-danger:hover{background:rgba(233,69,96,0.35)}
+.btn-success{background:rgba(0,200,83,0.2);color:var(--success)}
+.btn-success:hover{background:rgba(0,200,83,0.35)}
+.alarm-critical{color:var(--alert);font-weight:700}
+.alarm-emergency{color:#ff1744;font-weight:700}
+.alarm-warning{color:var(--warning)}
+.alarm-info{color:var(--info)}
+.alarm-level-badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:600}
+.alarm-level-critical{background:rgba(233,69,96,0.15);color:var(--alert)}
+.alarm-level-emergency{background:rgba(255,23,68,0.15);color:#ff1744}
+.alarm-level-warning{background:rgba(255,193,7,0.15);color:var(--warning)}
+.alarm-level-info{background:rgba(33,150,243,0.15);color:var(--info)}
+.progress-bar-wrap{background:rgba(255,255,255,0.06);border-radius:6px;height:22px;overflow:hidden;position:relative}
+.progress-bar-fill{height:100%;border-radius:6px;transition:width .8s ease;background:linear-gradient(90deg,var(--accent),var(--highlight))}
+.progress-bar-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:600;color:#fff}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.new-energy-item{background:rgba(0,210,255,0.04);border-radius:8px;padding:16px;margin-bottom:12px}
+.new-energy-item .ne-label{font-size:13px;color:var(--text-dim);margin-bottom:6px}
+.new-energy-item .ne-value{font-size:22px;font-weight:700;color:var(--highlight)}
+.form-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:12px;flex-wrap:wrap}
+.form-group{display:flex;flex-direction:column;gap:4px}
+.form-group label{font-size:12px;color:var(--text-dim)}
+.form-group select,.form-group input{background:var(--accent);border:1px solid rgba(255,255,255,0.1);color:var(--text);padding:8px 12px;border-radius:6px;font-size:13px;font-family:inherit;outline:none;transition:border .2s}
+.form-group select:focus,.form-group input:focus{border-color:var(--highlight)}
+.compensation-summary{background:rgba(0,210,255,0.04);border-radius:8px;padding:16px;margin-bottom:16px;display:flex;gap:30px;flex-wrap:wrap}
+.compensation-summary .cs-item .cs-label{font-size:12px;color:var(--text-dim);margin-bottom:4px}
+.compensation-summary .cs-item .cs-value{font-size:20px;font-weight:700;color:var(--highlight)}
+.table-wrap{overflow-x:auto;max-height:400px;overflow-y:auto}
+.table-wrap::-webkit-scrollbar{width:6px;height:6px}
+.table-wrap::-webkit-scrollbar-track{background:var(--card)}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px}
+.fade-update{animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:.5;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.toast{position:fixed;top:70px;right:24px;padding:14px 22px;border-radius:8px;font-size:14px;font-weight:600;z-index:999;animation:slideIn .3s ease;box-shadow:0 6px 24px rgba(0,0,0,0.4)}
+.toast-success{background:rgba(0,200,83,0.9);color:#fff}
+.toast-error{background:rgba(233,69,96,0.9);color:#fff}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:1200px){.cards-row{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
+@media(max-width:768px){.cards-row{grid-template-columns:1fr}.top-nav{flex-direction:column;gap:10px}.main-content{padding:12px}}
+</style>
+</head>
+<body>
+<nav class="top-nav">
+  <h1>⚡ 智能电网分布式无功补偿控制系统</h1>
+  <div class="nav-right">
+    <span class="clock" id="clock"></span>
+    <div class="status-indicator">
+      <span class="status-dot" id="sysStatusDot"></span>
+      <span id="sysStatusText">系统运行中</span>
+    </div>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="cards-row" id="cardsRow">
+    <div class="overview-card">
+      <div class="card-label">设备总数 / 在线设备数</div>
+      <div class="card-value" id="cardDevices">-- / --</div>
+      <div class="card-sub" id="cardDevicesSub">在线率 --</div>
+    </div>
+    <div class="overview-card">
+      <div class="card-label">系统平均电压(V)</div>
+      <div class="card-value" id="cardVoltage">--</div>
+      <div class="card-sub" id="cardVoltageSub">最低 -- V / 最高 -- V</div>
+    </div>
+    <div class="overview-card">
+      <div class="card-label">系统平均功率因数</div>
+      <div class="card-value" id="cardPF">--</div>
+      <div class="card-sub" id="cardPFSub">补偿需求 -- kVar</div>
+    </div>
+    <div class="overview-card alert-card">
+      <div class="card-label">未确认告警数</div>
+      <div class="card-value" id="cardAlarms">--</div>
+      <div class="card-sub" id="cardAlarmsSub">严重 -- / 警告 --</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="section">
+      <div class="section-title"><span class="title-text">电压监控</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>设备ID</th><th>设备名称</th><th>当前电压(V)</th><th>状态</th></tr></thead>
+          <tbody id="voltageTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <span class="title-text">无功补偿控制</span>
+        <button class="btn btn-primary" onclick="executeOptimize()">⚙ 执行优化</button>
+      </div>
+      <div class="compensation-summary" id="compSummary">
+        <div class="cs-item"><div class="cs-label">平均功率因数</div><div class="cs-value" id="compPF">--</div></div>
+        <div class="cs-item"><div class="cs-label">总补偿需求(kVar)</div><div class="cs-value" id="compNeed">--</div></div>
+        <div class="cs-item"><div class="cs-label">越限设备数</div><div class="cs-value" id="compOutOfRange" style="color:var(--alert)">--</div></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>设备ID</th><th>设备名称</th><th>无功功率(kVar)</th><th>功率因数</th></tr></thead>
+          <tbody id="reactiveTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="title-text">新能源并网</span></div>
+    <div class="grid-3" id="newEnergyArea">
+      <div class="new-energy-item">
+        <div class="ne-label">☀ 光伏出力(kW)</div>
+        <div class="ne-value" id="neSolar">--</div>
+      </div>
+      <div class="new-energy-item">
+        <div class="ne-label">🌬 风电出力(kW)</div>
+        <div class="ne-value" id="neWind">--</div>
+      </div>
+      <div class="new-energy-item">
+        <div class="ne-label">⚡ 新能源总出力(kW)</div>
+        <div class="ne-value" id="neTotal">--</div>
+      </div>
+    </div>
+    <div style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px">
+        <span>渗透率</span>
+        <span id="neRate">--%</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="neProgressBar" style="width:0%"></div>
+        <span class="progress-bar-text" id="neProgressText">--%</span>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:13px;color:var(--text-dim)">
+      适配策略：<span id="neStrategy" style="color:var(--highlight)">--</span>
+      <span style="margin-left:16px">适配设备数：<span id="neAdaptCount" style="color:var(--highlight)">--</span></span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">
+      <span class="title-text">告警管理</span>
+    </div>
+    <div class="table-wrap" style="max-height:300px">
+      <table>
+        <thead><tr><th>时间</th><th>设备</th><th>级别</th><th>消息</th><th>操作</th></tr></thead>
+        <tbody id="alarmTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="title-text">设备列表</span></div>
+    <div class="table-wrap" style="max-height:450px">
+      <table>
+        <thead><tr><th>编号</th><th>名称</th><th>类型</th><th>状态</th><th>变电站</th><th>电压(V)</th><th>有功(kW)</th><th>无功(kVar)</th><th>功率因数</th><th>频率(Hz)</th><th>温度(℃)</th></tr></thead>
+        <tbody id="deviceTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title"><span class="title-text">调控指令</span></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>选择设备</label>
+        <select id="cmdDevice" style="min-width:180px"></select>
+      </div>
+      <div class="form-group">
+        <label>指令类型</label>
+        <select id="cmdType" style="min-width:160px">
+          <option value="CAPACITOR_SWITCH">电容器投切</option>
+          <option value="REACTOR_SWITCH">电抗器投切</option>
+          <option value="SVG_CONTROL">SVG控制</option>
+          <option value="TAP_CHANGE">分接头调节</option>
+          <option value="POWER_FACTOR_SET">功率因数设定</option>
+          <option value="VOLTAGE_SET">电压设定</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>参数值</label>
+        <input type="number" id="cmdParam" step="0.01" placeholder="请输入参数值" style="min-width:140px">
+      </div>
+      <button class="btn btn-success" onclick="sendCommand()">📤 下发指令</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var DEVICE_TYPE_MAP = {
+  TRANSFORMER:'变压器', CAPACITOR_BANK:'电容器组', REACTOR:'电抗器',
+  SVG:'静止无功发生器', SOLAR_INVERTER:'光伏逆变器', WIND_INVERTER:'风电逆变器'
+};
+var STATUS_MAP = {
+  ONLINE:'在线', OFFLINE:'离线', FAULT:'故障', MAINTENANCE:'维护', STANDBY:'待机'
+};
+var STATUS_CLASS = {
+  ONLINE:'status-online', OFFLINE:'status-offline', FAULT:'status-fault',
+  MAINTENANCE:'status-maintenance', STANDBY:'status-standby'
+};
+var ALARM_LEVEL_MAP = {CRITICAL:'严重',WARNING:'警告',INFO:'信息',EMERGENCY:'紧急'};
+var ALARM_LEVEL_CLASS = {
+  CRITICAL:'alarm-level-critical', WARNING:'alarm-level-warning',
+  INFO:'alarm-level-info', EMERGENCY:'alarm-level-emergency'
+};
+var ALARM_LEVEL_TEXT_CLASS = {
+  CRITICAL:'alarm-critical', WARNING:'alarm-warning',
+  INFO:'alarm-info', EMERGENCY:'alarm-emergency'
+};
+
+function fmt(n, d) {
+  if (n == null || isNaN(n)) return '--';
+  return Number(n).toFixed(d != null ? d : 2);
+}
+
+function showToast(msg, type) {
+  var t = document.createElement('div');
+  t.className = 'toast toast-' + (type || 'success');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 3000);
+}
+
+function updateClock() {
+  var now = new Date();
+  var s = now.getFullYear() + '-' +
+    String(now.getMonth()+1).padStart(2,'0') + '-' +
+    String(now.getDate()).padStart(2,'0') + ' ' +
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = s;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+var overviewData = null;
+var devicesData = [];
+var alarmsData = [];
+
+function fetchOverview() {
+  fetch('/api/control/overview').then(function(r) { return r.json(); })
+    .then(function(d) {
+      overviewData = d;
+      renderOverview(d);
+    }).catch(function() {});
+}
+
+function fetchDevices() {
+  fetch('/api/devices').then(function(r) { return r.json(); })
+    .then(function(d) {
+      devicesData = d || [];
+      renderDevices(devicesData);
+      renderDeviceSelect(devicesData);
+    }).catch(function() {});
+}
+
+function fetchAlarms() {
+  fetch('/api/alarms').then(function(r) { return r.json(); })
+    .then(function(d) {
+      alarmsData = d || [];
+      renderAlarms(alarmsData);
+    }).catch(function() {});
+}
+
+function renderOverview(d) {
+  var total = d.totalDeviceCount || 0;
+  var online = d.onlineDeviceCount || 0;
+  var rate = total > 0 ? (online / total * 100).toFixed(1) : '0.0';
+  document.getElementById('cardDevices').textContent = total + ' / ' + online;
+  document.getElementById('cardDevicesSub').textContent = '在线率 ' + rate + '%';
+
+  var vs = d.voltageStats || {};
+  document.getElementById('cardVoltage').textContent = fmt(vs.averageVoltage);
+  document.getElementById('cardVoltageSub').textContent = '最低 ' + fmt(vs.minVoltage) + ' V / 最高 ' + fmt(vs.maxVoltage) + ' V';
+
+  var rs = d.reactivePowerStats || {};
+  document.getElementById('cardPF').textContent = fmt(rs.averagePowerFactor);
+  document.getElementById('cardPFSub').textContent = '补偿需求 ' + fmt(rs.totalCompensationNeeded) + ' kVar';
+
+  var unack = d.unacknowledgedAlarmCount || 0;
+  document.getElementById('cardAlarms').textContent = unack;
+  document.getElementById('cardAlarmsSub').textContent = '严重 ' + (d.criticalAlarmCount||0) + ' / 警告 ' + (d.warningAlarmCount||0);
+
+  renderVoltageTable(vs.deviceVoltages || [], vs.outOfRangeCount || 0);
+  renderReactiveTable(rs.deviceData || [], rs.averagePowerFactor, rs.totalCompensationNeeded, vs.outOfRangeCount);
+  renderNewEnergy(d.newEnergyStats || {});
+}
+
+function renderVoltageTable(list, outCount) {
+  var tb = document.getElementById('voltageTable');
+  var html = '';
+  list.forEach(function(item) {
+    var isOutOfRange = item.outOfRange;
+    var rowClass = isOutOfRange ? ' class="voltage-out-of-range"' : '';
+    var statusText = isOutOfRange ? '越限' : '正常';
+    var statusStyle = isOutOfRange ? 'color:var(--alert);font-weight:700' : 'color:var(--success)';
+    html += '<tr' + rowClass + '>' +
+      '<td>' + (item.deviceId||'--') + '</td>' +
+      '<td>' + (item.deviceName||'--') + '</td>' +
+      '<td>' + fmt(item.currentVoltage) + '</td>' +
+      '<td style="' + statusStyle + '">' + statusText + '</td>' +
+      '</tr>';
+  });
+  tb.innerHTML = html;
+}
+
+function renderReactiveTable(list, avgPF, totalNeed, outCount) {
+  document.getElementById('compPF').textContent = fmt(avgPF);
+  document.getElementById('compNeed').textContent = fmt(totalNeed);
+  document.getElementById('compOutOfRange').textContent = outCount;
+
+  var tb = document.getElementById('reactiveTable');
+  var html = '';
+  list.forEach(function(item) {
+    html += '<tr>' +
+      '<td>' + (item.deviceId||'--') + '</td>' +
+      '<td>' + (item.deviceName||'--') + '</td>' +
+      '<td>' + fmt(item.reactivePower) + '</td>' +
+      '<td>' + fmt(item.powerFactor) + '</td>' +
+      '</tr>';
+  });
+  tb.innerHTML = html;
+}
+
+function renderNewEnergy(ne) {
+  document.getElementById('neSolar').textContent = fmt(ne.solarOutput);
+  document.getElementById('neWind').textContent = fmt(ne.windOutput);
+  document.getElementById('neTotal').textContent = fmt(ne.totalNewEnergy);
+
+  var rate = ne.penetrationRate || 0;
+  var pct = Math.min(rate, 100);
+  document.getElementById('neRate').textContent = fmt(rate, 1) + '%';
+  document.getElementById('neProgressBar').style.width = pct + '%';
+  document.getElementById('neProgressText').textContent = fmt(rate, 1) + '%';
+
+  var strategy = '常规补偿策略';
+  var adaptCount = ne.adaptingDeviceCount || 0;
+  if (rate > 30) {
+    strategy = '高渗透率自适应补偿策略';
+  } else if (rate > 15) {
+    strategy = '中渗透率协调补偿策略';
+  }
+  document.getElementById('neStrategy').textContent = strategy;
+  document.getElementById('neAdaptCount').textContent = adaptCount;
+}
+
+function renderAlarms(list) {
+  var tb = document.getElementById('alarmTable');
+  var html = '';
+  list.forEach(function(a) {
+    var levelText = ALARM_LEVEL_MAP[a.level] || a.level;
+    var levelBadgeClass = ALARM_LEVEL_CLASS[a.level] || '';
+    var ackBtnDisabled = a.acknowledged ? 'disabled' : '';
+    var ackBtnText = a.acknowledged ? '已确认' : '确认告警';
+    var ackBtnClass = a.acknowledged ? 'btn btn-primary' : 'btn btn-danger';
+    html += '<tr class="fade-update">' +
+      '<td style="white-space:nowrap">' + (a.createdAt||'--') + '</td>' +
+      '<td>' + (a.source||a.deviceId||'--') + '</td>' +
+      '<td><span class="alarm-level-badge ' + levelBadgeClass + '">' + levelText + '</span></td>' +
+      '<td class="' + (ALARM_LEVEL_TEXT_CLASS[a.level]||'') + '">' + (a.message||'--') + '</td>' +
+      '<td><button class="' + ackBtnClass + '" onclick="acknowledgeAlarm(' + a.id + ',this)" ' + ackBtnDisabled + '>' + ackBtnText + '</button></td>' +
+      '</tr>';
+  });
+  tb.innerHTML = html;
+}
+
+function renderDevices(list) {
+  var tb = document.getElementById('deviceTable');
+  var html = '';
+  list.forEach(function(d) {
+    var statusText = STATUS_MAP[d.status] || d.status;
+    var statusClass = STATUS_CLASS[d.status] || '';
+    var typeText = DEVICE_TYPE_MAP[d.deviceType] || d.deviceType;
+    html += '<tr class="fade-update">' +
+      '<td>' + (d.deviceId||'--') + '</td>' +
+      '<td>' + (d.deviceName||'--') + '</td>' +
+      '<td>' + typeText + '</td>' +
+      '<td><span class="status-badge ' + statusClass + '">' + statusText + '</span></td>' +
+      '<td>' + (d.substationName||'--') + '</td>' +
+      '<td>' + fmt(d.currentVoltage) + '</td>' +
+      '<td>' + fmt(d.currentActivePower) + '</td>' +
+      '<td>' + fmt(d.currentReactivePower) + '</td>' +
+      '<td>' + fmt(d.powerFactor) + '</td>' +
+      '<td>' + fmt(d.frequency) + '</td>' +
+      '<td>' + fmt(d.temperature) + '</td>' +
+      '</tr>';
+  });
+  tb.innerHTML = html;
+}
+
+function renderDeviceSelect(list) {
+  var sel = document.getElementById('cmdDevice');
+  var html = '<option value="">-- 请选择设备 --</option>';
+  list.forEach(function(d) {
+    html += '<option value="' + d.deviceId + '">' + d.deviceId + ' - ' + d.deviceName + '</option>';
+  });
+  sel.innerHTML = html;
+}
+
+function acknowledgeAlarm(id, btn) {
+  fetch('/api/alarms/' + id + '/acknowledge', { method: 'PUT' })
+    .then(function(r) {
+      if (r.ok) {
+        showToast('告警已确认', 'success');
+        btn.disabled = true;
+        btn.textContent = '已确认';
+        btn.className = 'btn btn-primary';
+        fetchOverview();
+      } else {
+        showToast('确认失败', 'error');
+      }
+    }).catch(function() { showToast('网络错误', 'error'); });
+}
+
+function executeOptimize() {
+  fetch('/api/control/cycle', { method: 'POST' })
+    .then(function(r) {
+      if (r.ok) {
+        showToast('优化指令已执行', 'success');
+        fetchOverview();
+        fetchDevices();
+      } else {
+        showToast('执行失败', 'error');
+      }
+    }).catch(function() { showToast('网络错误', 'error'); });
+}
+
+function sendCommand() {
+  var deviceId = document.getElementById('cmdDevice').value;
+  var commandType = document.getElementById('cmdType').value;
+  var parameterValue = document.getElementById('cmdParam').value;
+  if (!deviceId) { showToast('请选择设备', 'error'); return; }
+  if (!parameterValue) { showToast('请输入参数值', 'error'); return; }
+
+  fetch('/api/control/command', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId: deviceId, commandType: commandType, parameterValue: parseFloat(parameterValue) })
+  }).then(function(r) {
+    if (r.ok) {
+      showToast('指令下发成功', 'success');
+      document.getElementById('cmdParam').value = '';
+      fetchOverview();
+      fetchDevices();
+    } else {
+      showToast('指令下发失败', 'error');
+    }
+  }).catch(function() { showToast('网络错误', 'error'); });
+}
+
+function refreshAll() {
+  fetchOverview();
+  fetchDevices();
+  fetchAlarms();
+}
+
+refreshAll();
+setInterval(refreshAll, 5000);
+</script>
+</body>
+</html>

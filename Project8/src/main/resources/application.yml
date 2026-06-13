@@ -1,0 +1,41 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:sqlite:${user.dir}/data/smartgrid.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: com.smartgrid.config.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 5000
+
+netty:
+  server:
+    port: 9090
+
+grid:
+  voltage:
+    nominal: 220.0
+    upper-limit: 242.0
+    lower-limit: 198.0
+  reactive:
+    target-power-factor: 0.95
+    max-compensation: 50000
+  new-energy:
+    max-penetration-rate: 0.3
+
+logging:
+  level:
+    com.smartgrid: INFO
+    io.netty: WARN

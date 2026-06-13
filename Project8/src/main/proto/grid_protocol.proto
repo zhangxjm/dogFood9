@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+package smartgrid;
+
+option java_package = "com.smartgrid.rpc.protobuf";
+option java_outer_classname = "GridProtocol";
+
+enum MessageType {
+  HEARTBEAT = 0;
+  STATUS_REPORT = 1;
+  CONTROL_COMMAND = 2;
+  VOLTAGE_REGULATION = 3;
+  REACTIVE_COMPENSATION = 4;
+  NEW_ENERGY_ADAPTATION = 5;
+  ALARM = 6;
+  ACK = 7;
+}
+
+enum DeviceType {
+  TRANSFORMER = 0;
+  CAPACITOR_BANK = 1;
+  REACTOR = 2;
+  SVG = 3;
+  SOLAR_INVERTER = 4;
+  WIND_INVERTER = 5;
+  SMART_METER = 6;
+}
+
+enum DeviceStatus {
+  ONLINE = 0;
+  OFFLINE = 1;
+  FAULT = 2;
+  MAINTENANCE = 3;
+  STANDBY = 4;
+}
+
+enum AlarmLevel {
+  INFO = 0;
+  WARNING = 1;
+  CRITICAL = 2;
+  EMERGENCY = 3;
+}
+
+message GridMessage {
+  MessageType type = 1;
+  string device_id = 2;
+  int64 timestamp = 3;
+  string session_id = 4;
+  oneof payload {
+    HeartbeatPayload heartbeat = 10;
+    StatusReportPayload status_report = 11;
+    ControlCommandPayload control_command = 12;
+    VoltageRegulationPayload voltage_regulation = 13;
+    ReactiveCompensationPayload reactive_compensation = 14;
+    NewEnergyAdaptationPayload new_energy_adaptation = 15;
+    AlarmPayload alarm = 16;
+    AckPayload ack = 17;
+  }
+}
+
+message HeartbeatPayload {
+  DeviceStatus status = 1;
+  double cpu_usage = 2;
+  double memory_usage = 3;
+}
+
+message StatusReportPayload {
+  DeviceType device_type = 1;
+  DeviceStatus device_status = 2;
+  double voltage_a = 3;
+  double voltage_b = 4;
+  double voltage_c = 5;
+  double current_a = 6;
+  double current_b = 7;
+  double current_c = 8;
+  double active_power = 9;
+  double reactive_power = 10;
+  double power_factor = 11;
+  double frequency = 12;
+  double temperature = 13;
+  double compensation_capacity = 14;
+  double load_rate = 15;
+}
+
+message ControlCommandPayload {
+  string command_id = 1;
+  string target_device_id = 2;
+  string command_type = 3;
+  double parameter_value = 4;
+  int32 priority = 5;
+  bool require_ack = 6;
+}
+
+message VoltageRegulationPayload {
+  string regulation_id = 1;
+  string device_id = 2;
+  double target_voltage = 3;
+  double current_voltage = 4;
+  double regulation_step = 5;
+  string regulation_mode = 6;
+}
+
+message ReactiveCompensationPayload {
+  string compensation_id = 1;
+  string device_id = 2;
+  double target_reactive_power = 3;
+  double current_reactive_power = 4;
+  double compensation_value = 5;
+  string compensation_type = 6;
+  double target_power_factor = 7;
+}
+
+message NewEnergyAdaptationPayload {
+  string adaptation_id = 1;
+  string device_id = 2;
+  double solar_output = 3;
+  double wind_output = 4;
+  double grid_load = 5;
+  double penetration_rate = 6;
+  string adaptation_strategy = 7;
+  double reserve_capacity = 8;
+}
+
+message AlarmPayload {
+  string alarm_id = 1;
+  AlarmLevel level = 2;
+  string alarm_source = 3;
+  string alarm_message = 4;
+  double threshold_value = 5;
+  double actual_value = 6;
+}
+
+message AckPayload {
+  string original_message_id = 1;
+  bool success = 2;
+  string message = 3;
+}
