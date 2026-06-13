@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>权限申请 - 政务数据共享交换中台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <h2>政务数据共享交换中台</h2>
+                <p>Government Data Sharing</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/"><span class="icon">📊</span>系统概览</a></li>
+                <li><a href="/catalog"><span class="icon">📚</span>数据目录</a></li>
+                <li><a href="/permission"><span class="icon">🔐</span>我的权限</a></li>
+                <li><a href="/permission/requests" class="active"><span class="icon">📝</span>权限申请</a></li>
+                <li><a href="/exchange"><span class="icon">🔄</span>数据交换</a></li>
+                <li><a href="/audit"><span class="icon">📋</span>审计日志</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title"><h1>权限申请记录</h1></div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar">{{slice .user.RealName 0 1}}</div>
+                        <div class="user-details">
+                            <div class="user-name">{{.user.RealName}}</div>
+                            <div class="user-role">{{if eq .user.Role "admin"}}系统管理员{{else if eq .user.Role "auditor"}}审计员{{else}}普通用户{{end}}</div>
+                        </div>
+                    </div>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            <div class="content">
+                {{if .success}}
+                <div class="success-message">{{.success}}</div>
+                {{end}}
+                {{if .error}}
+                <div class="error-message">{{.error}}</div>
+                {{end}}
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>申请记录列表</h2>
+                        <a href="/catalog" class="btn btn-primary btn-sm">新建申请</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>申请时间</th>
+                                        <th>数据目录</th>
+                                        <th>访问类型</th>
+                                        <th>使用目的</th>
+                                        <th>有效期（天）</th>
+                                        <th>审批状态</th>
+                                        <th>审批意见</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $r := .requests}}
+                                    <tr>
+                                        <td>{{add $i 1}}</td>
+                                        <td>{{$r.CreatedAt.Format "2006-01-02 15:04"}}</td>
+                                        <td><strong>{{if $r.DataCatalog}}{{$r.DataCatalog.Name}}{{end}}</strong></td>
+                                        <td>
+                                            {{if eq $r.AccessType "read"}}<span class="badge badge-blue">读取</span>
+                                            {{else if eq $r.AccessType "write"}}<span class="badge badge-green">写入</span>
+                                            {{else}}<span class="badge badge-gray">{{$r.AccessType}}</span>{{end}}
+                                        </td>
+                                        <td title="{{$r.Purpose}}">{{if gt (len $r.Purpose) 30}}{{slice $r.Purpose 0 30}}...{{else}}{{$r.Purpose}}{{end}}</td>
+                                        <td>{{$r.ValidDays}}</td>
+                                        <td>
+                                            {{if eq $r.Status "已通过"}}<span class="badge badge-green">{{$r.Status}}</span>
+                                            {{else if eq $r.Status "已拒绝"}}<span class="badge badge-red">{{$r.Status}}</span>
+                                            {{else}}<span class="badge badge-yellow">{{$r.Status}}</span>{{end}}
+                                        </td>
+                                        <td>{{$r.ApprovalComment}}</td>
+                                    </tr>
+                                    {{end}}
+                                    {{if not .requests}}
+                                    <tr><td colspan="8" class="empty-state"><div class="empty-state-icon">📭</div><p>暂无申请记录</p></td></tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <span class="pagination-info">共 {{.total}} 条记录</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

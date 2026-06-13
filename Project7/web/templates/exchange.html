@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据交换 - 政务数据共享交换中台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <h2>政务数据共享交换中台</h2>
+                <p>Government Data Sharing</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/"><span class="icon">📊</span>系统概览</a></li>
+                <li><a href="/catalog"><span class="icon">📚</span>数据目录</a></li>
+                <li><a href="/permission"><span class="icon">🔐</span>我的权限</a></li>
+                <li><a href="/permission/requests"><span class="icon">📝</span>权限申请</a></li>
+                <li><a href="/exchange" class="active"><span class="icon">🔄</span>数据交换</a></li>
+                <li><a href="/audit"><span class="icon">📋</span>审计日志</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title"><h1>数据交换</h1></div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar">{{slice .user.RealName 0 1}}</div>
+                        <div class="user-details">
+                            <div class="user-name">{{.user.RealName}}</div>
+                            <div class="user-role">{{if eq .user.Role "admin"}}系统管理员{{else if eq .user.Role "auditor"}}审计员{{else}}普通用户{{end}}</div>
+                        </div>
+                    </div>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            <div class="content">
+                <div class="system-alert">
+                    <span class="system-alert-icon">🔐</span>
+                    <div class="system-alert-content">
+                        <strong>安全交换保障</strong>
+                        <p>所有数据交换过程均采用加密传输，敏感字段自动脱敏处理，交换记录全程可追溯审计。</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>交换记录</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>请求编号</th>
+                                        <th>数据目录</th>
+                                        <th>请求方</th>
+                                        <th>交换类型</th>
+                                        <th>数据量</th>
+                                        <th>数据大小</th>
+                                        <th>开始时间</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $e := .exchanges}}
+                                    <tr>
+                                        <td>{{add $i 1}}</td>
+                                        <td><code>{{$e.RequestID}}</code></td>
+                                        <td>{{if $e.DataCatalog}}{{$e.DataCatalog.Name}}{{end}}</td>
+                                        <td>{{if $e.Requester}}{{$e.Requester.RealName}}{{end}}</td>
+                                        <td>
+                                            {{if eq $e.ExchangeType "read"}}<span class="badge badge-blue">读取</span>
+                                            {{else if eq $e.ExchangeType "write"}}<span class="badge badge-green">写入</span>
+                                            {{else}}<span class="badge badge-gray">{{$e.ExchangeType}}</span>{{end}}
+                                        </td>
+                                        <td>{{$e.DataCount}} 条</td>
+                                        <td id="size-{{$e.ID}}">{{$e.DataSize}}</td>
+                                        <td>{{$e.StartTime.Format "2006-01-02 15:04:05"}}</td>
+                                        <td>
+                                            {{if eq $e.Status "已完成"}}<span class="badge badge-green">{{$e.Status}}</span>
+                                            {{else if eq $e.Status "失败"}}<span class="badge badge-red">{{$e.Status}}</span>
+                                            {{else}}<span class="badge badge-yellow">{{$e.Status}}</span>{{end}}
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                    {{if not .exchanges}}
+                                    <tr><td colspan="9" class="empty-state"><div class="empty-state-icon">🔄</div><p>暂无交换记录，请前往数据目录发起数据交换</p></td></tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <span class="pagination-info">共 {{.total}} 条记录</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+    <script>
+        document.querySelectorAll('[id^="size-"]').forEach(el => {
+            const bytes = parseInt(el.textContent);
+            el.textContent = formatSize(bytes);
+        });
+    </script>
+</body>
+</html>

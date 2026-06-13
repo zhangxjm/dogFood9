@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据预览 - 政务数据共享交换中台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <h2>政务数据共享交换中台</h2>
+                <p>Government Data Sharing</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/"><span class="icon">📊</span>系统概览</a></li>
+                <li><a href="/catalog"><span class="icon">📚</span>数据目录</a></li>
+                <li><a href="/permission"><span class="icon">🔐</span>我的权限</a></li>
+                <li><a href="/permission/requests"><span class="icon">📝</span>权限申请</a></li>
+                <li><a href="/exchange"><span class="icon">🔄</span>数据交换</a></li>
+                <li><a href="/audit"><span class="icon">📋</span>审计日志</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title"><h1>数据预览</h1></div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar">{{slice .user.RealName 0 1}}</div>
+                        <div class="user-details">
+                            <div class="user-name">{{.user.RealName}}</div>
+                            <div class="user-role">{{if eq .user.Role "admin"}}系统管理员{{else if eq .user.Role "auditor"}}审计员{{else}}普通用户{{end}}</div>
+                        </div>
+                    </div>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            <div class="content">
+                <div class="system-alert">
+                    <span class="system-alert-icon">🔒</span>
+                    <div class="system-alert-content">
+                        <strong>脱敏提示</strong>
+                        <p>预览数据中的敏感字段已做脱敏处理（标记为***），实际数据交换时将根据安全等级进行加密传输。</p>
+                    </div>
+                </div>
+
+                {{with .data}}
+                <div class="card">
+                    <div class="card-header">
+                        <h2>目录信息：{{.catalog.Name}}</h2>
+                        <a href="/catalog" class="btn btn-secondary btn-sm">返回目录</a>
+                    </div>
+                    <div class="card-body">
+                        <table>
+                            <tbody>
+                                <tr><td style="width:120px;font-weight:600;">目录编码</td><td>{{.catalog.Code}}</td></tr>
+                                <tr><td style="font-weight:600;">描述</td><td>{{.catalog.Description}}</td></tr>
+                                <tr><td style="font-weight:600;">数据标准</td><td>{{.catalog.DataStandard}}</td></tr>
+                                <tr><td style="font-weight:600;">数据格式</td><td>{{.catalog.DataFormat}}</td></tr>
+                                <tr><td style="font-weight:600;">更新频率</td><td>{{.catalog.UpdateFrequency}}</td></tr>
+                                <tr><td style="font-weight:600;">来源系统</td><td>{{.catalog.SourceSystem}}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>字段定义</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="field-tags">
+                            {{range .fields}}
+                            <span class="field-tag {{if .encrypted}}encrypted{{end}}">
+                                {{.label}}（{{.name}}）{{if .encrypted}}🔒{{end}}
+                            </span>
+                            {{end}}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>数据预览（脱敏）</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="preview-table">
+                                <thead>
+                                    <tr>
+                                        {{range .fields}}
+                                        <th>{{.label}}{{if .encrypted}} 🔒{{end}}</th>
+                                        {{end}}
+                                    </tr>
+                                </thead>
+                                <tbody id="preview-data-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    (function() {
+                        var fields = {{.fields | json}};
+                        var data = {{.data | json}};
+                        var tbody = document.getElementById('preview-data-body');
+                        var html = '';
+                        for (var i = 0; i < data.length; i++) {
+                            html += '<tr>';
+                            for (var j = 0; j < fields.length; j++) {
+                                var fname = fields[j].name;
+                                var val = data[i][fname];
+                                if (val === undefined || val === null) val = '';
+                                html += '<td>' + val + '</td>';
+                            }
+                            html += '</tr>';
+                        }
+                        tbody.innerHTML = html;
+                    })();
+                </script>
+                {{end}}
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

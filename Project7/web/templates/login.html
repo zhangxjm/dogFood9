@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>政务数据共享交换中台 - 登录</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1 class="login-title">政务数据共享交换中台</h1>
+            <p class="login-subtitle">Government Data Sharing & Exchange Platform</p>
+            
+            {{if .error}}
+            <div class="error-message">{{.error}}</div>
+            {{end}}
+
+            <form method="POST" action="/login">
+                <div class="form-group">
+                    <label for="username">用户名</label>
+                    <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" name="password" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="btn btn-primary">登 录</button>
+            </form>
+
+            <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #eee;">
+                <p style="font-size: 12px; color: #999; text-align: center;">
+                    默认账号：admin / admin123<br>
+                    本系统符合《中华人民共和国数据安全法》要求
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

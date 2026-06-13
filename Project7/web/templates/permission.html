@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的权限 - 政务数据共享交换中台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <h2>政务数据共享交换中台</h2>
+                <p>Government Data Sharing</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/"><span class="icon">📊</span>系统概览</a></li>
+                <li><a href="/catalog"><span class="icon">📚</span>数据目录</a></li>
+                <li><a href="/permission" class="active"><span class="icon">🔐</span>我的权限</a></li>
+                <li><a href="/permission/requests"><span class="icon">📝</span>权限申请</a></li>
+                <li><a href="/exchange"><span class="icon">🔄</span>数据交换</a></li>
+                <li><a href="/audit"><span class="icon">📋</span>审计日志</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title"><h1>我的权限</h1></div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar">{{slice .user.RealName 0 1}}</div>
+                        <div class="user-details">
+                            <div class="user-name">{{.user.RealName}}</div>
+                            <div class="user-role">{{if eq .user.Role "admin"}}系统管理员{{else if eq .user.Role "auditor"}}审计员{{else}}普通用户{{end}}</div>
+                        </div>
+                    </div>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>已授权的数据权限</h2>
+                        <a href="/catalog" class="btn btn-primary btn-sm">申请新权限</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>数据目录</th>
+                                        <th>数据提供方</th>
+                                        <th>访问类型</th>
+                                        <th>生效时间</th>
+                                        <th>失效时间</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $p := .permissions}}
+                                    <tr>
+                                        <td>{{add $i 1}}</td>
+                                        <td><strong>{{if $p.DataCatalog}}{{$p.DataCatalog.Name}}{{end}}</strong></td>
+                                        <td>{{if $p.DataCatalog}}{{if $p.DataCatalog.DataOwner}}{{$p.DataCatalog.DataOwner.Name}}{{end}}{{end}}</td>
+                                        <td>
+                                            {{if eq $p.AccessType "read"}}<span class="badge badge-blue">读取</span>
+                                            {{else if eq $p.AccessType "write"}}<span class="badge badge-green">写入</span>
+                                            {{else}}<span class="badge badge-gray">{{$p.AccessType}}</span>{{end}}
+                                        </td>
+                                        <td>{{$p.ValidFrom.Format "2006-01-02"}}</td>
+                                        <td>{{$p.ValidTo.Format "2006-01-02"}}</td>
+                                        <td>
+                                            {{if eq $p.Status 1}}<span class="badge badge-green">有效</span>
+                                            {{else}}<span class="badge badge-red">无效</span>{{end}}
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                    {{if not .permissions}}
+                                    <tr><td colspan="7" class="empty-state"><div class="empty-state-icon">🔒</div><p>暂无授权权限，请前往数据目录申请</p></td></tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

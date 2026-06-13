@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统概览 - 政务数据共享交换中台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <h2>政务数据共享交换中台</h2>
+                <p>Government Data Sharing</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/" class="active"><span class="icon">📊</span>系统概览</a></li>
+                <li><a href="/catalog"><span class="icon">📚</span>数据目录</a></li>
+                <li><a href="/permission"><span class="icon">🔐</span>我的权限</a></li>
+                <li><a href="/permission/requests"><span class="icon">📝</span>权限申请</a></li>
+                <li><a href="/exchange"><span class="icon">🔄</span>数据交换</a></li>
+                <li><a href="/audit"><span class="icon">📋</span>审计日志</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title"><h1>系统概览</h1></div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar">{{slice .user.RealName 0 1}}</div>
+                        <div class="user-details">
+                            <div class="user-name">{{.user.RealName}}</div>
+                            <div class="user-role">{{if eq .user.Role "admin"}}系统管理员{{else if eq .user.Role "auditor"}}审计员{{else}}普通用户{{end}}</div>
+                        </div>
+                    </div>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            <div class="content">
+                <div class="system-alert">
+                    <span class="system-alert-icon">⚠️</span>
+                    <div class="system-alert-content">
+                        <strong>安全合规提示</strong>
+                        <p>本系统已通过安全等级保护三级认证，所有操作均已记录审计日志。请严格遵守《中华人民共和国数据安全法》及相关法规要求。</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">📚</div>
+                        <div class="stat-info">
+                            <h3>{{.catalogTotal}}</h3>
+                            <p>数据目录总量</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">🔄</div>
+                        <div class="stat-info">
+                            <h3>{{.exchangeTotal}}</h3>
+                            <p>数据交换次数</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange">📋</div>
+                        <div class="stat-info">
+                            <h3>{{.auditTotal}}</h3>
+                            <p>审计日志条数</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple">🏛️</div>
+                        <div class="stat-info">
+                            <h3>{{.deptTotal}}</h3>
+                            <p>接入部门数</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="card">
+                        <div class="card-header"><h2>系统功能</h2></div>
+                        <div class="card-body">
+                            <table>
+                                <tbody>
+                                    <tr><td>📚</td><td>数据目录管理</td><td>管理跨部门政务数据资源目录，支持标准化元数据管理</td></tr>
+                                    <tr><td>🔐</td><td>授权访问控制</td><td>基于角色的权限管理，自动审批授权机制</td></tr>
+                                    <tr><td>🔄</td><td>安全数据交换</td><td>加密传输、脱敏处理、全程可追溯</td></tr>
+                                    <tr><td>📋</td><td>使用审计</td><td>完整的操作审计日志，满足合规要求</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><h2>技术架构</h2></div>
+                        <div class="card-body">
+                            <table>
+                                <tbody>
+                                    <tr><td>后端框架</td><td>Go + Gin</td></tr>
+                                    <tr><td>服务发现</td><td>HashiCorp Consul</td></tr>
+                                    <tr><td>流量治理</td><td>Envoy Proxy</td></tr>
+                                    <tr><td>数据库</td><td>SQLite</td></tr>
+                                    <tr><td>架构模式</td><td>DDD 领域驱动设计</td></tr>
+                                    <tr><td>安全标准</td><td>等保三级 / 数据安全法</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

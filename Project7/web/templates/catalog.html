@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据目录 - 政务数据共享交换中台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <h2>政务数据共享交换中台</h2>
+                <p>Government Data Sharing</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/"><span class="icon">📊</span>系统概览</a></li>
+                <li><a href="/catalog" class="active"><span class="icon">📚</span>数据目录</a></li>
+                <li><a href="/permission"><span class="icon">🔐</span>我的权限</a></li>
+                <li><a href="/permission/requests"><span class="icon">📝</span>权限申请</a></li>
+                <li><a href="/exchange"><span class="icon">🔄</span>数据交换</a></li>
+                <li><a href="/audit"><span class="icon">📋</span>审计日志</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title"><h1>数据目录管理</h1></div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar">{{slice .user.RealName 0 1}}</div>
+                        <div class="user-details">
+                            <div class="user-name">{{.user.RealName}}</div>
+                            <div class="user-role">{{if eq .user.Role "admin"}}系统管理员{{else if eq .user.Role "auditor"}}审计员{{else}}普通用户{{end}}</div>
+                        </div>
+                    </div>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>数据目录列表</h2>
+                        <div class="search-bar">
+                            <form method="GET" action="/catalog" style="display:flex;gap:10px;align-items:center;">
+                                <input type="text" name="keyword" placeholder="搜索目录名称/编码" value="{{.keyword}}">
+                                <button type="submit" class="btn btn-primary btn-sm">搜索</button>
+                                <a href="/catalog" class="btn btn-secondary btn-sm">重置</a>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>目录名称</th>
+                                        <th>目录编码</th>
+                                        <th>数据标准</th>
+                                        <th>数据格式</th>
+                                        <th>更新频率</th>
+                                        <th>数据来源</th>
+                                        <th>数据提供方</th>
+                                        <th>安全等级</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $c := .catalogs}}
+                                    <tr>
+                                        <td>{{add $i 1}}</td>
+                                        <td><strong>{{$c.Name}}</strong></td>
+                                        <td><code>{{$c.Code}}</code></td>
+                                        <td>{{$c.DataStandard}}</td>
+                                        <td><span class="badge badge-blue">{{$c.DataFormat}}</span></td>
+                                        <td>{{$c.UpdateFrequency}}</td>
+                                        <td>{{$c.SourceSystem}}</td>
+                                        <td>{{if $c.DataOwner}}{{$c.DataOwner.Name}}{{end}}</td>
+                                        <td><span class="badge {{if eq $c.SecurityLevel "公开"}}badge-green{{else if eq $c.SecurityLevel "内部"}}badge-blue{{else if eq $c.SecurityLevel "秘密"}}badge-yellow{{else}}badge-red{{end}}">{{$c.SecurityLevel}}</span></td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm" onclick="openRequestModal({{$c.ID}}, '{{$c.Name}}')">申请权限</button>
+                                            <button class="btn btn-info btn-sm" onclick="requestData({{$c.ID}}, '{{$c.Name}}')">数据交换</button>
+                                            <button class="btn btn-warning btn-sm" onclick="previewData({{$c.ID}})">数据预览</button>
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                    {{if not .catalogs}}
+                                    <tr><td colspan="10" class="empty-state"><div class="empty-state-icon">📭</div><p>暂无数据目录</p></td></tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <span class="pagination-info">共 {{.total}} 条记录</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="requestModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>申请数据权限</h3>
+                <button class="modal-close" onclick="hideModal('requestModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="requestForm" onsubmit="event.preventDefault(); submitRequest();">
+                    <input type="hidden" id="data_catalog_id" name="data_catalog_id">
+                    <div class="form-group">
+                        <label>数据目录</label>
+                        <input type="text" id="catalog_name_display" readonly style="background:#f5f5f5;">
+                    </div>
+                    <div class="form-group">
+                        <label>访问类型</label>
+                        <select name="access_type">
+                            <option value="read">读取</option>
+                            <option value="write">写入</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>使用目的 <span style="color:red;">*</span></label>
+                        <textarea name="purpose" rows="3" placeholder="请说明数据使用目的" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>使用范围</label>
+                        <textarea name="usage_scope" rows="2" placeholder="请说明数据使用范围"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>有效期（天）</label>
+                        <input type="number" name="valid_days" value="365" min="1" max="3650">
+                    </div>
+                    <div style="text-align:right;">
+                        <button type="button" class="btn btn-secondary" onclick="hideModal('requestModal')">取消</button>
+                        <button type="submit" class="btn btn-primary" style="width:auto;padding:10px 30px;">提交申请</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

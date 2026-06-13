@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>审计日志 - 政务数据共享交换中台</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="sidebar-logo">
+                <h2>政务数据共享交换中台</h2>
+                <p>Government Data Sharing</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="/"><span class="icon">📊</span>系统概览</a></li>
+                <li><a href="/catalog"><span class="icon">📚</span>数据目录</a></li>
+                <li><a href="/permission"><span class="icon">🔐</span>我的权限</a></li>
+                <li><a href="/permission/requests"><span class="icon">📝</span>权限申请</a></li>
+                <li><a href="/exchange"><span class="icon">🔄</span>数据交换</a></li>
+                <li><a href="/audit" class="active"><span class="icon">📋</span>审计日志</a></li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <div class="header">
+                <div class="header-title"><h1>审计日志</h1></div>
+                <div class="header-user">
+                    <div class="user-info">
+                        <div class="user-avatar">{{slice .user.RealName 0 1}}</div>
+                        <div class="user-details">
+                            <div class="user-name">{{.user.RealName}}</div>
+                            <div class="user-role">{{if eq .user.Role "admin"}}系统管理员{{else if eq .user.Role "auditor"}}审计员{{else}}普通用户{{end}}</div>
+                        </div>
+                    </div>
+                    <a href="/logout" class="logout-btn">退出登录</a>
+                </div>
+            </div>
+            <div class="content">
+                <div class="system-alert">
+                    <span class="system-alert-icon">🔒</span>
+                    <div class="system-alert-content">
+                        <strong>审计日志保护</strong>
+                        <p>审计日志受系统保护，不可修改或删除，保留期限不少于6个月，符合《中华人民共和国数据安全法》要求。</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>操作审计记录</h2>
+                        <div class="search-bar">
+                            <form method="GET" action="/audit" style="display:flex;gap:10px;align-items:center;">
+                                <select name="operation">
+                                    <option value="">全部操作</option>
+                                    <option value="POST">新增</option>
+                                    <option value="PUT">修改</option>
+                                    <option value="DELETE">删除</option>
+                                </select>
+                                <input type="date" name="start_time" value="{{.start_time}}" placeholder="开始日期">
+                                <input type="date" name="end_time" value="{{.end_time}}" placeholder="结束日期">
+                                <button type="submit" class="btn btn-primary btn-sm">筛选</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>操作时间</th>
+                                        <th>操作用户</th>
+                                        <th>所属部门</th>
+                                        <th>操作类型</th>
+                                        <th>资源类型</th>
+                                        <th>IP地址</th>
+                                        <th>状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $l := .logs}}
+                                    <tr>
+                                        <td>{{add $i 1}}</td>
+                                        <td>{{$l.OperationTime.Format "2006-01-02 15:04:05"}}</td>
+                                        <td><strong>{{$l.RealName}}</strong>（{{$l.Username}}）</td>
+                                        <td>部门ID:{{$l.DepartmentID}}</td>
+                                        <td>
+                                            {{if eq $l.Operation "GET"}}<span class="badge badge-blue">查询</span>
+                                            {{else if eq $l.Operation "POST"}}<span class="badge badge-green">新增</span>
+                                            {{else if eq $l.Operation "PUT"}}<span class="badge badge-yellow">修改</span>
+                                            {{else if eq $l.Operation "DELETE"}}<span class="badge badge-red">删除</span>
+                                            {{else}}<span class="badge badge-gray">{{$l.Operation}}</span>{{end}}
+                                        </td>
+                                        <td>{{$l.ResourceType}}</td>
+                                        <td>{{$l.IPAddress}}</td>
+                                        <td>
+                                            {{if $l.Success}}<span class="badge badge-green">成功</span>
+                                            {{else}}<span class="badge badge-red">失败</span>{{end}}
+                                        </td>
+                                    </tr>
+                                    {{end}}
+                                    {{if not .logs}}
+                                    <tr><td colspan="8" class="empty-state"><div class="empty-state-icon">📋</div><p>暂无审计日志</p></td></tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <span class="pagination-info">共 {{.total}} 条记录</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

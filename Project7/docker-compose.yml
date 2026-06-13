@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  consul:
+    image: hashicorp/consul:1.15
+    container_name: gov-consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: agent -dev -client=0.0.0.0 -ui
+    volumes:
+      - consul-data:/consul/data
+    networks:
+      - gov-network
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  envoy:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: gov-envoy
+    ports:
+      - "9901:9901"
+      - "9900:9900"
+    volumes:
+      - ./config/envoy.yaml:/etc/envoy/envoy.yaml
+    networks:
+      - gov-network
+    depends_on:
+      - api-gateway
+      - data-catalog-service
+      - auth-service
+      - audit-service
+      - exchange-service
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gov-api-gateway
+    command: ["/app/api-gateway"]
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVICE_PORT=8080
+      - CONSUL_ADDR=consul:8500
+    volumes:
+      - app-data:/app/data
+    networks:
+      - gov-network
+    depends_on:
+      consul:
+        condition: service_healthy
+
+  data-catalog-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gov-data-catalog
+    command: ["/app/data-catalog-service"]
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVICE_PORT=8081
+      - CONSUL_ADDR=consul:8500
+    volumes:
+      - app-data:/app/data
+    networks:
+      - gov-network
+    depends_on:
+      consul:
+        condition: service_healthy
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gov-auth-service
+    command: ["/app/auth-service"]
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVICE_PORT=8082
+      - CONSUL_ADDR=consul:8500
+    volumes:
+      - app-data:/app/data
+    networks:
+      - gov-network
+    depends_on:
+      consul:
+        condition: service_healthy
+
+  audit-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gov-audit-service
+    command: ["/app/audit-service"]
+    ports:
+      - "8083:8083"
+    environment:
+      - SERVICE_PORT=8083
+      - CONSUL_ADDR=consul:8500
+    volumes:
+      - app-data:/app/data
+    networks:
+      - gov-network
+    depends_on:
+      consul:
+        condition: service_healthy
+
+  exchange-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gov-exchange-service
+    command: ["/app/exchange-service"]
+    ports:
+      - "8084:8084"
+    environment:
+      - SERVICE_PORT=8084
+      - CONSUL_ADDR=consul:8500
+    volumes:
+      - app-data:/app/data
+    networks:
+      - gov-network
+    depends_on:
+      consul:
+        condition: service_healthy
+
+networks:
+  gov-network:
+    driver: bridge
+
+volumes:
+  consul-data:
+  app-data:
