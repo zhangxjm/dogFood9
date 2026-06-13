@@ -442,11 +442,15 @@ function renderDevices(list) {
 
 function renderDeviceSelect(list) {
   var sel = document.getElementById('cmdDevice');
+  var selectedValue = sel.value;
   var html = '<option value="">-- 请选择设备 --</option>';
   list.forEach(function(d) {
     html += '<option value="' + d.deviceId + '">' + d.deviceId + ' - ' + d.deviceName + '</option>';
   });
   sel.innerHTML = html;
+  if (selectedValue) {
+    sel.value = selectedValue;
+  }
 }
 
 function acknowledgeAlarm(id, btn) {
