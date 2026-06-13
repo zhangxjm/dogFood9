@@ -6,10 +6,9 @@
 Web Application:
 - Port 8501 : Streamlit Web UI (Main application interface)
 
-Message Queue (Docker):
-- Port 2181 : Zookeeper client port (Kafka coordination)
-- Port 9092 : Kafka internal broker (Docker network)
-- Port 9093 : Kafka external broker (Host access)
+Message Queue (Docker - KRaft mode, no ZooKeeper required):
+- Port 9092 : Kafka controller (internal KRaft)
+- Port 9093 : Kafka broker (host access for clients)
 - Port 8080 : Kafka UI (Web interface for Kafka management)
 
 Database:
@@ -30,8 +29,7 @@ Kafka Management UI (requires Docker):
   Docker Container Names
 ============================================
 
-- agri-zookeeper  : Zookeeper service
-- agri-kafka      : Kafka message broker
+- agri-kafka      : Kafka message broker (KRaft mode)
 - agri-kafka-ui   : Kafka web UI
 
 ============================================

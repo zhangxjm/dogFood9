@@ -358,6 +358,10 @@ def train_all_models():
     growth_model = GrowthPredictionModel()
     growth_model.train_all()
     
+    from .pest_model import PestWarningModel
+    pest_model = PestWarningModel()
+    pest_model.train_all()
+    
     print("\nAll models trained successfully!")
     return True
 

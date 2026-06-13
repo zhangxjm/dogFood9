@@ -4,8 +4,6 @@
 # Agricultural Digital Twin System - Startup Script
 # ============================================
 
-set -e
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
@@ -40,20 +38,43 @@ pip install -r requirements.txt -q
 echo "Dependencies installed successfully."
 echo ""
 
-echo "[4/6] Starting Docker services (Kafka + Zookeeper + Kafka UI)..."
+echo "[4/6] Starting Docker services (Kafka + Kafka UI)..."
+DOCKER_SUCCESS=false
+
 if command -v docker &> /dev/null; then
-    if docker ps -a --format '{{.Names}}' | grep -q 'agri-kafka'; then
-        echo "Docker containers already exist, starting..."
-        docker-compose start
-    else
-        echo "Starting new Docker containers..."
-        docker-compose up -d
+    if docker ps -a --format '{{.Names}}' | grep -q 'agri-'; then
+        echo "Cleaning up old containers..."
+        docker-compose down -v 2>/dev/null || true
+        docker rm -f agri-kafka agri-kafka-ui 2>/dev/null || true
     fi
-    echo "Docker services starting..."
-    echo "Waiting for Kafka to be ready..."
-    sleep 15
+    
+    echo "Starting new Docker containers..."
+    if docker-compose up -d 2>&1; then
+        echo "Docker services starting..."
+        echo "Waiting for Kafka to be ready..."
+        sleep 15
+        
+        if docker ps --format '{{.Names}}' | grep -q 'agri-kafka'; then
+            DOCKER_SUCCESS=true
+            echo "Kafka is running successfully."
+        else
+            echo "WARNING: Kafka container failed to start."
+        fi
+    else
+        echo "WARNING: Docker image pull or startup failed."
+    fi
 else
     echo "WARNING: Docker not found. Kafka will run in simulated mode."
+fi
+
+if [ "$DOCKER_SUCCESS" = false ]; then
+    echo ""
+    echo "--------------------------------------------------"
+    echo "  NOTICE: Kafka services not available."
+    echo "  The system will run in standalone mode."
+    echo "  All core features are still functional."
+    echo "  Install Docker to enable real-time streaming."
+    echo "--------------------------------------------------"
 fi
 echo ""
 
@@ -74,7 +95,9 @@ echo "============================================"
 echo ""
 echo "The application will be available at:"
 echo "  - Streamlit UI:  http://localhost:8501"
-echo "  - Kafka UI:      http://localhost:8080 (if Docker is running)"
+if [ "$DOCKER_SUCCESS" = true ]; then
+    echo "  - Kafka UI:      http://localhost:8080"
+fi
 echo ""
 echo "Press Ctrl+C to stop the application."
 echo ""
