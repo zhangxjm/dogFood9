@@ -2,35 +2,34 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
-import time
 import sys
 import os
-import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.database import SessionLocal, FarmField, SoilData, WeatherData, CropGrowthData, DecisionCommand
-from src.kafka_module import get_kafka_manager, TOPICS
 
 
 def render_data_stream():
     st.header("🌊 实时数据流监控")
     
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.caption("实时监控Kafka消息流与系统运行状态")
-    with col2:
-        auto_refresh = st.toggle("自动刷新", value=True)
-    
-    kafka = get_kafka_manager()
+    st.caption("实时监控数据流与系统运行状态")
     
     col1, col2, col3, col4 = st.columns(4)
     
+    kafka_connected = False
+    try:
+        from src.kafka_module import get_kafka_manager
+        kafka = get_kafka_manager()
+        kafka_connected = kafka.connected
+    except Exception:
+        kafka_connected = False
+    
     with col1:
-        status = "✅ 已连接" if kafka.connected else "❌ 未连接"
+        status = "✅ 已连接" if kafka_connected else "❌ 未连接(独立模式)"
         st.metric("Kafka连接", status)
     with col2:
-        st.metric("主题数量", f"{len(TOPICS)} 个")
+        st.metric("主题数量", "5 个")
     with col3:
         st.metric("消息速率", "~12 msg/s")
     with col4:
@@ -44,14 +43,10 @@ def render_data_stream():
         render_data_overview()
     
     with tab2:
-        render_message_stream(kafka)
+        render_message_stream(kafka_connected)
     
     with tab3:
         render_real_time_trends()
-    
-    if auto_refresh:
-        time.sleep(2)
-        st.rerun()
 
 
 def render_data_overview():
@@ -133,7 +128,7 @@ def render_data_overview():
         db.close()
 
 
-def render_message_stream(kafka):
+def render_message_stream(kafka_connected):
     st.subheader("📨 Kafka消息流")
     
     topic_names = {
@@ -150,7 +145,10 @@ def render_message_stream(kafka):
         format_func=lambda x: topic_names.get(x, x),
     )
     
-    st.info(f"监听主题: {selected_topic} - 显示最新消息")
+    if not kafka_connected:
+        st.info(f"监听主题: {selected_topic} - 显示模拟消息（Kafka未连接，独立模式运行）")
+    else:
+        st.info(f"监听主题: {selected_topic} - 显示最新消息")
     
     messages = []
     for i in range(5):
@@ -158,7 +156,7 @@ def render_message_stream(kafka):
             "时间": (datetime.now() - timedelta(seconds=i * 30)).strftime("%H:%M:%S"),
             "类型": "土壤" if i % 3 == 0 else "气象" if i % 3 == 1 else "生长",
             "农田": f"{(i % 4) + 1}号大田",
-            "内容": f"传感器数据采集完成，包含温度、湿度等参数",
+            "内容": "传感器数据采集完成，包含温度、湿度等参数",
             "状态": "✓ 已处理",
         })
     
@@ -248,8 +246,8 @@ def render_real_time_trends():
                 fig.update_layout(
                     title="土壤温湿度实时趋势",
                     xaxis_title="时间",
-                    yaxis=dict(title="湿度 (%)", titlefont=dict(color="#3498db")),
-                    yaxis2=dict(title="温度 (℃)", titlefont=dict(color="#e74c3c"), 
+                    yaxis=dict(title="湿度 (%)", title_font=dict(color="#3498db")),
+                    yaxis2=dict(title="温度 (℃)", title_font=dict(color="#e74c3c"), 
                                overlaying='y', side='right'),
                     height=350,
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
@@ -292,8 +290,8 @@ def render_real_time_trends():
                 fig.update_layout(
                     title="气象数据实时趋势",
                     xaxis_title="时间",
-                    yaxis=dict(title="气温 (℃)", titlefont=dict(color="#e67e22")),
-                    yaxis2=dict(title="湿度 (%)", titlefont=dict(color="#9b59b6"), 
+                    yaxis=dict(title="气温 (℃)", title_font=dict(color="#e67e22")),
+                    yaxis2=dict(title="湿度 (%)", title_font=dict(color="#9b59b6"), 
                                overlaying='y', side='right'),
                     height=350,
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
