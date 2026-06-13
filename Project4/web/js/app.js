@@ -33,10 +33,16 @@ class App {
   }
 
   setupEventListeners() {
-    document.querySelector('.modal-close').addEventListener('click', () => this.hideModal());
-    document.getElementById('modal-overlay').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) this.hideModal();
-    });
+    const modalClose = document.querySelector('.modal-close');
+    const modalOverlay = document.getElementById('modal-overlay');
+    if (modalClose) {
+      modalClose.addEventListener('click', () => this.hideModal());
+    }
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) this.hideModal();
+      });
+    }
   }
 
   navigate(page) {
@@ -605,24 +611,41 @@ class App {
           <select class="form-select" name="building_id">${buildingOptions}</select>
         </div>
         <div class="form-group">
-          <label>位置</label>
-          <input class="form-input" name="location" placeholder="请输入火灾位置" required>
+          <label>楼层</label>
+          <input class="form-input" name="floor" placeholder="例如: 3F" required>
+        </div>
+        <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div>
+            <label>位置X</label>
+            <input class="form-input" name="location_x" type="number" step="0.1" placeholder="X坐标" value="0">
+          </div>
+          <div>
+            <label>位置Y</label>
+            <input class="form-input" name="location_y" type="number" step="0.1" placeholder="Y坐标" value="0">
+          </div>
+          <div>
+            <label>位置Z</label>
+            <input class="form-input" name="location_z" type="number" step="0.1" placeholder="Z坐标" value="0">
+          </div>
         </div>
         <div class="form-group">
           <label>严重程度</label>
           <select class="form-select" name="severity">
-            <option value="high">高危</option>
-            <option value="medium">中等</option>
-            <option value="low">低危</option>
+            <option value="低">低危</option>
+            <option value="中" selected>中等</option>
+            <option value="高">高危</option>
+            <option value="极高">极高</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>温度(℃)</label>
-          <input class="form-input" name="temperature" type="number" placeholder="请输入温度">
-        </div>
-        <div class="form-group">
-          <label>描述</label>
-          <textarea class="form-textarea" name="description" placeholder="请描述火情"></textarea>
+        <div class="form-group" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label>温度(℃)</label>
+            <input class="form-input" name="temperature" type="number" placeholder="请输入温度" value="200">
+          </div>
+          <div>
+            <label>蔓延速率</label>
+            <input class="form-input" name="spread_rate" type="number" step="0.1" placeholder="蔓延速度" value="0.5">
+          </div>
         </div>
         <div style="text-align:right">
           <button type="submit" class="btn btn-danger">提交报告</button>
@@ -635,10 +658,14 @@ class App {
       const form = e.target;
       const data = {
         building_id: parseInt(form.building_id.value),
-        location: form.location.value,
+        location_x: parseFloat(form.location_x.value) || 0,
+        location_y: parseFloat(form.location_y.value) || 0,
+        location_z: parseFloat(form.location_z.value) || 0,
+        floor: form.floor.value,
         severity: form.severity.value,
         temperature: parseFloat(form.temperature.value) || 0,
-        description: form.description.value
+        spread_rate: parseFloat(form.spread_rate.value) || 0,
+        status: '蔓延中'
       };
       const result = await this.apiPost('/api/v1/fire-events', data);
       if (result) {
