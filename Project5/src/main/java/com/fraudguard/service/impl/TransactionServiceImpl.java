@@ -4,7 +4,10 @@ import com.fraudguard.entity.FraudAlert;
 import com.fraudguard.entity.Transaction;
 import com.fraudguard.repository.FraudAlertRepository;
 import com.fraudguard.repository.TransactionRepository;
+import com.fraudguard.service.AuditTrailService;
+import com.fraudguard.service.FraudPatternDetectionService;
 import com.fraudguard.service.RiskAssessmentService;
+import com.fraudguard.service.TraceabilityService;
 import com.fraudguard.service.TransactionService;
 import com.fraudguard.service.TransactionStreamService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,9 @@ public class TransactionServiceImpl implements TransactionService {
     private final FraudAlertRepository fraudAlertRepository;
     private final RiskAssessmentService riskAssessmentService;
     private final TransactionStreamService transactionStreamService;
+    private final AuditTrailService auditTrailService;
+    private final TraceabilityService traceabilityService;
+    private final FraudPatternDetectionService fraudPatternDetectionService;
 
     @Override
     @Transactional
@@ -41,6 +46,15 @@ public class TransactionServiceImpl implements TransactionService {
 
         transaction.setStatus("PENDING");
         transaction = transactionRepository.save(transaction);
+
+        traceabilityService.createTraceRecord(transaction);
+        traceabilityService.appendDecisionStep(transaction.getTransactionId(),
+            "交易提交", "PENDING", "交易已创建并提交至风控队列");
+
+        auditTrailService.logAction(null, transaction.getTransactionId(), transaction.getUserId(),
+            null, "TRANSACTION_CREATED", "交易创建", "SUCCESS",
+            null, "PENDING", "SYSTEM", "系统", "SYSTEM",
+            transaction.getIpAddress(), null);
 
         transactionStreamService.submitTransaction(transaction);
 
@@ -112,6 +126,7 @@ public class TransactionServiceImpl implements TransactionService {
             return false;
         }
 
+        String beforeState = transaction.getStatus();
         transaction.setStatus("REJECTED");
         transactionRepository.save(transaction);
 
@@ -123,10 +138,18 @@ public class TransactionServiceImpl implements TransactionService {
         alert.setAlertLevel("HIGH");
         alert.setDescription("人工拦截: " + reason);
         alert.setAlertStatus("HANDLED");
-        alert.setHandledBy("SYSTEM");
+        alert.setHandledBy("ADMIN");
         alert.setHandledAt(LocalDateTime.now());
         alert.setHandleNote(reason);
         fraudAlertRepository.save(alert);
+
+        traceabilityService.recordManualIntervention(transactionId, "ADMIN", "INTERCEPT", reason);
+        traceabilityService.finalizeTrace(transactionId, "REJECTED", "MANUAL", "人工拦截: " + reason);
+
+        auditTrailService.logAction(null, transactionId, transaction.getUserId(),
+            alert.getAlertId(), "MANUAL_INTERCEPT", "人工拦截交易", "SUCCESS",
+            beforeState, "REJECTED", "ADMIN", "管理员", "OPERATOR",
+            null, null);
 
         log.info("Transaction {} intercepted: {}", transactionId, reason);
         return true;
@@ -140,8 +163,17 @@ public class TransactionServiceImpl implements TransactionService {
             return false;
         }
 
+        String beforeState = transaction.getStatus();
         transaction.setStatus("APPROVED");
         transactionRepository.save(transaction);
+
+        traceabilityService.recordManualIntervention(transactionId, "ADMIN", "APPROVE", "人工审核通过");
+        traceabilityService.finalizeTrace(transactionId, "APPROVED", "MANUAL", "人工审核通过");
+
+        auditTrailService.logAction(null, transactionId, transaction.getUserId(),
+            null, "MANUAL_APPROVE", "人工审核通过", "SUCCESS",
+            beforeState, "APPROVED", "ADMIN", "管理员", "OPERATOR",
+            null, null);
 
         log.info("Transaction {} approved", transactionId);
         return true;
@@ -155,11 +187,46 @@ public class TransactionServiceImpl implements TransactionService {
             return false;
         }
 
+        String beforeState = transaction.getStatus();
         transaction.setStatus("REJECTED");
         transactionRepository.save(transaction);
 
+        traceabilityService.recordManualIntervention(transactionId, "ADMIN", "REJECT", reason);
+        traceabilityService.finalizeTrace(transactionId, "REJECTED", "MANUAL", "人工拒绝: " + reason);
+
+        auditTrailService.logAction(null, transactionId, transaction.getUserId(),
+            null, "MANUAL_REJECT", "人工拒绝交易", "SUCCESS",
+            beforeState, "REJECTED", "ADMIN", "管理员", "OPERATOR",
+            null, null);
+
         log.info("Transaction {} rejected: {}", transactionId, reason);
         return true;
+    }
+
+    public Map<String, Object> getTransactionDetail(String transactionId) {
+        Map<String, Object> detail = new HashMap<>();
+
+        Transaction transaction = getTransactionById(transactionId);
+        if (transaction == null) {
+            return null;
+        }
+
+        detail.put("transaction", transaction);
+
+        var detection = fraudPatternDetectionService.getDetectionByTransaction(transactionId);
+        if (detection != null) {
+            detail.put("fraudPatternDetection", detection);
+        }
+
+        var traceRecord = traceabilityService.getTraceRecord(transactionId);
+        if (traceRecord != null) {
+            detail.put("traceability", traceRecord);
+        }
+
+        var auditTrails = auditTrailService.getTransactionAudit(transactionId);
+        detail.put("auditTrails", auditTrails);
+
+        return detail;
     }
 
     private String generateTransactionId() {

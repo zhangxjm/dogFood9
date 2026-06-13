@@ -1165,3 +1165,245 @@ function getRiskColor(level) {
     };
     return map[level] || '#22c55e';
 }
+
+let currentTraceTxnId = null;
+
+function loadFraudPatternStats() {
+    fetch(API_BASE + '/fraud-pattern/stats')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('statStolenCard').textContent = formatNumber(data.stolenCardCount || 0);
+            document.getElementById('statCashOut').textContent = formatNumber(data.cashOutCount || 0);
+            document.getElementById('statFakeTxn').textContent = formatNumber(data.fakeTransactionCount || 0);
+            document.getElementById('statTakeover').textContent = formatNumber(0);
+        })
+        .catch(e => console.error('Failed to load fraud pattern stats:', e));
+}
+
+function queryTraceability() {
+    const txnId = document.getElementById('traceTxnId').value.trim();
+    if (!txnId) {
+        alert('请输入交易ID');
+        return;
+    }
+    currentTraceTxnId = txnId;
+
+    Promise.all([
+        fetch(`${API_BASE}/traceability/${txnId}`).then(r => r.ok ? r.json() : null),
+        fetch(`${API_BASE}/fraud-pattern/transaction/${txnId}`).then(r => r.ok ? r.json() : null),
+        fetch(`${API_BASE}/audit/transaction/${txnId}`).then(r => r.ok ? r.json() : null),
+        fetch(`${API_BASE}/transactions/${txnId}`).then(r => r.ok ? r.json() : null)
+    ]).then(([trace, pattern, audits, txn]) => {
+        document.getElementById('tracePlaceholder').style.display = 'none';
+        document.getElementById('traceResultCard').style.display = 'block';
+        renderTraceContent(trace, pattern, audits, txn);
+    }).catch(e => {
+        console.error('Trace query failed:', e);
+        alert('查询失败，请检查交易ID是否正确');
+    });
+}
+
+function renderTraceContent(trace, pattern, audits, txn) {
+    let html = '';
+
+    if (txn) {
+        html += `
+            <div style="margin-bottom:24px;padding:16px;background:#f8fafc;border-radius:8px;">
+                <h4 style="margin-bottom:12px;color:#111827;">📋 交易基本信息</h4>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:13px;">
+                    <div><span style="color:#6b7280;">交易ID:</span> <strong>${txn.transactionId}</strong></div>
+                    <div><span style="color:#6b7280;">用户ID:</span> ${txn.userId}</div>
+                    <div><span style="color:#6b7280;">金额:</span> <strong style="color:#ef4444;">¥${formatAmount(txn.amount)}</strong></div>
+                    <div><span style="color:#6b7280;">状态:</span> <span class="status-badge status-${(txn.status || 'pending').toLowerCase()}">${getStatusText(txn.status)}</span></div>
+                    <div><span style="color:#6b7280;">风险评分:</span> <strong style="color:${getRiskColor(txn.riskLevel)};">${txn.riskScore || 0}分</strong></div>
+                    <div><span style="color:#6b7280;">风险等级:</span> <span class="risk-badge risk-${(txn.riskLevel || 'low').toLowerCase()}">${getRiskLevelText(txn.riskLevel)}</span></div>
+                    <div><span style="color:#6b7280;">商户:</span> ${txn.merchant || '-'}</div>
+                    <div><span style="color:#6b7280;">创建时间:</span> ${formatTime(txn.createdAt)}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (trace) {
+        html += `
+            <div style="margin-bottom:24px;">
+                <h4 style="margin-bottom:12px;color:#111827;">🔗 决策链路</h4>
+                <div style="padding:12px 16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:13px;color:#1e40af;line-height:1.8;">
+                    ${trace.decisionChain || '无决策链路信息'}
+                </div>
+            </div>
+        `;
+
+        if (trace.ruleTriggerHistory) {
+            html += `
+                <div style="margin-bottom:24px;">
+                    <h4 style="margin-bottom:12px;color:#111827;">📋 规则触发历史</h4>
+                    <div style="padding:12px 16px;background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;font-size:12px;color:#92400e;line-height:1.8;white-space:pre-wrap;font-family:monospace;max-height:200px;overflow-y:auto;">
+                        ${trace.ruleTriggerHistory || '无规则触发'}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (trace.modelInferenceHistory) {
+            html += `
+                <div style="margin-bottom:24px;">
+                    <h4 style="margin-bottom:12px;color:#111827;">🤖 模型推理历史</h4>
+                    <div style="padding:12px 16px;background:#ede9fe;border:1px solid #c4b5fd;border-radius:8px;font-size:12px;color:#5b21b6;line-height:1.8;white-space:pre-wrap;font-family:monospace;max-height:200px;overflow-y:auto;">
+                        ${trace.modelInferenceHistory || '无模型推理记录'}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (trace.evidenceChain) {
+            html += `
+                <div style="margin-bottom:24px;">
+                    <h4 style="margin-bottom:12px;color:#111827;">🔍 证据链</h4>
+                    <div style="padding:12px 16px;background:#fce7f3;border:1px solid #f9a8d4;border-radius:8px;font-size:13px;color:#9d174d;line-height:1.8;">
+                        ${trace.evidenceChain || '无证据链信息'}
+                    </div>
+                </div>
+            `;
+        }
+
+        if (trace.fullTraceLog) {
+            html += `
+                <div style="margin-bottom:24px;">
+                    <h4 style="margin-bottom:12px;color:#111827;">📝 完整追踪日志</h4>
+                    <div style="padding:12px 16px;background:#1f2937;border-radius:8px;font-size:12px;color:#d1d5db;line-height:1.8;white-space:pre-wrap;font-family:monospace;max-height:300px;overflow-y:auto;">
+                        ${trace.fullTraceLog || '无追踪日志'}
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    if (pattern) {
+        html += `
+            <div style="margin-bottom:24px;">
+                <h4 style="margin-bottom:12px;color:#111827;">🎯 机器学习欺诈模式检测</h4>
+                <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;">
+                    <div style="text-align:center;padding:12px;background:${pattern.isStolenCard ? '#fef2f2' : '#f9fafb'};border-radius:8px;border:1px solid ${pattern.isStolenCard ? '#fecaca' : '#e5e7eb'};">
+                        <div style="font-size:20px;font-weight:700;color:${pattern.isStolenCard ? '#dc2626' : '#6b7280'};">${pattern.stolenCardScore || 0}</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:4px;">盗刷评分</div>
+                        ${pattern.isStolenCard ? '<div style="font-size:11px;color:#dc2626;margin-top:4px;">⚠ 高风险</div>' : ''}
+                    </div>
+                    <div style="text-align:center;padding:12px;background:${pattern.isCashOut ? '#fffbeb' : '#f9fafb'};border-radius:8px;border:1px solid ${pattern.isCashOut ? '#fcd34d' : '#e5e7eb'};">
+                        <div style="font-size:20px;font-weight:700;color:${pattern.isCashOut ? '#d97706' : '#6b7280'};">${pattern.cashOutScore || 0}</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:4px;">套现评分</div>
+                        ${pattern.isCashOut ? '<div style="font-size:11px;color:#d97706;margin-top:4px;">⚠ 高风险</div>' : ''}
+                    </div>
+                    <div style="text-align:center;padding:12px;background:${pattern.isFakeTransaction ? '#fffbeb' : '#f9fafb'};border-radius:8px;border:1px solid ${pattern.isFakeTransaction ? '#fcd34d' : '#e5e7eb'};">
+                        <div style="font-size:20px;font-weight:700;color:${pattern.isFakeTransaction ? '#d97706' : '#6b7280'};">${pattern.fakeTransactionScore || 0}</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:4px;">虚假交易</div>
+                        ${pattern.isFakeTransaction ? '<div style="font-size:11px;color:#d97706;margin-top:4px;">⚠ 高风险</div>' : ''}
+                    </div>
+                    <div style="text-align:center;padding:12px;background:${pattern.isAccountTakeover ? '#f5f3ff' : '#f9fafb'};border-radius:8px;border:1px solid ${pattern.isAccountTakeover ? '#c4b5fd' : '#e5e7eb'};">
+                        <div style="font-size:20px;font-weight:700;color:${pattern.isAccountTakeover ? '#7c3aed' : '#6b7280'};">${pattern.accountTakeoverScore || 0}</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:4px;">账户盗用</div>
+                        ${pattern.isAccountTakeover ? '<div style="font-size:11px;color:#7c3aed;margin-top:4px;">⚠ 高风险</div>' : ''}
+                    </div>
+                    <div style="text-align:center;padding:12px;background:${pattern.isMoneyLaundering ? '#ecfeff' : '#f9fafb'};border-radius:8px;border:1px solid ${pattern.isMoneyLaundering ? '#67e8f9' : '#e5e7eb'};">
+                        <div style="font-size:20px;font-weight:700;color:${pattern.isMoneyLaundering ? '#0891b2' : '#6b7280'};">${pattern.moneyLaunderingScore || 0}</div>
+                        <div style="font-size:12px;color:#6b7280;margin-top:4px;">洗钱评分</div>
+                        ${pattern.isMoneyLaundering ? '<div style="font-size:11px;color:#0891b2;margin-top:4px;">⚠ 高风险</div>' : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    if (audits && audits.length > 0) {
+        html += `
+            <div>
+                <h4 style="margin-bottom:12px;color:#111827;">📊 审计追踪记录 (${audits.length}条)</h4>
+                <div class="table-container">
+                    <table class="data-table" style="font-size:12px;">
+                        <thead>
+                            <tr>
+                                <th>操作时间</th>
+                                <th>操作类型</th>
+                                <th>操作结果</th>
+                                <th>操作人</th>
+                                <th>角色</th>
+                                <th>详情</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${audits.map(a => `
+                                <tr>
+                                    <td>${formatTime(a.actionTime)}</td>
+                                    <td><span style="padding:2px 8px;background:#e0e7ff;color:#3730a3;border-radius:4px;font-size:11px;">${a.actionType || '-'}</span></td>
+                                    <td>${a.actionResult || '-'}</td>
+                                    <td>${a.operatorName || '-'}</td>
+                                    <td>${a.operatorRole || '-'}</td>
+                                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${a.actionDetail || ''}">${a.actionDetail || '-'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+    }
+
+    if (!trace && !pattern && (!audits || audits.length === 0) && !txn) {
+        html = '<div style="text-align:center;padding:40px;color:#9ca3af;"><div style="font-size:48px;margin-bottom:16px;">📭</div><p>未找到该交易的溯源信息</p></div>';
+    }
+
+    document.getElementById('traceContent').innerHTML = html;
+}
+
+function showTraceReport() {
+    if (!currentTraceTxnId) {
+        alert('请先查询交易溯源');
+        return;
+    }
+    window.open(`${API_BASE}/traceability/${currentTraceTxnId}/report`, '_blank');
+}
+
+const originalSwitchPage = switchPage;
+switchPage = function(page) {
+    const titles = {
+        dashboard: '监控仪表盘',
+        transactions: '交易监控',
+        alerts: '风险告警',
+        rules: '规则引擎管理',
+        users: '用户管理',
+        blacklist: '黑名单管理',
+        'fraud-patterns': '欺诈模式识别',
+        traceability: '交易溯源追踪'
+    };
+    document.getElementById('pageTitle').textContent = titles[page] || page;
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+        if (item.getAttribute('data-page') === page) {
+            item.classList.add('active');
+        }
+    });
+
+    document.querySelectorAll('.page').forEach(p => {
+        p.classList.remove('active');
+    });
+    const pageEl = document.getElementById('page-' + page);
+    if (pageEl) {
+        pageEl.classList.add('active');
+    }
+
+    if (page === 'transactions') {
+        loadTransactions();
+    } else if (page === 'alerts') {
+        loadAlerts();
+    } else if (page === 'rules') {
+        loadRules();
+    } else if (page === 'users') {
+        loadUsers();
+    } else if (page === 'blacklist') {
+        loadBlacklist();
+    } else if (page === 'fraud-patterns') {
+        loadFraudPatternStats();
+    }
+};
+

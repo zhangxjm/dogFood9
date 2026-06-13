@@ -42,6 +42,14 @@
                     <span class="nav-icon">🚫</span>
                     <span class="nav-label">黑名单管理</span>
                 </a>
+                <a href="#fraud-patterns" class="nav-item" data-page="fraud-patterns">
+                    <span class="nav-icon">🎯</span>
+                    <span class="nav-label">欺诈模式识别</span>
+                </a>
+                <a href="#traceability" class="nav-item" data-page="traceability">
+                    <span class="nav-icon">🔍</span>
+                    <span class="nav-label">交易溯源追踪</span>
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <div class="system-status">
@@ -404,6 +412,155 @@
                                 <tbody id="blacklistBody">
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-fraud-patterns" class="page">
+                    <div class="filter-bar">
+                        <h3>机器学习欺诈模式识别</h3>
+                        <div class="filter-group">
+                            <label>欺诈类型:</label>
+                            <select id="patternTypeFilter" onchange="loadFraudPatternStats()">
+                                <option value="">全部类型</option>
+                                <option value="STOLEN_CARD">盗刷识别</option>
+                                <option value="CASH_OUT">套现识别</option>
+                                <option value="FAKE_TRANSACTION">虚假交易</option>
+                                <option value="ACCOUNT_TAKEOVER">账户盗用</option>
+                                <option value="MONEY_LAUNDERING">洗钱识别</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary" onclick="loadFraudPatternStats()">刷新统计</button>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card stat-danger">
+                            <div class="stat-icon">💳</div>
+                            <div class="stat-content">
+                                <h3 id="statStolenCard">0</h3>
+                                <p>疑似盗刷交易</p>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-warning">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-content">
+                                <h3 id="statCashOut">0</h3>
+                                <p>疑似套现交易</p>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-warning">
+                            <div class="stat-icon">🎭</div>
+                            <div class="stat-content">
+                                <h3 id="statFakeTxn">0</h3>
+                                <p>疑似虚假交易</p>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-danger">
+                            <div class="stat-icon">🔐</div>
+                            <div class="stat-content">
+                                <h3 id="statTakeover">0</h3>
+                                <p>账户盗用风险</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-card">
+                        <div class="card-header">
+                            <h3>欺诈识别模型说明</h3>
+                        </div>
+                        <div style="padding:20px;">
+                            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+                                <div class="pattern-card">
+                                    <h4 style="color:#ef4444;margin-bottom:10px;">🔴 盗刷识别模型</h4>
+                                    <p style="color:#6b7280;font-size:13px;line-height:1.6;">
+                                        基于多维度特征识别被盗卡片交易，包括：大额异常消费、深夜时段交易、异地交易、
+                                        新设备首次交易、陌生IP地址、短时间密集交易、高变现商品类别等特征。
+                                    </p>
+                                    <div style="margin-top:10px;">
+                                        <span class="pattern-tag">置信度阈值: 70分</span>
+                                        <span class="pattern-tag">模型版本: v2.0</span>
+                                    </div>
+                                </div>
+                                <div class="pattern-card">
+                                    <h4 style="color:#f59e0b;margin-bottom:10px;">🟡 套现识别模型</h4>
+                                    <p style="color:#6b7280;font-size:13px;line-height:1.6;">
+                                        识别信用卡套现行为，特征包括：整数额度消费、当日大额笔数异常、
+                                        高额度使用率、疑似套现商户类别、短时间多笔消费、接近信用额度等。
+                                    </p>
+                                    <div style="margin-top:10px;">
+                                        <span class="pattern-tag">置信度阈值: 65分</span>
+                                        <span class="pattern-tag">模型版本: v2.0</span>
+                                    </div>
+                                </div>
+                                <div class="pattern-card">
+                                    <h4 style="color:#f59e0b;margin-bottom:10px;">🟡 虚假交易识别</h4>
+                                    <p style="color:#6b7280;font-size:13px;line-height:1.6;">
+                                        识别虚假/测试交易，特征包括：极低金额交易、验证性小额金额、
+                                        收付账户相同、异常交易描述、可疑商户名称、缺少设备/IP信息等。
+                                    </p>
+                                    <div style="margin-top:10px;">
+                                        <span class="pattern-tag">置信度阈值: 70分</span>
+                                        <span class="pattern-tag">模型版本: v2.0</span>
+                                    </div>
+                                </div>
+                                <div class="pattern-card">
+                                    <h4 style="color:#8b5cf6;margin-bottom:10px;">🟣 账户盗用模型</h4>
+                                    <p style="color:#6b7280;font-size:13px;line-height:1.6;">
+                                        识别账户被劫持/盗用风险，特征包括：资金转移类交易、大额转出余额、
+                                        IP与登录不一致、全新设备操作、位置突变、转账至新收款人等。
+                                    </p>
+                                    <div style="margin-top:10px;">
+                                        <span class="pattern-tag">置信度阈值: 65分</span>
+                                        <span class="pattern-tag">模型版本: v2.0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="page-traceability" class="page">
+                    <div class="filter-bar">
+                        <h3>交易溯源追踪</h3>
+                        <div class="filter-group">
+                            <label>交易ID:</label>
+                            <input type="text" id="traceTxnId" placeholder="输入交易ID查询" style="width:300px;">
+                        </div>
+                        <button class="btn btn-primary" onclick="queryTraceability()">查询溯源</button>
+                        <button class="btn btn-secondary" onclick="showTraceReport()">查看完整报告</button>
+                    </div>
+
+                    <div class="data-card" id="traceResultCard" style="display:none;">
+                        <div class="card-header">
+                            <h3>溯源结果</h3>
+                        </div>
+                        <div id="traceContent" style="padding:20px;">
+                        </div>
+                    </div>
+
+                    <div class="data-card" id="tracePlaceholder">
+                        <div style="text-align:center;padding:60px 20px;color:#9ca3af;">
+                            <div style="font-size:64px;margin-bottom:20px;">🔍</div>
+                            <h3 style="margin-bottom:10px;">交易溯源查询</h3>
+                            <p>输入交易ID即可查看完整的交易决策链路、规则触发历史、模型推理记录、证据链等溯源信息</p>
+                        </div>
+                    </div>
+
+                    <div class="data-card" style="margin-top:20px;">
+                        <div class="card-header">
+                            <h3>溯源功能说明</h3>
+                        </div>
+                        <div style="padding:20px;color:#6b7280;font-size:13px;line-height:1.8;">
+                            <p><strong>交易溯源系统</strong>提供完整的交易全生命周期追踪能力，支持：</p>
+                            <ul style="margin-left:20px;margin-top:10px;">
+                                <li><strong>决策链路追踪：</strong>完整记录交易从提交到最终决策的每一步骤</li>
+                                <li><strong>规则触发历史：</strong>详细记录每条风控规则的触发情况和评分</li>
+                                <li><strong>模型推理记录：</strong>机器学习各模型的推理结果和置信度分数</li>
+                                <li><strong>证据链管理：</strong>自动收集和汇总欺诈检测的各类证据</li>
+                                <li><strong>关联交易/告警：</strong>自动关联相关交易和风险告警</li>
+                                <li><strong>人工干预记录：</strong>完整记录人工审核操作和决策原因</li>
+                                <li><strong>审计追踪：</strong>所有操作均可追溯，满足监管合规要求</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

@@ -51,6 +51,24 @@ public class RiskAssessment {
 
     private LocalDateTime assessedAt;
 
+    @Column(length = 2048)
+    private String fraudPatternDetails;
+
+    @Column(length = 512)
+    private String fraudTags;
+
+    @Column(length = 128)
+    private String primaryFraudType;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal stolenCardScore;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal cashOutScore;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal fakeTransactionScore;
+
     @PrePersist
     protected void onCreate() {
         assessedAt = LocalDateTime.now();

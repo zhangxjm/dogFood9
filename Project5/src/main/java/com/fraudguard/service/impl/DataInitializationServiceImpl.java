@@ -68,7 +68,7 @@ public class DataInitializationServiceImpl implements DataInitializationService 
         log.info("System statistics initialized");
 
         if (transactionRepository.count() == 0) {
-            mockTransactionGenerator.generateBatchTransactions(50);
+            mockTransactionGenerator.generateBatchTransactions(10);
             log.info("Initial transactions generated");
         }
 
