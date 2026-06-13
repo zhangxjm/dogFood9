@@ -2,11 +2,18 @@ const API_BASE = '/api';
 
 async function apiRequest(url, options = {}) {
   try {
+    const headers = {};
+    
+    if (options.body !== undefined && options.body !== null) {
+      headers['Content-Type'] = 'application/json';
+    }
+    
+    if (options.headers) {
+      Object.assign(headers, options.headers);
+    }
+    
     const response = await fetch(API_BASE + url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
       ...options,
     });
     
