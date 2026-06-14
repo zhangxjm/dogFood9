@@ -399,6 +399,7 @@ def get_report_content(db, report_id):
         "period_start": report.period_start.isoformat() if report.period_start else None,
         "period_end": report.period_end.isoformat() if report.period_end else None,
         "content": content,
+        "file_path": report.file_path or "",
         "generated_at": report.generated_at.isoformat() if report.generated_at else None,
     }
 

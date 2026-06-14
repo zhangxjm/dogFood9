@@ -56,7 +56,7 @@ var Report = (function () {
 
     function loadReportList(type) {
         var url = "/api/report/list";
-        if (type) url += "?type=" + encodeURIComponent(type);
+        if (type) url += "?report_type=" + encodeURIComponent(type);
         fetch(url)
             .then(function (r) { return r.json(); })
             .then(function (data) {
@@ -75,10 +75,14 @@ var Report = (function () {
         }
         var html = "";
         reports.forEach(function (r) {
-            var typeName = TYPE_MAP[r.type] || r.type || "未知";
+            var typeName = TYPE_MAP[r.report_type] || r.report_type || "未知";
+            var dateStr = "";
+            if (r.generated_at) {
+                dateStr = r.generated_at.substring(0, 10);
+            }
             html += '<div class="report-item" data-id="' + r.id + '">' +
                 '<div class="ri-title">' + (r.title || typeName) + '</div>' +
-                '<div class="ri-meta">' + typeName + ' · ' + (r.date || r.created_at || "") + '</div>' +
+                '<div class="ri-meta">' + typeName + ' · ' + dateStr + '</div>' +
                 '</div>';
         });
         container.innerHTML = html;
@@ -107,63 +111,112 @@ var Report = (function () {
         var container = document.getElementById("report-content");
         if (!container) return;
 
+        var typeName = TYPE_MAP[data.report_type] || "";
+        var dateStr = "";
+        if (data.generated_at) {
+            dateStr = data.generated_at.substring(0, 10);
+        }
+
         var html = '<div class="rc-header">' +
             '<h2 class="rc-title">' + (data.title || "安全报告") + '</h2>' +
-            '<div class="rc-meta">' + (TYPE_MAP[data.type] || "") + ' · ' + (data.date || data.created_at || "") + '</div>' +
+            '<div class="rc-meta">' + typeName + ' · ' + dateStr + '</div>' +
             '</div>';
 
-        if (data.summary) {
-            html += '<div class="rc-section"><h3>统计概览</h3><div class="rc-stats-grid">';
-            var keys = Object.keys(data.summary);
-            keys.forEach(function (key) {
-                html += '<div class="rc-stat-item">' +
-                    '<span class="rc-stat-label">' + key + '</span>' +
-                    '<span class="rc-stat-value">' + data.summary[key] + '</span>' +
-                    '</div>';
-            });
+        var c = data.content || {};
+
+        html += '<div class="rc-section"><h3>人员统计</h3><div class="rc-stats-grid">';
+        var p = c.personnel || {};
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">总人数</span><span class="rc-stat-value">' + (p.total || 0) + '</span></div>';
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">井下人数</span><span class="rc-stat-value">' + (p.underground || 0) + '</span></div>';
+        html += '</div></div>';
+
+        html += '<div class="rc-section"><h3>传感器统计</h3><div class="rc-stats-grid">';
+        var gs = c.gas_sensors || {};
+        var rs = c.roof_sensors || {};
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">瓦斯传感器</span><span class="rc-stat-value">' + (gs.count || 0) + '</span></div>';
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">瓦斯预警</span><span class="rc-stat-value">' + (gs.warnings || 0) + '</span></div>';
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">顶板传感器</span><span class="rc-stat-value">' + (rs.count || 0) + '</span></div>';
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">顶板预警</span><span class="rc-stat-value">' + (rs.warnings || 0) + '</span></div>';
+        if (rs.max_stress != null) {
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">最大应力</span><span class="rc-stat-value">' + rs.max_stress + ' MPa</span></div>';
+        }
+        if (rs.max_displacement != null) {
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">最大位移</span><span class="rc-stat-value">' + rs.max_displacement + ' mm</span></div>';
+        }
+        html += '</div></div>';
+
+        html += '<div class="rc-section"><h3>通风设备</h3><div class="rc-stats-grid">';
+        var v = c.ventilation || {};
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">设备总数</span><span class="rc-stat-value">' + (v.total_equipment || 0) + '</span></div>';
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">运行中</span><span class="rc-stat-value">' + (v.running || 0) + '</span></div>';
+        if (v.avg_airflow != null) {
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">平均风量</span><span class="rc-stat-value">' + v.avg_airflow + ' m³/s</span></div>';
+        }
+        html += '</div></div>';
+
+        var w = c.warnings || {};
+        html += '<div class="rc-section"><h3>预警统计</h3><div class="rc-stats-grid">';
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">预警总数</span><span class="rc-stat-value">' + (w.total || 0) + '</span></div>';
+        var byLevel = w.by_level || {};
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">预警级</span><span class="rc-stat-value">' + (byLevel.warning || 0) + '</span></div>';
+        html += '<div class="rc-stat-item"><span class="rc-stat-label">危险级</span><span class="rc-stat-value">' + (byLevel.critical || 0) + '</span></div>';
+        html += '</div></div>';
+
+        if (c.compliance) {
+            html += '<div class="rc-section"><h3>合规率</h3><div class="rc-stats-grid">';
+            var comp = c.compliance || {};
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">瓦斯合规率</span><span class="rc-stat-value">' + (comp.gas_compliance_rate != null ? comp.gas_compliance_rate + "%" : "-") + '</span></div>';
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">顶板合规率</span><span class="rc-stat-value">' + (comp.roof_compliance_rate != null ? comp.roof_compliance_rate + "%" : "-") + '</span></div>';
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">通风合规率</span><span class="rc-stat-value">' + (comp.ventilation_compliance_rate != null ? comp.ventilation_compliance_rate + "%" : "-") + '</span></div>';
             html += '</div></div>';
         }
 
-        if (data.gas_statistics && data.gas_statistics.length > 0) {
-            html += '<div class="rc-section"><h3>瓦斯统计</h3><table class="rc-table"><thead><tr>' +
-                '<th>区域</th><th>最大值</th><th>平均值</th><th>超标次数</th>' +
-                '</tr></thead><tbody>';
-            data.gas_statistics.forEach(function (g) {
-                html += '<tr>' +
-                    '<td>' + (g.zone || "-") + '</td>' +
-                    '<td>' + (g.max != null ? g.max : "-") + '</td>' +
-                    '<td>' + (g.avg != null ? g.avg : "-") + '</td>' +
-                    '<td>' + (g.overlimit_count != null ? g.overlimit_count : "-") + '</td>' +
-                    '</tr>';
-            });
-            html += '</tbody></table></div>';
+        if (c.trend_analysis && c.trend_analysis.daily_warning_counts) {
+            var trend = c.trend_analysis.daily_warning_counts;
+            var dates = Object.keys(trend).sort();
+            if (dates.length > 0) {
+                html += '<div class="rc-section"><h3>每日预警趋势</h3><table class="rc-table"><thead><tr>';
+                html += '<th>日期</th><th>预警数量</th>';
+                html += '</tr></thead><tbody>';
+                dates.forEach(function (d) {
+                    html += '<tr><td>' + d + '</td><td>' + trend[d] + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            }
         }
 
-        if (data.zone_risk && data.zone_risk.length > 0) {
-            html += '<div class="rc-section"><h3>区域风险评估</h3><table class="rc-table"><thead><tr>' +
-                '<th>区域</th><th>风险等级</th><th>预警次数</th><th>评估说明</th>' +
-                '</tr></thead><tbody>';
-            data.zone_risk.forEach(function (z) {
-                html += '<tr>' +
-                    '<td>' + (z.zone || "-") + '</td>' +
-                    '<td>' + (z.risk_level || "-") + '</td>' +
-                    '<td>' + (z.warning_count != null ? z.warning_count : "-") + '</td>' +
-                    '<td>' + (z.description || "-") + '</td>' +
-                    '</tr>';
-            });
-            html += '</tbody></table></div>';
+        if (c.production) {
+            html += '<div class="rc-section"><h3>生产数据</h3><div class="rc-stats-grid">';
+            var prod = c.production || {};
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">监测记录</span><span class="rc-stat-value">' + (prod.monitoring_records || 0) + '</span></div>';
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">活跃区域</span><span class="rc-stat-value">' + (prod.active_zones || 0) + '</span></div>';
+            html += '</div></div>';
         }
 
-        if (data.recommendations && data.recommendations.length > 0) {
-            html += '<div class="rc-section"><h3>安全建议</h3><ul class="rc-list">';
-            data.recommendations.forEach(function (rec) {
-                html += '<li>' + rec + '</li>';
-            });
-            html += '</ul></div>';
+        if (c.incident_summary) {
+            html += '<div class="rc-section"><h3>事故汇总</h3><div class="rc-stats-grid">';
+            var inc = c.incident_summary || {};
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">严重事故</span><span class="rc-stat-value">' + (inc.critical_count || 0) + '</span></div>';
+            html += '<div class="rc-stat-item"><span class="rc-stat-label">处理率</span><span class="rc-stat-value">' + (inc.handled_rate != null ? inc.handled_rate + "%" : "-") + '</span></div>';
+            html += '</div></div>';
+        }
+
+        if (c.safety_metrics && c.safety_metrics.zone_warnings) {
+            var zw = c.safety_metrics.zone_warnings;
+            var zones = Object.keys(zw);
+            if (zones.length > 0) {
+                html += '<div class="rc-section"><h3>区域预警统计</h3><table class="rc-table"><thead><tr>';
+                html += '<th>区域</th><th>预警次数</th>';
+                html += '</tr></thead><tbody>';
+                zones.forEach(function (z) {
+                    html += '<tr><td>' + z + '</td><td>' + zw[z] + '</td></tr>';
+                });
+                html += '</tbody></table></div>';
+            }
         }
 
         html += '<div class="rc-actions">' +
-            '<button class="btn-export" onclick="Report.exportReport(\'' + data.id + '\')">导出Excel</button>' +
+            '<button class="btn-export" onclick="Report.exportReport(\'' + data.id + '\')">导出报表</button>' +
             '</div>';
 
         container.innerHTML = html;
@@ -174,34 +227,16 @@ var Report = (function () {
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var rows = [];
-                if (data.summary) {
-                    rows.push("统计概览");
-                    rows.push("项目,数值");
-                    Object.keys(data.summary).forEach(function (key) {
-                        rows.push(csvEscape(key) + "," + csvEscape(String(data.summary[key])));
-                    });
+                if (data.title) {
+                    rows.push(data.title);
                     rows.push("");
                 }
-                if (data.gas_statistics && data.gas_statistics.length > 0) {
-                    rows.push("瓦斯统计");
-                    rows.push("区域,最大值,平均值,超标次数");
-                    data.gas_statistics.forEach(function (g) {
-                        rows.push(csvEscape(g.zone || "") + "," + csvEscape(String(g.max != null ? g.max : "")) + "," + csvEscape(String(g.avg != null ? g.avg : "")) + "," + csvEscape(String(g.overlimit_count != null ? g.overlimit_count : "")));
-                    });
-                    rows.push("");
+                if (data.headers && data.headers.length > 0) {
+                    rows.push(data.headers.map(function (h) { return csvEscape(String(h)); }).join(","));
                 }
-                if (data.zone_risk && data.zone_risk.length > 0) {
-                    rows.push("区域风险评估");
-                    rows.push("区域,风险等级,预警次数,评估说明");
-                    data.zone_risk.forEach(function (z) {
-                        rows.push(csvEscape(z.zone || "") + "," + csvEscape(z.risk_level || "") + "," + csvEscape(String(z.warning_count != null ? z.warning_count : "")) + "," + csvEscape(z.description || ""));
-                    });
-                    rows.push("");
-                }
-                if (data.recommendations && data.recommendations.length > 0) {
-                    rows.push("安全建议");
-                    data.recommendations.forEach(function (rec, i) {
-                        rows.push((i + 1) + "," + csvEscape(rec));
+                if (data.rows && data.rows.length > 0) {
+                    data.rows.forEach(function (row) {
+                        rows.push(row.map(function (cell) { return csvEscape(String(cell != null ? cell : "")); }).join(","));
                     });
                 }
 
@@ -210,7 +245,11 @@ var Report = (function () {
                 var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
                 var link = document.createElement("a");
                 link.href = URL.createObjectURL(blob);
-                link.download = "安全报告_" + reportId + ".csv";
+                var filename = "安全报表_" + reportId + ".csv";
+                if (data.title) {
+                    filename = data.title + ".csv";
+                }
+                link.download = filename;
                 link.click();
                 URL.revokeObjectURL(link.href);
                 App.notify("导出成功", "success");

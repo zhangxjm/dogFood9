@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
 
 
@@ -158,7 +158,7 @@ class SafetyReportResponse(BaseModel):
     title: str
     period_start: Optional[datetime] = None
     period_end: Optional[datetime] = None
-    content: str
+    content: Any
     file_path: str
     generated_at: Optional[datetime] = None
 
