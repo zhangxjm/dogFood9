@@ -54,6 +54,26 @@ source venv/bin/activate
 echo "  Installing Python dependencies..."
 pip install -q -r requirements.txt 2>/dev/null || pip install -r requirements.txt
 
+echo "  Installing TensorFlow (optional)..."
+TF_INSTALLED=false
+PY_VER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null || echo "3.11")
+ARCH=$(uname -m)
+
+if [ "$ARCH" = "arm64" ]; then
+    echo "    Detected Apple Silicon (arm64), trying tensorflow-macos..."
+    pip install -q "tensorflow-macos>=2.13,<2.16" 2>/dev/null && TF_INSTALLED=true || \
+    pip install -q "tensorflow>=2.13,<2.16" 2>/dev/null && TF_INSTALLED=true || \
+    echo "    [WARN] TensorFlow install failed, using demo mode (AI detection will use simulated data)"
+else
+    echo "    Detected Intel Mac (x86_64), trying tensorflow..."
+    pip install -q "tensorflow>=2.13,<2.16" 2>/dev/null && TF_INSTALLED=true || \
+    echo "    [WARN] TensorFlow install failed, using demo mode (AI detection will use simulated data)"
+fi
+
+if [ "$TF_INSTALLED" = true ]; then
+    echo "    TensorFlow installed successfully"
+fi
+
 echo "  Running database migrations..."
 python manage.py migrate --noinput
 
