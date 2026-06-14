@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:sqlite:${parking.db.path:./data/smart_parking.db}
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: false
+    open-in-view: false
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: never
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+  cache:
+    type: simple
+
+parking:
+  billing:
+    first-hour-fee: 5.00
+    additional-hour-fee: 3.00
+    daily-max-fee: 50.00
+    monthly-fee: 300.00
+  hardware:
+    heartbeat-timeout: 30000
+    reconnect-interval: 5000
+    max-reconnect-attempts: 10
+  alert:
+    overdue-hours: 24
+    device-offline-threshold: 60000
+
+logging:
+  level:
+    com.smartparking: INFO
+    org.hibernate.SQL: WARN

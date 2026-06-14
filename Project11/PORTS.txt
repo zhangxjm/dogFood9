@@ -1,0 +1,17 @@
+Smart Parking Management System - Port List
+=============================================
+
+Service              Port    Protocol    Description
+---------------------------------------------------------------------------
+Spring Boot Backend  8080    HTTP/WS     REST API endpoint + WebSocket
+React Frontend       3000    HTTP        Admin dashboard + Owner portal
+Redis (Docker)       6379    TCP         Cache service (optional)
+
+=============================================
+
+Access URLs:
+  - Admin Dashboard: http://localhost:3000/admin
+  - Owner Portal:    http://localhost:3000/
+  - API Base:        http://localhost:8080/api
+  - WebSocket:       ws://localhost:8080/ws/parking
+=============================================
