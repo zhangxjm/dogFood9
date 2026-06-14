@@ -1,0 +1,14 @@
+Port List - Mine Digital Twin Safety System
+============================================
+
+Port    Service             Description
+------  ------------------  ------------------------------------------
+8000    FastAPI             Web UI + REST API + WebSocket
+8081    Flink JobManager    Flink cluster web UI & REST API
+6123    Flink RPC           Flink JobManager RPC communication
+9999    Flink Data Server   Stream processor data server (internal)
+
+Access URLs:
+- Web UI:    http://localhost:8000
+- API Docs:  http://localhost:8000/docs
+- Flink UI:  http://localhost:8081

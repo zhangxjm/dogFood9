@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>矿山数字孪生安全管控系统</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 32 32">
+                        <path d="M16 2L2 16h4v12h8v-8h4v8h8V16h4L16 2z" fill="#00d4ff" stroke="#0088cc" stroke-width="1"/>
+                        <circle cx="16" cy="12" r="3" fill="#ff6b35"/>
+                    </svg>
+                </div>
+                <h1>矿山数字孪生安全管控系统</h1>
+            </div>
+            <div class="header-center">
+                <div class="system-status">
+                    <span class="status-dot online"></span>
+                    <span id="system-time">--</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">井下人数</span>
+                        <span class="stat-value" id="stat-underground">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">活跃预警</span>
+                        <span class="stat-value warning" id="stat-warnings">--</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">通风设备</span>
+                        <span class="stat-value" id="stat-ventilation">--</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <nav class="nav-bar">
+            <button class="nav-btn active" data-page="digital-twin">
+                <span class="nav-icon">🏠</span>
+                <span>数字孪生</span>
+            </button>
+            <button class="nav-btn" data-page="monitoring">
+                <span class="nav-icon">📊</span>
+                <span>实时监测</span>
+            </button>
+            <button class="nav-btn" data-page="warning">
+                <span class="nav-icon">⚠️</span>
+                <span>智能预警</span>
+            </button>
+            <button class="nav-btn" data-page="evacuation">
+                <span class="nav-icon">🚨</span>
+                <span>紧急撤离</span>
+            </button>
+            <button class="nav-btn" data-page="report">
+                <span class="nav-icon">📋</span>
+                <span>安全报表</span>
+            </button>
+            <button class="nav-btn" data-page="planning">
+                <span class="nav-icon">⛏️</span>
+                <span>开采规划</span>
+            </button>
+            <button class="nav-btn" data-page="flink">
+                <span class="nav-icon">⚙️</span>
+                <span>Flink任务</span>
+            </button>
+        </nav>
+
+        <main class="main-content">
+            <div id="page-digital-twin" class="page active">
+                <div class="page-header">
+                    <h2>井下数字孪生场景</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-sm" onclick="DigitalTwin.resetCamera()">重置视角</button>
+                        <button class="btn btn-sm" onclick="DigitalTwin.toggleLabels()">切换标注</button>
+                        <select id="dt-zone-select" class="select-sm" onchange="DigitalTwin.focusZone(this.value)">
+                            <option value="">全部区域</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="dt-layout">
+                    <div class="dt-viewer" id="dt-viewer">
+                        <div class="dt-overlay" id="dt-overlay">
+                            <div class="overlay-panel top-left" id="dt-legend">
+                                <h4>图例</h4>
+                                <div class="legend-item"><span class="legend-color" style="background:#4CAF50"></span>正常</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#FF9800"></span>预警</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#f44336"></span>危险</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#2196F3"></span>人员</div>
+                                <div class="legend-item"><span class="legend-color" style="background:#9C27B0"></span>撤离中</div>
+                            </div>
+                            <div class="overlay-panel bottom-right" id="dt-info">
+                                <h4>场景信息</h4>
+                                <div id="dt-scene-info">加载中...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dt-sidebar">
+                        <div class="sidebar-section">
+                            <h3>区域状态</h3>
+                            <div id="dt-zone-status" class="zone-list"></div>
+                        </div>
+                        <div class="sidebar-section">
+                            <h3>传感器概览</h3>
+                            <div id="dt-sensor-summary"></div>
+                        </div>
+                        <div class="sidebar-section">
+                            <h3>实时预警</h3>
+                            <div id="dt-live-warnings" class="warning-mini-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-monitoring" class="page">
+                <div class="page-header">
+                    <h2>实时监测数据</h2>
+                    <div class="page-actions">
+                        <select id="monitor-zone" class="select-sm" onchange="Monitoring.filterZone(this.value)">
+                            <option value="">全部区域</option>
+                        </select>
+                        <button class="btn btn-sm" onclick="Monitoring.refresh()">刷新数据</button>
+                    </div>
+                </div>
+                <div class="monitor-grid">
+                    <div class="monitor-card">
+                        <h3>瓦斯浓度监测</h3>
+                        <div class="chart-container">
+                            <canvas id="gas-chart"></canvas>
+                        </div>
+                        <div id="gas-sensor-list" class="sensor-list"></div>
+                    </div>
+                    <div class="monitor-card">
+                        <h3>顶板应力监测</h3>
+                        <div class="chart-container">
+                            <canvas id="roof-chart"></canvas>
+                        </div>
+                        <div id="roof-sensor-list" class="sensor-list"></div>
+                    </div>
+                    <div class="monitor-card">
+                        <h3>通风设备状态</h3>
+                        <div class="chart-container">
+                            <canvas id="vent-chart"></canvas>
+                        </div>
+                        <div id="vent-equip-list" class="sensor-list"></div>
+                    </div>
+                    <div class="monitor-card">
+                        <h3>人员分布</h3>
+                        <div class="chart-container">
+                            <canvas id="personnel-chart"></canvas>
+                        </div>
+                        <div id="personnel-zone-list" class="sensor-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-warning" class="page">
+                <div class="page-header">
+                    <h2>智能预警中心</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-sm btn-warning" onclick="Warning.checkNow()">立即检查</button>
+                        <button class="btn btn-sm" onclick="Warning.refresh()">刷新</button>
+                    </div>
+                </div>
+                <div class="warning-layout">
+                    <div class="warning-stats-row">
+                        <div class="warning-stat-card">
+                            <div class="stat-number" id="w-total">0</div>
+                            <div class="stat-title">总预警数</div>
+                        </div>
+                        <div class="warning-stat-card active">
+                            <div class="stat-number" id="w-active">0</div>
+                            <div class="stat-title">活跃预警</div>
+                        </div>
+                        <div class="warning-stat-card warning-level">
+                            <div class="stat-number" id="w-warning">0</div>
+                            <div class="stat-title">预警级</div>
+                        </div>
+                        <div class="warning-stat-card critical-level">
+                            <div class="stat-number" id="w-critical">0</div>
+                            <div class="stat-title">危险级</div>
+                        </div>
+                    </div>
+                    <div class="warning-content">
+                        <div class="warning-list-panel">
+                            <h3>预警列表</h3>
+                            <div class="filter-bar">
+                                <select id="warning-type-filter" class="select-sm" onchange="Warning.filterType(this.value)">
+                                    <option value="">全部类型</option>
+                                    <option value="gas_overlimit">瓦斯超限</option>
+                                    <option value="roof_stress">冒顶风险</option>
+                                </select>
+                                <select id="warning-level-filter" class="select-sm" onchange="Warning.filterLevel(this.value)">
+                                    <option value="">全部级别</option>
+                                    <option value="warning">预警</option>
+                                    <option value="critical">危险</option>
+                                </select>
+                            </div>
+                            <div id="warning-list" class="warning-list"></div>
+                        </div>
+                        <div class="warning-detail-panel">
+                            <h3>预警详情</h3>
+                            <div id="warning-detail" class="detail-content">
+                                <p class="placeholder-text">选择一条预警查看详情</p>
+                            </div>
+                            <div class="warning-actions-panel">
+                                <h3>撤离检查</h3>
+                                <button class="btn btn-danger" onclick="Warning.checkEvacuation()">撤离区域检查</button>
+                                <div id="evacuation-check-result"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-evacuation" class="page">
+                <div class="page-header">
+                    <h2>紧急撤离引导</h2>
+                    <div class="page-actions">
+                        <select id="evac-zone-select" class="select-sm" onchange="Evacuation.loadGuidance(this.value)">
+                            <option value="">选择区域</option>
+                        </select>
+                        <button class="btn btn-danger" onclick="Evacuation.triggerEvacuation()">触发撤离</button>
+                    </div>
+                </div>
+                <div class="evacuation-layout">
+                    <div class="evac-map-panel">
+                        <h3>撤离路线图</h3>
+                        <canvas id="evac-canvas" width="800" height="500"></canvas>
+                    </div>
+                    <div class="evac-info-panel">
+                        <div class="evac-section">
+                            <h3>撤离引导信息</h3>
+                            <div id="evac-guidance-info"></div>
+                        </div>
+                        <div class="evac-section">
+                            <h3>避难硐室</h3>
+                            <div id="evac-refuge-info"></div>
+                        </div>
+                        <div class="evac-section">
+                            <h3>撤离状态</h3>
+                            <div id="evac-status-info"></div>
+                        </div>
+                        <div class="evac-section">
+                            <h3>可用撤离路线</h3>
+                            <div id="evac-routes-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-report" class="page">
+                <div class="page-header">
+                    <h2>安全合规报表</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-sm" onclick="Report.generateDaily()">生成日报</button>
+                        <button class="btn btn-sm" onclick="Report.generateWeekly()">生成周报</button>
+                        <button class="btn btn-sm" onclick="Report.generateMonthly()">生成月报</button>
+                        <select id="report-type-filter" class="select-sm" onchange="Report.filterType(this.value)">
+                            <option value="">全部类型</option>
+                            <option value="daily">日报</option>
+                            <option value="weekly">周报</option>
+                            <option value="monthly">月报</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="report-layout">
+                    <div class="report-list-panel">
+                        <h3>报表列表</h3>
+                        <div id="report-list" class="report-list"></div>
+                    </div>
+                    <div class="report-content-panel">
+                        <div id="report-content" class="report-display">
+                            <p class="placeholder-text">选择或生成一份报表查看内容</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-planning" class="page">
+                <div class="page-header">
+                    <h2>矿山开采规划</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-sm" onclick="Planning.showCreateForm()">新建计划</button>
+                        <button class="btn btn-sm" onclick="Planning.refresh()">刷新</button>
+                    </div>
+                </div>
+                <div class="planning-layout">
+                    <div class="planning-dashboard">
+                        <div class="plan-stat-cards">
+                            <div class="plan-stat-card">
+                                <div class="stat-number" id="plan-total">0</div>
+                                <div class="stat-title">总计划数</div>
+                            </div>
+                            <div class="plan-stat-card">
+                                <div class="stat-number" id="plan-active">0</div>
+                                <div class="stat-title">进行中</div>
+                            </div>
+                            <div class="plan-stat-card">
+                                <div class="stat-number" id="plan-completed">0</div>
+                                <div class="stat-title">已完成</div>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="plan-progress-chart"></canvas>
+                        </div>
+                    </div>
+                    <div class="planning-content">
+                        <div class="plan-list-panel">
+                            <h3>开采计划</h3>
+                            <div id="plan-list"></div>
+                        </div>
+                        <div class="zone-list-panel">
+                            <h3>区域管理</h3>
+                            <div id="zone-list"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="plan-create-modal" class="modal" style="display:none">
+                    <div class="modal-content">
+                        <h3>新建开采计划</h3>
+                        <form id="plan-form" onsubmit="Planning.createPlan(event)">
+                            <div class="form-group">
+                                <label>计划名称</label>
+                                <input type="text" id="plan-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>所属区域</label>
+                                <select id="plan-zone" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label>计划类型</label>
+                                <select id="plan-type">
+                                    <option value="excavation">开采</option>
+                                    <option value="maintenance">维护</option>
+                                    <option value="exploration">勘探</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>目标产量(吨)</label>
+                                <input type="number" id="plan-target" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label>描述</label>
+                                <textarea id="plan-desc" rows="3"></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">创建</button>
+                                <button type="button" class="btn" onclick="Planning.hideCreateForm()">取消</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="page-flink" class="page">
+                <div class="page-header">
+                    <h2>Apache Flink 任务管理</h2>
+                    <div class="page-actions">
+                        <button class="btn btn-sm" onclick="FlinkManager.checkStatus()">检查状态</button>
+                        <button class="btn btn-sm" onclick="FlinkManager.submitStream()">提交流式任务</button>
+                        <button class="btn btn-sm" onclick="FlinkManager.submitBatch()">提交批处理任务</button>
+                    </div>
+                </div>
+                <div class="flink-layout">
+                    <div class="flink-status-panel">
+                        <h3>集群状态</h3>
+                        <div id="flink-cluster-status" class="flink-status-grid"></div>
+                    </div>
+                    <div class="flink-jobs-panel">
+                        <h3>任务列表</h3>
+                        <div id="flink-jobs-list"></div>
+                    </div>
+                    <div class="flink-detail-panel">
+                        <h3>任务详情</h3>
+                        <div id="flink-job-detail">
+                            <p class="placeholder-text">选择任务查看详情</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <div id="notification-container"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/static/js/digital_twin.js"></script>
+    <script src="/static/js/monitoring.js"></script>
+    <script src="/static/js/warning.js"></script>
+    <script src="/static/js/evacuation.js"></script>
+    <script src="/static/js/report.js"></script>
+    <script src="/static/js/planning.js"></script>
+    <script src="/static/js/flink.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

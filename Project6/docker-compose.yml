@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  flink-jobmanager:
+    build:
+      context: ./docker/flink
+      dockerfile: Dockerfile
+    container_name: mine-flink-jobmanager
+    hostname: flink-jobmanager
+    ports:
+      - "8081:8081"
+      - "6123:6123"
+    environment:
+      - FLINK_PROPERTIES=jobmanager.rpc.address: flink-jobmanager
+    volumes:
+      - flink-data:/opt/flink/data
+      - ../data/hudi:/data/hudi
+      - ../backend/flink_jobs:/jobs
+    command: jobmanager
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/config"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  flink-taskmanager:
+    build:
+      context: ./docker/flink
+      dockerfile: Dockerfile
+    container_name: mine-flink-taskmanager
+    hostname: flink-taskmanager
+    depends_on:
+      flink-jobmanager:
+        condition: service_healthy
+    environment:
+      - FLINK_PROPERTIES=jobmanager.rpc.address: flink-jobmanager
+        taskmanager.numberOfTaskSlots: 4
+    volumes:
+      - flink-data:/opt/flink/data
+      - ../data/hudi:/data/hudi
+      - ../backend/flink_jobs:/jobs
+    command: taskmanager
+
+volumes:
+  flink-data:
