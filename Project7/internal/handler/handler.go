@@ -30,23 +30,55 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		Password string `json:"password" binding:"required"`
 	}
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		if c.Request.Method == "GET" || strings.Contains(c.Request.Header.Get("Content-Type"), "application/x-www-form-urlencoded") {
-			req.Username = c.PostForm("username")
-			req.Password = c.PostForm("password")
-			if req.Username == "" {
-				c.HTML(http.StatusOK, "login.html", gin.H{"error": ""})
-				return
-			}
-		} else {
+	isHTMLRequest := false
+	if c.Request.Method == "GET" {
+		isHTMLRequest = true
+	}
+	contentType := c.Request.Header.Get("Content-Type")
+	if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+		isHTMLRequest = true
+	}
+	accept := c.Request.Header.Get("Accept")
+	if strings.Contains(accept, "text/html") {
+		isHTMLRequest = true
+	}
+
+	if c.Request.Method == "GET" {
+		c.HTML(http.StatusOK, "login.html", gin.H{"error": ""})
+		return
+	}
+
+	if strings.Contains(contentType, "application/x-www-form-urlencoded") {
+		req.Username = c.PostForm("username")
+		req.Password = c.PostForm("password")
+	} else if strings.Contains(contentType, "application/json") {
+		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, common.Error(400, "参数错误"))
 			return
 		}
+	} else {
+		req.Username = c.PostForm("username")
+		req.Password = c.PostForm("password")
+		if req.Username == "" {
+			if err := c.ShouldBindJSON(&req); err != nil {
+				c.JSON(http.StatusBadRequest, common.Error(400, "参数错误"))
+				return
+			}
+		}
+	}
+
+	if req.Username == "" {
+		if isHTMLRequest {
+			c.HTML(http.StatusOK, "login.html", gin.H{"error": ""})
+		} else {
+			c.JSON(http.StatusBadRequest, common.Error(400, "用户名不能为空"))
+		}
+		return
 	}
 
 	user, token, err := h.authService.Login(req.Username, req.Password)
 	if err != nil {
-		if strings.Contains(c.Request.Header.Get("Accept"), "text/html") {
+		if isHTMLRequest {
 			c.HTML(http.StatusOK, "login.html", gin.H{"error": err.Error()})
 			return
 		}
@@ -58,7 +90,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.SetCookie("user_id", strconv.Itoa(int(user.ID)), 86400, "/", "", false, false)
 	c.SetCookie("user_role", user.Role, 86400, "/", "", false, false)
 
-	if strings.Contains(c.Request.Header.Get("Accept"), "text/html") || c.Request.Method == "POST" && c.Request.Header.Get("Content-Type") == "application/x-www-form-urlencoded" {
+	if isHTMLRequest {
 		c.Redirect(http.StatusFound, "/")
 		return
 	}
