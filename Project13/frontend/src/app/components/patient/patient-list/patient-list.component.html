@@ -31,9 +31,9 @@
           <th mat-header-cell *matHeaderCellDef>年龄</th>
           <td mat-cell *matCellDef="let element">{{ calculateAge(element.birthDate) }}岁</td>
         </ng-container>
-        <ng-container matColumnDef="medicalRecordNo">
+        <ng-container matColumnDef="medicalRecordNumber">
           <th mat-header-cell *matHeaderCellDef>住院号</th>
-          <td mat-cell *matCellDef="let element">{{ element.medicalRecordNo }}</td>
+          <td mat-cell *matCellDef="let element">{{ element.medicalRecordNumber }}</td>
         </ng-container>
         <ng-container matColumnDef="studyCount">
           <th mat-header-cell *matHeaderCellDef>检查次数</th>

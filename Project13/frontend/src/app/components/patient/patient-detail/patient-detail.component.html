@@ -30,13 +30,13 @@
             </div>
             <div class="info-item">
               <span class="info-label">身份证号：</span>
-              <span class="info-value">{{ patient.idCard || '未填写' }}</span>
+              <span class="info-value">{{ patient.idNumber || '未填写' }}</span>
             </div>
           </div>
           <div fxFlex="50" fxFlex.xs="100">
             <div class="info-item">
               <span class="info-label">住院号：</span>
-              <span class="info-value">{{ patient.medicalRecordNo }}</span>
+              <span class="info-value">{{ patient.medicalRecordNumber }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">联系电话：</span>
@@ -48,7 +48,7 @@
             </div>
             <div class="info-item">
               <span class="info-label">过敏史：</span>
-              <span class="info-value">{{ patient.allergyHistory || '无' }}</span>
+              <span class="info-value">{{ patient.allergies || '无' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">创建时间：</span>

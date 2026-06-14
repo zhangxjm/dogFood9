@@ -29,15 +29,15 @@
 
       <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
         <mat-label>住院号</mat-label>
-        <input matInput formControlName="medicalRecordNo" placeholder="请输入住院号">
-        <mat-error *ngIf="form.get('medicalRecordNo')?.hasError('required')">请输入住院号</mat-error>
+        <input matInput formControlName="medicalRecordNumber" placeholder="请输入住院号">
+        <mat-error *ngIf="form.get('medicalRecordNumber')?.hasError('required')">请输入住院号</mat-error>
       </mat-form-field>
     </div>
 
     <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
       <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
         <mat-label>身份证号</mat-label>
-        <input matInput formControlName="idCard" placeholder="请输入身份证号">
+        <input matInput formControlName="idNumber" placeholder="请输入身份证号">
       </mat-form-field>
 
       <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
@@ -53,7 +53,7 @@
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>过敏史</mat-label>
-      <textarea matInput formControlName="allergyHistory" rows="2" placeholder="请输入过敏史"></textarea>
+      <textarea matInput formControlName="allergies" rows="2" placeholder="请输入过敏史"></textarea>
     </mat-form-field>
   </form>
 </mat-dialog-content>

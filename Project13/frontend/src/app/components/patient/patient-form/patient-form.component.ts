@@ -24,11 +24,11 @@ export class PatientFormComponent {
       name: new FormControl(data?.name || '', [Validators.required]),
       gender: new FormControl(data?.gender || 'male', [Validators.required]),
       birthDate: new FormControl(data?.birthDate || '', [Validators.required]),
-      idCard: new FormControl(data?.idCard || ''),
+      idNumber: new FormControl(data?.idNumber || ''),
       phone: new FormControl(data?.phone || ''),
       address: new FormControl(data?.address || ''),
-      medicalRecordNo: new FormControl(data?.medicalRecordNo || '', [Validators.required]),
-      allergyHistory: new FormControl(data?.allergyHistory || '')
+      medicalRecordNumber: new FormControl(data?.medicalRecordNumber || '', [Validators.required]),
+      allergies: new FormControl(data?.allergies || '')
     });
   }
 

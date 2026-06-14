@@ -17,7 +17,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./patient-list.component.scss']
 })
 export class PatientListComponent implements OnInit {
-  displayedColumns: string[] = ['name', 'gender', 'age', 'medicalRecordNo', 'studyCount', 'createdAt', 'actions'];
+  displayedColumns: string[] = ['name', 'gender', 'age', 'medicalRecordNumber', 'studyCount', 'createdAt', 'actions'];
   dataSource = new MatTableDataSource<Patient>([]);
   total = 0;
   keyword = '';

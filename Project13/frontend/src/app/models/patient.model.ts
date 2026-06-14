@@ -3,11 +3,11 @@ export interface Patient {
   name: string;
   gender: 'male' | 'female';
   birthDate: string;
-  idCard?: string;
+  idNumber?: string;
   phone?: string;
   address?: string;
-  medicalRecordNo: string;
-  allergyHistory?: string;
+  medicalRecordNumber: string;
+  allergies?: string;
   studyCount: number;
   createdAt: string;
   updatedAt: string;
@@ -17,11 +17,11 @@ export interface PatientCreateRequest {
   name: string;
   gender: 'male' | 'female';
   birthDate: string;
-  idCard?: string;
+  idNumber?: string;
   phone?: string;
   address?: string;
-  medicalRecordNo: string;
-  allergyHistory?: string;
+  medicalRecordNumber: string;
+  allergies?: string;
 }
 
 export const GenderLabels: Record<string, string> = {
