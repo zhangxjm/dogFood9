@@ -2,6 +2,16 @@ var FlinkManager = (function() {
     var clusterStatus = null;
     var refreshInterval = null;
 
+    var STATUS_MAP = {
+        running: '运行中',
+        pending: '等待中',
+        submitted_locally: '本地提交',
+        stopped: '已停止',
+        canceled: '已取消',
+        finished: '已完成',
+        failed: '失败'
+    };
+
     function init() {
         checkStatus();
         loadJobs();
@@ -57,7 +67,7 @@ var FlinkManager = (function() {
         var container = document.getElementById('flink-jobs-list');
         if (!container) return;
 
-        var jobs = data.db_jobs || data.jobs || [];
+        var jobs = data.database_jobs || data.db_jobs || data.jobs || [];
         if (jobs.length === 0) {
             container.innerHTML = '<p class="placeholder-text">暂无Flink任务</p>';
             return;
@@ -65,11 +75,12 @@ var FlinkManager = (function() {
 
         container.innerHTML = jobs.map(function(job) {
             var statusCls = job.status === 'running' ? 'running' : 'stopped';
+            var statusText = STATUS_MAP[job.status] || job.status || '未知';
             return '<div class="flink-job-item" onclick="FlinkManager.showJobDetail(' + job.id + ')">' +
                 '<div class="fji-name">' + (job.job_name || '未命名任务') + '</div>' +
                 '<div class="fji-type">' +
                 '<span>类型: ' + (job.job_type === 'streaming' ? '流式处理' : '批处理') + '</span>' +
-                '<span class="value ' + statusCls + '" style="margin-left:8px">' + (job.status || '未知') + '</span>' +
+                '<span class="value ' + statusCls + '" style="margin-left:8px">' + statusText + '</span>' +
                 '</div>' +
                 '</div>';
         }).join('');
@@ -82,17 +93,20 @@ var FlinkManager = (function() {
         fetch('/api/flink/jobs')
             .then(function(r) { return r.json(); })
             .then(function(data) {
-                var jobs = data.db_jobs || data.jobs || [];
+                var jobs = data.database_jobs || data.db_jobs || data.jobs || [];
                 var job = jobs.find(function(j) { return j.id === jobId; });
                 if (!job) {
                     container.innerHTML = '<p class="placeholder-text">任务不存在</p>';
                     return;
                 }
 
+                var statusText = STATUS_MAP[job.status] || job.status || '未知';
+                var statusCls = job.status === 'running' ? 'running' : 'stopped';
+
                 var html = '<div style="margin-bottom:16px">';
                 html += '<div style="margin-bottom:8px"><strong>任务名称:</strong> ' + job.job_name + '</div>';
                 html += '<div style="margin-bottom:8px"><strong>任务类型:</strong> ' + (job.job_type === 'streaming' ? '流式处理' : '批处理') + '</div>';
-                html += '<div style="margin-bottom:8px"><strong>状态:</strong> <span class="value ' + (job.status === 'running' ? 'running' : 'stopped') + '">' + job.status + '</span></div>';
+                html += '<div style="margin-bottom:8px"><strong>状态:</strong> <span class="value ' + statusCls + '">' + statusText + '</span></div>';
                 html += '<div style="margin-bottom:8px"><strong>Job ID:</strong> ' + (job.job_id || '未分配') + '</div>';
                 html += '<div style="margin-bottom:8px"><strong>提交时间:</strong> ' + (job.submitted_at || '-') + '</div>';
                 html += '<div style="margin-bottom:8px"><strong>最后检查:</strong> ' + (job.last_check || '-') + '</div>';
