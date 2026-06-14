@@ -16,7 +16,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 export class ConsultationFormComponent implements OnInit {
   form: FormGroup;
   studies: Study[] = [];
-  experts: { id: number; realName: string; department: string; title: string }[] = [];
+  experts: { id: number; name: string; department: string; title: string }[] = [];
   loading = false;
 
   constructor(

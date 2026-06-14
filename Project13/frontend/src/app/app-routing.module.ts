@@ -37,8 +37,8 @@ const routes: Routes = [
       { path: 'reports/:id', component: ReportDetailComponent },
       { path: 'reports/generate/:studyId', component: ReportGenerateComponent },
       { path: 'consultations', component: ConsultationListComponent },
-      { path: 'consultations/:id', component: ConsultationDetailComponent },
       { path: 'consultations/new', component: ConsultationFormComponent },
+      { path: 'consultations/:id', component: ConsultationDetailComponent },
       { path: 'comparison', component: CaseComparisonComponent },
     ]
   },

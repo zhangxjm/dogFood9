@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Consultation, ConsultationComment
 from .serializers import ConsultationSerializer, ConsultationCreateSerializer, ConsultationCommentSerializer
+from apps.accounts.models import User
 
 
 class ConsultationListCreateView(generics.ListCreateAPIView):
@@ -21,10 +22,34 @@ class ConsultationListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(status=status_filter)
         return queryset
 
-    def perform_create(self, serializer):
-        consultation = serializer.save(initiator=self.request.user)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        consultation = serializer.save(initiator=request.user)
         consultation.status = 'in_progress'
         consultation.save()
+        return Response(
+            ConsultationSerializer(consultation).data,
+            status=status.HTTP_201_CREATED,
+            headers=self.get_success_headers(serializer.data)
+        )
+
+
+class ConsultationExpertsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        experts = User.objects.filter(role='expert').order_by('name')
+        data = [
+            {
+                'id': expert.id,
+                'name': expert.name,
+                'department': expert.department or '',
+                'title': expert.get_role_display(),
+            }
+            for expert in experts
+        ]
+        return Response(data)
 
 
 class ConsultationDetailView(generics.RetrieveUpdateDestroyAPIView):

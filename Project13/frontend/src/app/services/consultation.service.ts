@@ -35,7 +35,7 @@ export class ConsultationService {
     return this.http.post<Consultation>(`${this.apiUrl}/${id}/close/`, {});
   }
 
-  getExperts(): Observable<{ id: number; realName: string; department: string; title: string }[]> {
-    return this.http.get<{ id: number; realName: string; department: string; title: string }[]>(`${this.apiUrl}/experts/`);
+  getExperts(): Observable<{ id: number; name: string; department: string; title: string }[]> {
+    return this.http.get<{ id: number; name: string; department: string; title: string }[]>(`${this.apiUrl}/experts/`);
   }
 }

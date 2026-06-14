@@ -35,7 +35,7 @@
         <mat-label>选择专家</mat-label>
         <mat-select formControlName="expertIds" multiple>
           <mat-option *ngFor="let expert of experts" [value]="expert.id">
-            {{ expert.realName }} - {{ expert.department }} ({{ expert.title }})
+            {{ expert.name }} - {{ expert.department }} ({{ expert.title }})
           </mat-option>
         </mat-select>
         <mat-error *ngIf="form.get('expertIds')?.hasError('required')">请选择专家</mat-error>
