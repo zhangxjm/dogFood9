@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: ancient-book-es
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../docker/backend.Dockerfile
+    container_name: ancient-book-backend
+    environment:
+      - DATABASE_URL=sqlite:////app/data/ancient_books.db
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_USE_SSL=false
+      - FLASK_ENV=production
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/data:/app/data
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../docker/frontend.Dockerfile
+    container_name: ancient-book-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  es_data:
