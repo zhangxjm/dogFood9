@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, Input, Modal, Form, Select, Tag, Space, message, Popconfirm } from 'antd';
+import { Table, Button, Input, Modal, Form, Select, Tag, Space, message, Popconfirm, Card } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { getVehicles, registerVehicle, vehicleEntry, vehicleExit } from '../../api';
 
