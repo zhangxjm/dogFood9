@@ -59,7 +59,7 @@ echo "Backend PID: $BACKEND_PID"
 
 echo "Starting frontend dev server on port 8080..."
 cd "$FRONTEND_DIR"
-nohup npm run serve > "$DATA_DIR/frontend.log" 2>&1 &
+nohup npm run dev > "$DATA_DIR/frontend.log" 2>&1 &
 FRONTEND_PID=$!
 echo "Frontend PID: $FRONTEND_PID"
 
