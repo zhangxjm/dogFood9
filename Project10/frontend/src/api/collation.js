@@ -1,50 +1,50 @@
 import request from './index.js'
 
-export function convertVariants(text) {
+export function convertVariantChar(data) {
   return request({
     url: '/collation/convert-variants',
     method: 'post',
-    data: { text }
+    data
   })
 }
 
-export function insertPunctuation(text) {
+export function insertPunctuation(data) {
   return request({
     url: '/collation/insert-punctuation',
     method: 'post',
-    data: { text }
+    data
   })
 }
 
-export function compareTexts(text1, text2, label1, label2) {
+export function compareTexts(data) {
   return request({
     url: '/collation/compare',
     method: 'post',
-    data: { text1, text2, label1, label2 }
+    data
   })
 }
 
-export function compareVersions(version1_id, version2_id) {
+export function compareVersions(data) {
   return request({
     url: '/collation/compare-versions',
     method: 'post',
-    data: { version1_id, version2_id }
+    data
   })
 }
 
-export function semanticCollate(text, context_text) {
+export function semanticCollate(data) {
   return request({
     url: '/collation/semantic-collate',
     method: 'post',
-    data: { text, context_text }
+    data
   })
 }
 
-export function autoCollate(text, context_text, steps) {
+export function autoCollate(data) {
   return request({
     url: '/collation/auto-collate',
     method: 'post',
-    data: { text, context_text, steps }
+    data
   })
 }
 
@@ -91,5 +91,28 @@ export function lookupVariantChar(char) {
     url: '/collation/variant-chars/lookup',
     method: 'get',
     params: { char }
+  })
+}
+
+export function getCollationHistory(pageId) {
+  return request({
+    url: '/history/',
+    method: 'get',
+    params: { page_id: pageId }
+  })
+}
+
+export function saveCollationHistory(pageId, data) {
+  return request({
+    url: '/history/',
+    method: 'post',
+    data: { ...data, page_id: pageId }
+  })
+}
+
+export function revertCollation(pageId, historyId) {
+  return request({
+    url: `/history/pages/${pageId}/revert/${historyId}`,
+    method: 'post'
   })
 }

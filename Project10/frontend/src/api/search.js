@@ -1,6 +1,6 @@
 import request from './index.js'
 
-export function search(params) {
+export function searchFulltext(params) {
   return request({
     url: '/search/',
     method: 'get',
