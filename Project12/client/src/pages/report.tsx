@@ -206,8 +206,186 @@ export default function ReportPage() {
 
   const handleExport = () => {
     if (!reportData) return;
-    
-    message.info('报表导出功能开发中...');
+
+    try {
+      const csvContent = generateCSV(reportData);
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `直播数据报表_${dayjs().format('YYYYMMDD_HHmmss')}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      message.success('报表导出成功');
+    } catch (err) {
+      console.error('Export error:', err);
+      message.error('报表导出失败');
+    }
+  };
+
+  const generateCSV = (data: any) => {
+    const lines: string[] = [];
+    const escapeCSV = (value: string | number) => {
+      const str = String(value);
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    lines.push('直播数据监控报表');
+    lines.push('');
+    lines.push(`生成时间,${escapeCSV(data.generateTime)}`);
+    lines.push(`时间范围,${escapeCSV(data.timeRange.start + ' 至 ' + data.timeRange.end)}`);
+    lines.push(`直播间数量,${data.rooms.length} 个`);
+    lines.push(`数据维度,${escapeCSV(data.dimensions.map((d: string) => {
+      const opt = dimensionOptions.find((o) => o.value === d);
+      return opt?.label || d;
+    }).join('、'))}`);
+    lines.push('');
+
+    lines.push('【汇总数据】');
+    lines.push('指标,数值');
+    lines.push(`总平均观看人数,${data.overall.avgViewers}`);
+    lines.push(`总点赞数,${data.overall.totalLikes}`);
+    lines.push(`总评论数,${data.overall.totalComments}`);
+    lines.push(`总礼物价值(元),${data.overall.totalGiftValue}`);
+    lines.push(`总商品点击量,${data.overall.totalClicks}`);
+    lines.push(`总订单数,${data.overall.totalOrders}`);
+    lines.push(`总GMV(元),${data.overall.totalGMV}`);
+    lines.push(`总转化率,${data.overall.conversionRate}%`);
+    lines.push('');
+
+    lines.push('【各直播间数据明细】');
+    const headerCols = ['直播间', '平台', '主播'];
+    if (data.dimensions.includes('viewer_count')) {
+      headerCols.push('平均观看人数', '峰值观看人数');
+    }
+    if (data.dimensions.includes('like_count')) {
+      headerCols.push('总点赞数');
+    }
+    if (data.dimensions.includes('comment_count')) {
+      headerCols.push('总评论数');
+    }
+    if (data.dimensions.includes('share_count')) {
+      headerCols.push('总分享数');
+    }
+    if (data.dimensions.includes('gift_value')) {
+      headerCols.push('礼物价值(元)');
+    }
+    if (data.dimensions.includes('product_click_count')) {
+      headerCols.push('商品点击量');
+    }
+    if (data.dimensions.includes('order_count')) {
+      headerCols.push('订单数');
+    }
+    if (data.dimensions.includes('conversion_rate')) {
+      headerCols.push('转化率(%)');
+    }
+    lines.push(headerCols.join(','));
+
+    data.rooms.forEach((room: any) => {
+      const row = [
+        escapeCSV(room.roomInfo?.title || ''),
+        escapeCSV(room.roomInfo?.platform_display_name || ''),
+        escapeCSV(room.roomInfo?.streamer_name || ''),
+      ];
+      if (data.dimensions.includes('viewer_count')) {
+        row.push(String(room.summary.avgViewers));
+        row.push(String(room.summary.maxViewers));
+      }
+      if (data.dimensions.includes('like_count')) {
+        row.push(String(room.summary.totalLikes));
+      }
+      if (data.dimensions.includes('comment_count')) {
+        row.push(String(room.summary.totalComments));
+      }
+      if (data.dimensions.includes('share_count')) {
+        row.push(String(room.summary.totalShares));
+      }
+      if (data.dimensions.includes('gift_value')) {
+        row.push(String(room.summary.totalGiftValue));
+      }
+      if (data.dimensions.includes('product_click_count')) {
+        row.push(String(room.summary.totalClicks));
+      }
+      if (data.dimensions.includes('order_count')) {
+        row.push(String(room.summary.totalOrders));
+      }
+      if (data.dimensions.includes('conversion_rate')) {
+        row.push(String(room.summary.avgConversion));
+      }
+      lines.push(row.join(','));
+    });
+    lines.push('');
+
+    lines.push('【时间序列数据】');
+    data.rooms.forEach((room: any, roomIndex: number) => {
+      lines.push(`直播间${roomIndex + 1}: ${escapeCSV(room.roomInfo?.title || '')}`);
+      
+      const timeHeader = ['时间'];
+      if (data.dimensions.includes('viewer_count')) {
+        timeHeader.push('平均观看人数', '峰值观看人数');
+      }
+      if (data.dimensions.includes('like_count')) {
+        timeHeader.push('点赞数');
+      }
+      if (data.dimensions.includes('comment_count')) {
+        timeHeader.push('评论数');
+      }
+      if (data.dimensions.includes('share_count')) {
+        timeHeader.push('分享数');
+      }
+      if (data.dimensions.includes('gift_value')) {
+        timeHeader.push('礼物价值(元)');
+      }
+      if (data.dimensions.includes('product_click_count')) {
+        timeHeader.push('商品点击量');
+      }
+      if (data.dimensions.includes('order_count')) {
+        timeHeader.push('订单数');
+      }
+      if (data.dimensions.includes('conversion_rate')) {
+        timeHeader.push('转化率(%)');
+      }
+      lines.push(timeHeader.join(','));
+
+      room.metrics.forEach((metric: any) => {
+        const row = [escapeCSV(metric.time_bucket || metric.timestamp || '')];
+        if (data.dimensions.includes('viewer_count')) {
+          row.push(String(metric.avg_viewer_count || 0));
+          row.push(String(metric.max_viewer_count || 0));
+        }
+        if (data.dimensions.includes('like_count')) {
+          row.push(String(metric.total_likes || 0));
+        }
+        if (data.dimensions.includes('comment_count')) {
+          row.push(String(metric.total_comments || 0));
+        }
+        if (data.dimensions.includes('share_count')) {
+          row.push(String(metric.total_shares || 0));
+        }
+        if (data.dimensions.includes('gift_value')) {
+          row.push(String(metric.total_gift_value || 0));
+        }
+        if (data.dimensions.includes('product_click_count')) {
+          row.push(String(metric.total_product_clicks || 0));
+        }
+        if (data.dimensions.includes('order_count')) {
+          row.push(String(metric.total_orders || 0));
+        }
+        if (data.dimensions.includes('conversion_rate')) {
+          row.push(String(metric.avg_conversion_rate || 0));
+        }
+        lines.push(row.join(','));
+      });
+      lines.push('');
+    });
+
+    return lines.join('\n');
   };
 
   const columns = [
