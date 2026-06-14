@@ -1,0 +1,82 @@
+<div class="viewer-container">
+  <div class="viewer-toolbar" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="4px">
+    <button mat-mini-fab *ngFor="let tool of tools"
+            [color]="activeTool === tool.name ? 'primary' : ''"
+            (click)="activateTool(tool.name)"
+            [matTooltip]="tool.label">
+      <mat-icon>{{ tool.icon }}</mat-icon>
+    </button>
+    <span class="toolbar-divider"></span>
+    <button mat-mini-fab (click)="undo()" matTooltip="撤销">
+      <mat-icon>undo</mat-icon>
+    </button>
+    <button mat-mini-fab (click)="clearAnnotations()" matTooltip="清除">
+      <mat-icon>delete_sweep</mat-icon>
+    </button>
+    <button mat-mini-fab (click)="resetViewport()" matTooltip="重置">
+      <mat-icon>restart_alt</mat-icon>
+    </button>
+  </div>
+
+  <div class="viewer-body" fxLayout="row">
+    <div class="dicom-viewport" fxFlex>
+      <div #dicomCanvas class="cornerstone-element"></div>
+    </div>
+
+    <div class="nodule-overlay" *ngIf="nodules.length > 0" fxFlex="280px">
+      <div class="overlay-header">
+        <mat-icon>search</mat-icon>
+        检测到的结节 ({{ nodules.length }})
+      </div>
+      <div class="nodelist">
+        <div class="nodule-item" *ngFor="let nodule of nodules; let i = index"
+             [class.selected]="selectedNodule?.id === nodule.id"
+             (click)="selectNodule(nodule)">
+          <div class="nodule-index">{{ i + 1 }}</div>
+          <div class="nodule-info">
+            <div class="nodule-type">{{ nodule.noduleType }}</div>
+            <div class="nodule-size">{{ nodule.size }}mm</div>
+          </div>
+          <span class="malignancy-badge" [ngClass]="malignancyLevelCssClass[nodule.malignancyLevel]">
+            {{ malignancyLevelLabels[nodule.malignancyLevel] }}
+          </span>
+        </div>
+      </div>
+
+      <div class="nodule-detail" *ngIf="selectedNodule">
+        <mat-divider></mat-divider>
+        <div class="detail-header">结节详情</div>
+        <div class="detail-item">
+          <span class="detail-label">类型：</span>
+          <span>{{ selectedNodule.noduleType }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">直径：</span>
+          <span>{{ selectedNodule.size }}mm</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">体积：</span>
+          <span>{{ selectedNodule.volume }}mm³</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">密度：</span>
+          <span>{{ selectedNodule.density }}HU</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">边缘特征：</span>
+          <span>{{ selectedNodule.marginFeature }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">恶性概率：</span>
+          <span class="malignancy-value">{{ getMalignancyPercent(selectedNodule.malignancyProbability) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">恶性等级：</span>
+          <span class="malignancy-badge" [ngClass]="malignancyLevelCssClass[selectedNodule.malignancyLevel]">
+            {{ malignancyLevelLabels[selectedNodule.malignancyLevel] }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

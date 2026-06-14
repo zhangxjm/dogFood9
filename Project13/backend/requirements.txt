@@ -1,0 +1,11 @@
+Django>=4.2,<5.0
+djangorestframework>=3.14
+djangorestframework-simplejwt>=5.3
+django-cors-headers>=4.3
+celery>=5.3
+redis>=5.0
+pydicom>=2.4
+numpy>=1.24
+Pillow>=10.0
+tensorflow-macos>=2.13
+reportlab>=4.0

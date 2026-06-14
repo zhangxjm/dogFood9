@@ -1,0 +1,116 @@
+<div class="page-container" *ngIf="patient">
+  <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h1 class="page-title">患者详情</h1>
+    <button mat-raised-button routerLink="/patients">
+      <mat-icon>arrow_back</mat-icon>
+      返回列表
+    </button>
+  </div>
+
+  <mat-card class="card">
+    <mat-tab-group [(selectedIndex)]="selectedTab">
+      <mat-tab label="基本信息">
+        <div class="info-grid" fxLayout="row" fxLayoutGap="32px" fxLayout.xs="column">
+          <div fxFlex="50" fxFlex.xs="100">
+            <div class="info-item">
+              <span class="info-label">姓名：</span>
+              <span class="info-value">{{ patient.name }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">性别：</span>
+              <span class="info-value">{{ genderLabels[patient.gender] }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">年龄：</span>
+              <span class="info-value">{{ calculateAge(patient.birthDate) }}岁</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">出生日期：</span>
+              <span class="info-value">{{ patient.birthDate | date:'yyyy-MM-dd' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">身份证号：</span>
+              <span class="info-value">{{ patient.idCard || '未填写' }}</span>
+            </div>
+          </div>
+          <div fxFlex="50" fxFlex.xs="100">
+            <div class="info-item">
+              <span class="info-label">住院号：</span>
+              <span class="info-value">{{ patient.medicalRecordNo }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">联系电话：</span>
+              <span class="info-value">{{ patient.phone || '未填写' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">地址：</span>
+              <span class="info-value">{{ patient.address || '未填写' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">过敏史：</span>
+              <span class="info-value">{{ patient.allergyHistory || '无' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">创建时间：</span>
+              <span class="info-value">{{ patient.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="检查记录">
+        <table mat-table [dataSource]="studies">
+          <ng-container matColumnDef="studyDate">
+            <th mat-header-cell *matHeaderCellDef>检查日期</th>
+            <td mat-cell *matCellDef="let element">{{ element.studyDate | date:'yyyy-MM-dd' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="studyType">
+            <th mat-header-cell *matHeaderCellDef>检查类型</th>
+            <td mat-cell *matCellDef="let element">{{ element.studyType }}</td>
+          </ng-container>
+          <ng-container matColumnDef="bodyPart">
+            <th mat-header-cell *matHeaderCellDef>检查部位</th>
+            <td mat-cell *matCellDef="let element">{{ element.bodyPart }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>状态</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="status-badge" [ngClass]="getStatusClass(element.status)">
+                {{ getStudyStatusLabel(element.status) }}
+              </span>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedStudyColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedStudyColumns;"></tr>
+        </table>
+      </mat-tab>
+
+      <mat-tab label="诊断报告">
+        <table mat-table [dataSource]="reports">
+          <ng-container matColumnDef="reportType">
+            <th mat-header-cell *matHeaderCellDef>报告类型</th>
+            <td mat-cell *matCellDef="let element">{{ element.reportType }}</td>
+          </ng-container>
+          <ng-container matColumnDef="conclusion">
+            <th mat-header-cell *matHeaderCellDef>结论</th>
+            <td mat-cell *matCellDef="let element">{{ element.conclusion }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>状态</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="status-badge" [ngClass]="element.status === 'unsigned' ? 'status-unsigned' : 'status-signed'">
+                {{ getReportStatusLabel(element.status) }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>创建时间</th>
+            <td mat-cell *matCellDef="let element">{{ element.createdAt | date:'yyyy-MM-dd' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedReportColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedReportColumns;"></tr>
+        </table>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-card>
+</div>

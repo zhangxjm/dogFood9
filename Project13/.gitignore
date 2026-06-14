@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Django
+*.log
+db.sqlite3
+db.sqlite3-journal
+backend/staticfiles/
+backend/media/!backend/media/dicom/
+backend/media/!backend/media/reports/
+
+# TensorFlow models
+backend/models/*.h5
+backend/models/*.pb
+backend/models/*.tflite
+backend/models/*.keras
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.angular/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+*.env
+.env.local
+.env.production
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Misc
+*.bak
+*.tmp

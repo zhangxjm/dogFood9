@@ -1,0 +1,114 @@
+<div class="page-container" *ngIf="nodule">
+  <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h1 class="page-title">结节详情</h1>
+    <button mat-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      返回列表
+    </button>
+  </div>
+
+  <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+    <div fxFlex="60" fxFlex.xs="100">
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>边界框可视化</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="bbox-visualization">
+            <div class="bbox-canvas">
+              <div class="bbox-rect" [ngStyle]="{
+                left: nodule.bboxX + 'px',
+                top: nodule.bboxY + 'px',
+                width: nodule.bboxWidth + 'px',
+                height: nodule.bboxHeight + 'px'
+              }">
+                <span class="bbox-label">{{ nodule.noduleType }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>特征分析</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="feature-grid" fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+            <div fxFlex="25" fxFlex.xs="50" class="feature-item">
+              <div class="feature-icon"><mat-icon>straighten</mat-icon></div>
+              <div class="feature-label">直径</div>
+              <div class="feature-value">{{ nodule.size }}mm</div>
+            </div>
+            <div fxFlex="25" fxFlex.xs="50" class="feature-item">
+              <div class="feature-icon"><mat-icon>view_in_ar</mat-icon></div>
+              <div class="feature-label">体积</div>
+              <div class="feature-value">{{ nodule.volume }}mm³</div>
+            </div>
+            <div fxFlex="25" fxFlex.xs="50" class="feature-item">
+              <div class="feature-icon"><mat-icon>opacity</mat-icon></div>
+              <div class="feature-label">密度</div>
+              <div class="feature-value">{{ nodule.density }}HU</div>
+            </div>
+            <div fxFlex="25" fxFlex.xs="50" class="feature-item">
+              <div class="feature-icon"><mat-icon>border_style</mat-icon></div>
+              <div class="feature-label">边缘特征</div>
+              <div class="feature-value">{{ nodule.marginFeature }}</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div fxFlex="40" fxFlex.xs="100">
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>恶性概率</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="gauge-container" *ngIf="gaugeData">
+            <canvas baseChart [data]="gaugeData" [options]="gaugeOptions" type="doughnut"></canvas>
+            <div class="gauge-value">{{ (nodule.malignancyProbability * 100).toFixed(1) }}%</div>
+          </div>
+          <div class="malignancy-result">
+            <span class="malignancy-badge" [ngClass]="malignancyLevelCssClass[nodule.malignancyLevel]">
+              {{ malignancyLevelLabels[nodule.malignancyLevel] }}
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>基本信息</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-item">
+            <span class="info-label">影像编号：</span>
+            <span>{{ nodule.studyId }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">结节类型：</span>
+            <span>{{ nodule.noduleType }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">检测方式：</span>
+            <span>{{ detectionMethodLabels[nodule.detectionMethod] }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">切片位置：</span>
+            <span>{{ nodule.sliceIndex }}</span>
+          </div>
+          <div class="info-item" *ngIf="nodule.description">
+            <span class="info-label">描述：</span>
+            <span>{{ nodule.description }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">检测时间：</span>
+            <span>{{ nodule.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

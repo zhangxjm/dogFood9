@@ -1,0 +1,112 @@
+<div class="page-container" *ngIf="study">
+  <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h1 class="page-title">影像详情</h1>
+    <div fxLayout="row" fxLayoutGap="8px">
+      <button mat-raised-button color="primary" (click)="analyzeStudy()" *ngIf="study.status === 'pending'">
+        <mat-icon>auto_fix_high</mat-icon>
+        AI分析
+      </button>
+      <button mat-raised-button color="accent" (click)="generateReport()" *ngIf="study.status === 'completed'">
+        <mat-icon>description</mat-icon>
+        生成报告
+      </button>
+      <button mat-raised-button (click)="requestConsultation()">
+        <mat-icon>groups</mat-icon>
+        申请会诊
+      </button>
+      <button mat-button routerLink="/studies">
+        <mat-icon>arrow_back</mat-icon>
+        返回
+      </button>
+    </div>
+  </div>
+
+  <div fxLayout="row" fxLayoutGap="16px">
+    <div fxFlex="70" fxFlex.xs="100">
+      <mat-card class="card viewer-card">
+        <mat-card-header>
+          <mat-card-title>DICOM影像</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-dicom-viewer [studyId]="study.id" [nodules]="nodules"></app-dicom-viewer>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div fxFlex="30" fxFlex.xs="100">
+      <mat-card class="card info-card">
+        <mat-card-header>
+          <mat-card-title>检查信息</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-item">
+            <span class="info-label">患者姓名：</span>
+            <span>{{ study.patientName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">检查日期：</span>
+            <span>{{ study.studyDate | date:'yyyy-MM-dd' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">检查类型：</span>
+            <span>{{ study.studyType }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">检查部位：</span>
+            <span>{{ study.bodyPart }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">状态：</span>
+            <span class="status-badge" [ngClass]="getStatusClass(study.status)">
+              {{ studyStatusLabels[study.status] }}
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="card nodules-card">
+        <mat-card-header>
+          <mat-card-title>结节检测结果 ({{ nodules.length }})</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <table mat-table [dataSource]="nodules" *ngIf="nodules.length > 0">
+            <ng-container matColumnDef="noduleType">
+              <th mat-header-cell *matHeaderCellDef>类型</th>
+              <td mat-cell *matCellDef="let element">{{ element.noduleType }}</td>
+            </ng-container>
+            <ng-container matColumnDef="size">
+              <th mat-header-cell *matHeaderCellDef>大小</th>
+              <td mat-cell *matCellDef="let element">{{ element.size }}mm</td>
+            </ng-container>
+            <ng-container matColumnDef="malignancyProbability">
+              <th mat-header-cell *matHeaderCellDef>恶性概率</th>
+              <td mat-cell *matCellDef="let element">{{ (element.malignancyProbability * 100).toFixed(1) }}%</td>
+            </ng-container>
+            <ng-container matColumnDef="malignancyLevel">
+              <th mat-header-cell *matHeaderCellDef>等级</th>
+              <td mat-cell *matCellDef="let element">
+                <span class="malignancy-badge" [ngClass]="getMalignancyCssClass(element.malignancyLevel)">
+                  {{ getMalignancyLabel(element.malignancyLevel) }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let element">
+                <button mat-icon-button (click)="viewNodule(element)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedNoduleColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedNoduleColumns;"></tr>
+          </table>
+          <div class="no-data" *ngIf="nodules.length === 0">
+            <mat-icon>search_off</mat-icon>
+            <p>暂无结节检测结果</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,105 @@
+<div class="page-container">
+  <h1 class="page-title">工作台</h1>
+
+  <div class="stats-row" fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+    <mat-card class="stat-card" fxFlex="25" fxFlex.xs="100">
+      <mat-card-content>
+        <div class="stat-icon exams-icon">
+          <mat-icon>assignment</mat-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.todayExams }}</div>
+          <div class="stat-label">今日检查数</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card" fxFlex="25" fxFlex.xs="100">
+      <mat-card-content>
+        <div class="stat-icon pending-icon">
+          <mat-icon>hourglass_empty</mat-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.pendingAnalysis }}</div>
+          <div class="stat-label">待分析</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card" fxFlex="25" fxFlex.xs="100">
+      <mat-card-content>
+        <div class="stat-icon report-icon">
+          <mat-icon>description</mat-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.pendingReports }}</div>
+          <div class="stat-label">待报告</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card" fxFlex="25" fxFlex.xs="100">
+      <mat-card-content>
+        <div class="stat-icon consult-icon">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats.pendingConsultations }}</div>
+          <div class="stat-label">待会诊</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column" class="main-section">
+    <mat-card class="chart-card" fxFlex="60" fxFlex.xs="100">
+      <mat-card-header>
+        <mat-card-title>本周检查趋势</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="chart-container" *ngIf="weeklyChartData">
+          <canvas baseChart [data]="weeklyChartData" [options]="weeklyChartOptions" type="bar">
+          </canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div fxFlex="40" fxFlex.xs="100" fxLayout="column" fxLayoutGap="16px">
+      <mat-card class="recent-card" fxFlex="50">
+        <mat-card-header>
+          <mat-card-title>最近检查</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-list>
+            <mat-list-item *ngFor="let study of recentStudies">
+              <mat-icon matListItemIcon>medical_services</mat-icon>
+              <span matListItemTitle>{{ study.patientName }}</span>
+              <span matListItemLine>{{ study.studyType }}</span>
+              <span class="status-badge" [ngClass]="getStatusClass(study.status)">
+                {{ getStudyStatusLabel(study.status) }}
+              </span>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="recent-card" fxFlex="50">
+        <mat-card-header>
+          <mat-card-title>最近报告</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <mat-list>
+            <mat-list-item *ngFor="let report of recentReports">
+              <mat-icon matListItemIcon>description</mat-icon>
+              <span matListItemTitle>{{ report.patientName }}</span>
+              <span matListItemLine>{{ report.reportType }}</span>
+              <span class="status-badge" [ngClass]="getReportStatusClass(report.status)">
+                {{ report.status === 'unsigned' ? '未签署' : '已签署' }}
+              </span>
+            </mat-list-item>
+          </mat-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,131 @@
+<div class="page-container">
+  <h1 class="page-title">病例对比</h1>
+
+  <div class="selectors" fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+    <mat-card class="card selector-card" fxFlex="50" fxFlex.xs="100">
+      <mat-card-header>
+        <mat-card-title>影像 A</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>选择影像</mat-label>
+          <mat-select [(ngModel)]="selectedStudyA" (ngModelChange)="onStudyAChange()">
+            <mat-option *ngFor="let study of studies" [value]="study.id">
+              {{ study.patientName }} - {{ study.studyDate | date:'yyyy-MM-dd' }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="viewer-placeholder">
+          <app-dicom-viewer *ngIf="selectedStudyA" [studyId]="selectedStudyA" [nodules]="nodulesA"></app-dicom-viewer>
+          <div class="no-selection" *ngIf="!selectedStudyA">
+            <mat-icon>compare</mat-icon>
+            <p>请选择影像A</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card selector-card" fxFlex="50" fxFlex.xs="100">
+      <mat-card-header>
+        <mat-card-title>影像 B</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>选择影像</mat-label>
+          <mat-select [(ngModel)]="selectedStudyB" (ngModelChange)="onStudyBChange()">
+            <mat-option *ngFor="let study of studies" [value]="study.id">
+              {{ study.patientName }} - {{ study.studyDate | date:'yyyy-MM-dd' }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="viewer-placeholder">
+          <app-dicom-viewer *ngIf="selectedStudyB" [studyId]="selectedStudyB" [nodules]="nodulesB"></app-dicom-viewer>
+          <div class="no-selection" *ngIf="!selectedStudyB">
+            <mat-icon>compare</mat-icon>
+            <p>请选择影像B</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="card comparison-card" *ngIf="studyA && studyB">
+    <mat-card-header>
+      <mat-card-title>对比信息</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="getComparisonData()">
+        <ng-container matColumnDef="property">
+          <th mat-header-cell *matHeaderCellDef>属性</th>
+          <td mat-cell *matCellDef="let element" class="property-cell">{{ element.property }}</td>
+        </ng-container>
+        <ng-container matColumnDef="studyA">
+          <th mat-header-cell *matHeaderCellDef>影像 A</th>
+          <td mat-cell *matCellDef="let element">{{ element.studyA }}</td>
+        </ng-container>
+        <ng-container matColumnDef="studyB">
+          <th mat-header-cell *matHeaderCellDef>影像 B</th>
+          <td mat-cell *matCellDef="let element">{{ element.studyB }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="card" *ngIf="studyA && studyB && (nodulesA.length > 0 || nodulesB.length > 0)">
+    <mat-card-header>
+      <mat-card-title>结节对比</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+        <div fxFlex="50" fxFlex.xs="100">
+          <h4 class="nodule-section-title">影像A 结节 ({{ nodulesA.length }})</h4>
+          <div class="nodule-mini-item" *ngFor="let n of nodulesA">
+            <span>{{ n.noduleType }}</span>
+            <span>{{ n.size }}mm</span>
+            <span class="malignancy-badge" [ngClass]="getMalignancyCssClass(n.malignancyLevel)">
+              {{ getMalignancyLabel(n.malignancyLevel) }}
+            </span>
+            <span>{{ (n.malignancyProbability * 100).toFixed(1) }}%</span>
+          </div>
+        </div>
+        <div fxFlex="50" fxFlex.xs="100">
+          <h4 class="nodule-section-title">影像B 结节 ({{ nodulesB.length }})</h4>
+          <div class="nodule-mini-item" *ngFor="let n of nodulesB">
+            <span>{{ n.noduleType }}</span>
+            <span>{{ n.size }}mm</span>
+            <span class="malignancy-badge" [ngClass]="getMalignancyCssClass(n.malignancyLevel)">
+              {{ getMalignancyLabel(n.malignancyLevel) }}
+            </span>
+            <span>{{ (n.malignancyProbability * 100).toFixed(1) }}%</span>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="card timeline-card" *ngIf="studyA && studyB">
+    <mat-card-header>
+      <mat-card-title>历史时间线</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot dot-a"></div>
+          <div class="timeline-content" *ngIf="studyA">
+            <div class="timeline-date">{{ studyA.studyDate | date:'yyyy-MM-dd' }}</div>
+            <div class="timeline-info">{{ studyA.patientName }} - {{ studyA.studyType }}</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot dot-b"></div>
+          <div class="timeline-content" *ngIf="studyB">
+            <div class="timeline-date">{{ studyB.studyDate | date:'yyyy-MM-dd' }}</div>
+            <div class="timeline-info">{{ studyB.patientName }} - {{ studyB.studyType }}</div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,65 @@
+.page-header {
+  margin-bottom: 20px;
+}
+
+.report-card {
+  padding: 0;
+}
+
+.report-header {
+  padding: 20px 24px 16px;
+}
+
+.report-title-row {
+  margin-bottom: 12px;
+
+  h2 {
+    font-size: 20px;
+    color: #1a1a2e;
+  }
+}
+
+.patient-info-row {
+  padding: 12px 0;
+  font-size: 13px;
+  color: #666;
+  flex-wrap: wrap;
+}
+
+.report-section {
+  padding: 16px 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 15px;
+  color: #1976D2;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+
+  &::before {
+    content: '';
+    width: 3px;
+    height: 16px;
+    background: #1976D2;
+    margin-right: 8px;
+    border-radius: 2px;
+  }
+}
+
+.section-content {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+  padding-left: 11px;
+}
+
+.conclusion-content {
+  font-weight: 500;
+  color: #1a1a2e;
+}
+
+table {
+  width: 100%;
+}

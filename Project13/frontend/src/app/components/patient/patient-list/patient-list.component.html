@@ -1,0 +1,69 @@
+<div class="page-container">
+  <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h1 class="page-title">患者管理</h1>
+    <button mat-raised-button color="primary" (click)="openAddDialog()">
+      <mat-icon>add</mat-icon>
+      新增患者
+    </button>
+  </div>
+
+  <mat-card class="card">
+    <div class="search-bar" fxLayout="row" fxLayoutGap="12px" fxLayoutAlign="start center">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>搜索</mat-label>
+        <input matInput [(ngModel)]="keyword" (keyup.enter)="onSearch()" placeholder="姓名/住院号">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="onSearch()">搜索</button>
+    </div>
+
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort>
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>姓名</th>
+          <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+        </ng-container>
+        <ng-container matColumnDef="gender">
+          <th mat-header-cell *matHeaderCellDef>性别</th>
+          <td mat-cell *matCellDef="let element">{{ getGenderLabel(element.gender) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="age">
+          <th mat-header-cell *matHeaderCellDef>年龄</th>
+          <td mat-cell *matCellDef="let element">{{ calculateAge(element.birthDate) }}岁</td>
+        </ng-container>
+        <ng-container matColumnDef="medicalRecordNo">
+          <th mat-header-cell *matHeaderCellDef>住院号</th>
+          <td mat-cell *matCellDef="let element">{{ element.medicalRecordNo }}</td>
+        </ng-container>
+        <ng-container matColumnDef="studyCount">
+          <th mat-header-cell *matHeaderCellDef>检查次数</th>
+          <td mat-cell *matCellDef="let element">{{ element.studyCount }}</td>
+        </ng-container>
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>创建时间</th>
+          <td mat-cell *matCellDef="let element">{{ element.createdAt | date:'yyyy-MM-dd' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>操作</th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-icon-button (click)="viewPatient(element.id)" matTooltip="查看">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button (click)="openEditDialog(element)" matTooltip="编辑">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deletePatient(element.id)" matTooltip="删除">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+
+    <mat-paginator [length]="total" [pageSize]="10" [pageSizeOptions]="[5, 10, 20]"
+                   (page)="onPageChange()" showFirstLastButtons></mat-paginator>
+  </mat-card>
+</div>

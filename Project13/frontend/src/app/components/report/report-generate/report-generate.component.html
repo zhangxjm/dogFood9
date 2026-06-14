@@ -1,0 +1,81 @@
+<div class="page-container">
+  <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h1 class="page-title">生成诊断报告</h1>
+    <div fxLayout="row" fxLayoutGap="8px">
+      <button mat-raised-button color="accent" (click)="fillFromAi()" [disabled]="aiLoading">
+        <mat-icon>auto_fix_high</mat-icon>
+        AI自动填充
+      </button>
+      <button mat-button (click)="togglePreview()">
+        <mat-icon>{{ previewMode ? 'edit' : 'preview' }}</mat-icon>
+        {{ previewMode ? '编辑' : '预览' }}
+      </button>
+      <button mat-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        返回
+      </button>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!previewMode">
+    <mat-card class="card">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>报告类型</mat-label>
+        <mat-select formControlName="reportType">
+          <mat-option *ngFor="let opt of reportTypeOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('reportType')?.hasError('required')">请选择报告类型</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>检查所见</mat-label>
+        <textarea matInput formControlName="findings" rows="6" placeholder="请输入检查所见"></textarea>
+        <mat-error *ngIf="form.get('findings')?.hasError('required')">请输入检查所见</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>诊断结论</mat-label>
+        <textarea matInput formControlName="conclusion" rows="4" placeholder="请输入诊断结论"></textarea>
+        <mat-error *ngIf="form.get('conclusion')?.hasError('required')">请输入诊断结论</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>建议</mat-label>
+        <textarea matInput formControlName="recommendations" rows="3" placeholder="请输入建议"></textarea>
+      </mat-form-field>
+
+      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+        <button mat-button type="button" (click)="goBack()">取消</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+          {{ loading ? '保存中...' : '保存报告' }}
+        </button>
+      </div>
+    </mat-card>
+  </form>
+
+  <mat-card class="card" *ngIf="previewMode">
+    <div class="preview-header">
+      <h2>{{ form.get('reportType')?.value || '诊断报告' }}</h2>
+    </div>
+    <mat-divider></mat-divider>
+    <div class="preview-section">
+      <h3>检查所见</h3>
+      <p>{{ form.get('findings')?.value }}</p>
+    </div>
+    <div class="preview-section">
+      <h3>诊断结论</h3>
+      <p class="conclusion">{{ form.get('conclusion')?.value }}</p>
+    </div>
+    <div class="preview-section" *ngIf="form.get('recommendations')?.value">
+      <h3>建议</h3>
+      <p>{{ form.get('recommendations')?.value }}</p>
+    </div>
+    <mat-divider></mat-divider>
+    <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px" style="padding: 16px 0">
+      <button mat-button (click)="togglePreview()">返回编辑</button>
+      <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading">
+        保存报告
+      </button>
+    </div>
+  </mat-card>
+</div>

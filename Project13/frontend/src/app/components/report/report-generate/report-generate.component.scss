@@ -1,0 +1,37 @@
+.page-header {
+  margin-bottom: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.preview-header {
+  padding: 16px 0;
+
+  h2 {
+    font-size: 20px;
+    color: #1a1a2e;
+  }
+}
+
+.preview-section {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+
+  h3 {
+    font-size: 15px;
+    color: #1976D2;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #333;
+  }
+
+  .conclusion {
+    font-weight: 500;
+  }
+}

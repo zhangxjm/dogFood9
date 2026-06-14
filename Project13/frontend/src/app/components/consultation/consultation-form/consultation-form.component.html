@@ -1,0 +1,52 @@
+<div class="page-container">
+  <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h1 class="page-title">新建会诊</h1>
+    <button mat-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      返回
+    </button>
+  </div>
+
+  <mat-card class="card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="consultation-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>会诊标题</mat-label>
+        <input matInput formControlName="title" placeholder="请输入会诊标题">
+        <mat-error *ngIf="form.get('title')?.hasError('required')">请输入会诊标题</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>关联影像</mat-label>
+        <mat-select formControlName="studyId">
+          <mat-option *ngFor="let study of studies" [value]="study.id">
+            {{ study.patientName }} - {{ study.studyDate | date:'yyyy-MM-dd' }} - {{ study.studyType }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('studyId')?.hasError('required')">请选择关联影像</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>会诊描述</mat-label>
+        <textarea matInput formControlName="description" rows="4" placeholder="请输入会诊描述"></textarea>
+        <mat-error *ngIf="form.get('description')?.hasError('required')">请输入会诊描述</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>选择专家</mat-label>
+        <mat-select formControlName="expertIds" multiple>
+          <mat-option *ngFor="let expert of experts" [value]="expert.id">
+            {{ expert.realName }} - {{ expert.department }} ({{ expert.title }})
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('expertIds')?.hasError('required')">请选择专家</mat-error>
+      </mat-form-field>
+
+      <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+        <button mat-button type="button" (click)="goBack()">取消</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+          {{ loading ? '创建中...' : '创建会诊' }}
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>

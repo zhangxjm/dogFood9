@@ -1,0 +1,42 @@
+=========================================
+  System Port List
+=========================================
+
+Service                    Port    Protocol
+---------                  -----   --------
+Frontend (Angular)         4200    HTTP
+Backend (Django)           8000    HTTP
+Redis                      6379    TCP
+RabbitMQ                   5672    TCP
+RabbitMQ Management UI     15672   HTTP
+
+=========================================
+  Details
+=========================================
+
+Port 4200:
+  - Frontend web interface
+  - Angular development server
+  - Access: http://localhost:4200
+
+Port 8000:
+  - Backend API server
+  - Django REST framework
+  - Access: http://localhost:8000
+  - Admin:  http://localhost:8000/admin/
+
+Port 6379:
+  - Redis cache server
+  - Used for Celery broker and caching
+  - Docker container: lungct_redis
+
+Port 5672:
+  - RabbitMQ message broker
+  - Alternative message queue
+  - Docker container: lungct_rabbitmq
+
+Port 15672:
+  - RabbitMQ management web UI
+  - Default login: admin / admin123
+  - Access: http://localhost:15672
+  - Docker container: lungct_rabbitmq

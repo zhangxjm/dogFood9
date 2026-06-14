@@ -1,0 +1,111 @@
+<div class="page-container" *ngIf="consultation">
+  <div class="page-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h1 class="page-title">{{ consultation.title }}</h1>
+    <div fxLayout="row" fxLayoutGap="8px">
+      <button mat-raised-button color="warn" (click)="closeConsultation()"
+              *ngIf="consultation.status !== 'completed'">
+        <mat-icon>check_circle</mat-icon>
+        关闭会诊
+      </button>
+      <button mat-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        返回
+      </button>
+    </div>
+  </div>
+
+  <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+    <div fxFlex="65" fxFlex.xs="100">
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>讨论区</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="comment-list" *ngIf="consultation.comments && consultation.comments.length > 0">
+            <div class="comment-item" *ngFor="let comment of consultation.comments">
+              <div class="comment-avatar">
+                <mat-icon>account_circle</mat-icon>
+              </div>
+              <div class="comment-body">
+                <div class="comment-header">
+                  <span class="comment-author">{{ comment.userName }}</span>
+                  <span class="comment-time">{{ comment.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+                </div>
+                <div class="comment-content">{{ comment.content }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="no-comments" *ngIf="!consultation.comments || consultation.comments.length === 0">
+            <mat-icon>chat_bubble_outline</mat-icon>
+            <p>暂无讨论，请发表意见</p>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="comment-form" *ngIf="consultation.status !== 'completed'">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>发表意见</mat-label>
+              <textarea matInput [(ngModel)]="commentContent" rows="3" placeholder="请输入您的意见"></textarea>
+            </mat-form-field>
+            <div fxLayout="row" fxLayoutAlign="end center">
+              <button mat-raised-button color="primary" (click)="addComment()" [disabled]="!commentContent.trim() || loading">
+                发送
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div fxFlex="35" fxFlex.xs="100">
+      <mat-card class="card">
+        <mat-card-header>
+          <mat-card-title>会诊信息</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-item">
+            <span class="info-label">状态：</span>
+            <span class="status-badge" [ngClass]="getStatusClass(consultation.status)">
+              {{ getStatusLabel(consultation.status) }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">发起人：</span>
+            <span>{{ consultation.initiatorName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">患者：</span>
+            <span>{{ consultation.patientName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">影像编号：</span>
+            <span>{{ consultation.studyId }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">创建时间：</span>
+            <span>{{ consultation.createdAt | date:'yyyy-MM-dd HH:mm' }}</span>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <div class="info-item">
+            <span class="info-label">描述：</span>
+          </div>
+          <div class="description-text">{{ consultation.description }}</div>
+
+          <mat-divider></mat-divider>
+
+          <div class="info-item">
+            <span class="info-label">参与专家：</span>
+          </div>
+          <div class="expert-chips">
+            <mat-chip-set>
+              <mat-chip *ngFor="let name of consultation.expertNames">{{ name }}</mat-chip>
+            </mat-chip-set>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

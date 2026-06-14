@@ -1,0 +1,86 @@
+.stats-row {
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0 0;
+  }
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  mat-icon {
+    font-size: 28px;
+    color: #fff;
+  }
+
+  &.exams-icon {
+    background: linear-gradient(135deg, #1976D2, #42A5F5);
+  }
+
+  &.pending-icon {
+    background: linear-gradient(135deg, #F57C00, #FFB74D);
+  }
+
+  &.report-icon {
+    background: linear-gradient(135deg, #388E3C, #66BB6A);
+  }
+
+  &.consult-icon {
+    background: linear-gradient(135deg, #7B1FA2, #BA68C8);
+  }
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.main-section {
+  min-height: 400px;
+}
+
+.chart-card {
+  mat-card-content {
+    padding-top: 8px;
+  }
+}
+
+.chart-container {
+  height: 320px;
+  position: relative;
+}
+
+.recent-card {
+  mat-card-content {
+    padding-top: 0;
+    max-height: 180px;
+    overflow: auto;
+  }
+}
+
+mat-list-item {
+  font-size: 13px;
+}

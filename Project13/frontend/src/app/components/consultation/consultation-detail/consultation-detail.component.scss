@@ -1,0 +1,95 @@
+.page-header {
+  margin-bottom: 20px;
+}
+
+.comment-list {
+  max-height: 500px;
+  overflow-y: auto;
+  margin-bottom: 16px;
+}
+
+.comment-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.comment-avatar {
+  mat-icon {
+    font-size: 36px;
+    color: #1976D2;
+  }
+}
+
+.comment-body {
+  flex: 1;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.comment-author {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.comment-time {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.comment-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+}
+
+.no-comments {
+  text-align: center;
+  padding: 32px;
+  color: #aaa;
+
+  mat-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 13px;
+  }
+}
+
+.comment-form {
+  padding-top: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.info-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+
+.info-label {
+  color: #888;
+  margin-right: 8px;
+}
+
+.description-text {
+  padding: 8px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #555;
+}
+
+.expert-chips {
+  padding: 8px 0;
+}

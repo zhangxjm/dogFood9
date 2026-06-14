@@ -1,0 +1,57 @@
+.page-header {
+  margin-bottom: 20px;
+}
+
+.viewer-card {
+  mat-card-content {
+    padding: 0;
+  }
+}
+
+.info-card {
+  margin-bottom: 16px;
+
+  mat-card-content {
+    padding-top: 8px;
+  }
+}
+
+.info-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 13px;
+}
+
+.info-label {
+  color: #888;
+}
+
+.nodules-card {
+  mat-card-content {
+    padding-top: 0;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  th, td {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}
+
+.no-data {
+  text-align: center;
+  padding: 24px;
+  color: #aaa;
+
+  mat-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    font-size: 13px;
+  }
+}

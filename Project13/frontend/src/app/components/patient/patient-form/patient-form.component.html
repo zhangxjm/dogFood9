@@ -1,0 +1,65 @@
+<h2 mat-dialog-title>{{ isEdit ? '编辑患者' : '新增患者' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="patient-form">
+    <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+      <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
+        <mat-label>姓名</mat-label>
+        <input matInput formControlName="name" placeholder="请输入姓名">
+        <mat-error *ngIf="form.get('name')?.hasError('required')">请输入姓名</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
+        <mat-label>性别</mat-label>
+        <mat-select formControlName="gender">
+          <mat-option value="male">男</mat-option>
+          <mat-option value="female">女</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('gender')?.hasError('required')">请选择性别</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+      <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
+        <mat-label>出生日期</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="birthDate">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="form.get('birthDate')?.hasError('required')">请选择出生日期</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
+        <mat-label>住院号</mat-label>
+        <input matInput formControlName="medicalRecordNo" placeholder="请输入住院号">
+        <mat-error *ngIf="form.get('medicalRecordNo')?.hasError('required')">请输入住院号</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+      <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
+        <mat-label>身份证号</mat-label>
+        <input matInput formControlName="idCard" placeholder="请输入身份证号">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
+        <mat-label>联系电话</mat-label>
+        <input matInput formControlName="phone" placeholder="请输入联系电话">
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>地址</mat-label>
+      <input matInput formControlName="address" placeholder="请输入地址">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>过敏史</mat-label>
+      <textarea matInput formControlName="allergyHistory" rows="2" placeholder="请输入过敏史"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+  <button mat-button (click)="onCancel()">取消</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="loading">
+    {{ isEdit ? '保存' : '创建' }}
+  </button>
+</mat-dialog-actions>

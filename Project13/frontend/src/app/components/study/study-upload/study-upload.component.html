@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>上传DICOM影像</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="upload-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>患者ID</mat-label>
+      <input matInput formControlName="patientId" type="number" placeholder="请输入患者ID">
+      <mat-error *ngIf="form.get('patientId')?.hasError('required')">请输入患者ID</mat-error>
+    </mat-form-field>
+
+    <div fxLayout="row" fxLayoutGap="16px" fxLayout.xs="column">
+      <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
+        <mat-label>检查类型</mat-label>
+        <mat-select formControlName="studyType">
+          <mat-option *ngFor="let opt of studyTypeOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('studyType')?.hasError('required')">请选择检查类型</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="50" fxFlex.xs="100">
+        <mat-label>检查部位</mat-label>
+        <mat-select formControlName="bodyPart">
+          <mat-option *ngFor="let opt of bodyPartOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('bodyPart')?.hasError('required')">请选择检查部位</mat-error>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>检查描述</mat-label>
+      <textarea matInput formControlName="description" rows="2" placeholder="请输入检查描述"></textarea>
+    </mat-form-field>
+
+    <div class="drop-zone" [class.drag-over]="dragOver"
+         (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+      <mat-icon class="drop-icon">cloud_upload</mat-icon>
+      <p>将DICOM文件拖拽到此处上传</p>
+      <p class="drop-hint">或</p>
+      <button mat-raised-button color="primary" (click)="fileInput.click()">选择文件</button>
+      <input #fileInput type="file" multiple hidden (change)="onFileSelect($event)" accept=".dcm,.dicom">
+    </div>
+
+    <div class="file-list" *ngIf="files.length > 0">
+      <div class="file-item" *ngFor="let file of files; let i = index">
+        <mat-icon>description</mat-icon>
+        <span class="file-name">{{ file.name }}</span>
+        <span class="file-size">{{ (file.size / 1024 / 1024).toFixed(2) }} MB</span>
+        <button mat-icon-button color="warn" (click)="removeFile(i)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <mat-progress-bar *ngIf="uploading" mode="determinate" [value]="uploadProgress" class="upload-progress"></mat-progress-bar>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
+  <button mat-button (click)="onCancel()" [disabled]="uploading">取消</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()"
+          [disabled]="uploading || form.invalid || files.length === 0">
+    上传
+  </button>
+</mat-dialog-actions>

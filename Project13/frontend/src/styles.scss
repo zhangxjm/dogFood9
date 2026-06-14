@@ -1,0 +1,149 @@
+@use '@angular/material' as mat;
+
+$primary: #1976D2;
+$accent: #00BCD4;
+$warn: #F44336;
+
+@include mat.core();
+
+$app-primary: mat.define-palette(mat.$indigo-palette, 700);
+$app-accent: mat.define-palette(mat.$cyan-palette, 500);
+$app-warn: mat.define-palette(mat.$red-palette);
+
+$app-theme: mat.define-light-theme((
+  color: (
+    primary: $app-primary,
+    accent: $app-accent,
+    warn: $app-warn,
+  ),
+  typography: mat.define-typography-config(
+    $font-family: "'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif",
+  ),
+  density: 0,
+));
+
+@include mat.all-component-themes($app-theme);
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Noto Sans SC', sans-serif;
+  font-size: 14px;
+  color: #333;
+  background: #f5f7fa;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.page-container {
+  padding: 24px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.status-pending {
+    background: #FFF8E1;
+    color: #F57F17;
+  }
+
+  &.status-processing {
+    background: #E3F2FD;
+    color: #1565C0;
+  }
+
+  &.status-completed {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  &.status-unsigned {
+    background: #FFF3E0;
+    color: #E65100;
+  }
+
+  &.status-signed {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+}
+
+.malignancy-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.benign {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  &.possibly-benign {
+    background: #F1F8E9;
+    color: #558B2F;
+  }
+
+  &.uncertain {
+    background: #FFFDE7;
+    color: #F9A825;
+  }
+
+  &.possibly-malignant {
+    background: #FFF3E0;
+    color: #E65100;
+  }
+
+  &.malignant {
+    background: #FFEBEE;
+    color: #C62828;
+  }
+}
+
+.toolbar-action-btn {
+  mat-icon {
+    font-size: 20px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
