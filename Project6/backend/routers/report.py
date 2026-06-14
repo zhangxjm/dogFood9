@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+from typing import List
 from database import get_db
 from models import SafetyReportResponse
 from services.report_service import (
@@ -29,7 +30,7 @@ def generate_monthly(db: Session = Depends(get_db)):
     return generate_monthly_report(db)
 
 
-@router.get("/list")
+@router.get("/list", response_model=List[SafetyReportResponse])
 def list_reports(
     report_type: str = Query(None),
     limit: int = Query(20),

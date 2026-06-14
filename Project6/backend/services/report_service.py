@@ -380,11 +380,11 @@ def generate_monthly_report(db):
     return report
 
 
-def get_reports(db, report_type=None):
+def get_reports(db, report_type=None, limit=20):
     query = db.query(SafetyReport)
     if report_type:
         query = query.filter(SafetyReport.report_type == report_type)
-    return query.order_by(SafetyReport.generated_at.desc()).all()
+    return query.order_by(SafetyReport.generated_at.desc()).limit(limit).all()
 
 
 def get_report_content(db, report_id):
