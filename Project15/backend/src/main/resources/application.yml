@@ -1,0 +1,55 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: exam-system
+  sql:
+    init:
+      mode: never
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:./data/exam.db
+    hikari:
+      connection-timeout: 60000
+      maximum-pool-size: 10
+      pool-name: ExamHikariPool
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000
+      connect-timeout: 2000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.exam.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: exam-system-secret-key-2024-spring-boot-jwt-token-secret
+  expiration: 86400000
+
+nlp:
+  similarity-threshold: 0.6
+
+logging:
+  level:
+    root: INFO
+    com.exam: INFO
+    com.zaxxer.hikari: INFO
