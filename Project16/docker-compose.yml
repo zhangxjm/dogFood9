@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hotel-iot-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - JWT_SECRET=hotel-iot-secret-key-2024
+      - JWT_EXPIRES_IN=24h
+      - DB_PATH=/app/data/hotel_iot.db
+      - PORT=3000
+      - WS_PORT=3000
+      - NODE_ENV=production
+    volumes:
+      - ./backend/data:/app/data
+    restart: unless-stopped
+    networks:
+      - hotel-iot-network
+
+networks:
+  hotel-iot-network:
+    driver: bridge
