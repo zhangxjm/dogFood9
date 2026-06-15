@@ -106,15 +106,63 @@ public class QuestionService {
                 .collect(Collectors.toList());
 
         Map<String, Object> result = new HashMap<>();
-        result.put("question", question);
+        result.put("id", question.getId());
+        result.put("type", question.getType());
+        result.put("content", question.getContent());
+        result.put("image", question.getImage());
+        result.put("analysis", question.getAnalysis());
+        result.put("difficulty", question.getDifficulty());
+        result.put("score", question.getScore());
+        result.put("subject", question.getSubject());
+        result.put("createBy", question.getCreateBy());
+        result.put("createTime", question.getCreateTime());
+        result.put("updateTime", question.getUpdateTime());
         result.put("options", options);
         result.put("knowledgeIds", knowledgeIds);
         return result;
     }
 
     @Transactional
-    public void updateQuestion(Question question) {
+    public void updateQuestion(Long id, QuestionCreateDTO dto) {
+        Question question = questionMapper.selectById(id);
+        if (question == null) {
+            throw new BusinessException("题目不存在");
+        }
+        question.setType(dto.getType());
+        question.setContent(dto.getContent());
+        question.setImage(dto.getImage());
+        question.setAnalysis(dto.getAnalysis());
+        question.setDifficulty(dto.getDifficulty());
+        if (dto.getScore() != null) question.setScore(dto.getScore());
+        question.setSubject(dto.getSubject());
         questionMapper.updateById(question);
+
+        questionOptionMapper.delete(
+                new LambdaQueryWrapper<QuestionOption>().eq(QuestionOption::getQuestionId, id));
+        questionKnowledgeMapper.delete(
+                new LambdaQueryWrapper<QuestionKnowledge>().eq(QuestionKnowledge::getQuestionId, id));
+
+        List<QuestionOptionDTO> options = dto.getOptions();
+        if (options != null && !options.isEmpty()) {
+            for (QuestionOptionDTO optDTO : options) {
+                QuestionOption opt = new QuestionOption();
+                opt.setQuestionId(id);
+                opt.setOptionLabel(optDTO.getOptionLabel());
+                opt.setOptionContent(optDTO.getOptionContent());
+                opt.setIsCorrect(optDTO.getIsCorrect() != null ? optDTO.getIsCorrect() : 0);
+                questionOptionMapper.insert(opt);
+            }
+        }
+
+        List<Long> knowledgeIds = dto.getKnowledgeIds();
+        if (knowledgeIds != null && !knowledgeIds.isEmpty()) {
+            for (Long kid : knowledgeIds) {
+                QuestionKnowledge qk = new QuestionKnowledge();
+                qk.setQuestionId(id);
+                qk.setKnowledgeId(kid);
+                questionKnowledgeMapper.insert(qk);
+            }
+        }
     }
 
     @Transactional

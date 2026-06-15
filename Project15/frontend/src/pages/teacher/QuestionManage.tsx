@@ -169,6 +169,32 @@ const QuestionManage: React.FC = () => {
     try {
       const detailRes = await questionApi.detail(record.id);
       const detail = detailRes?.data || record;
+      const opts = detail.options || [];
+
+      const buildDefaultOptions = (labels: string[], contents: string[] = []) =>
+        labels.map((label, i) => ({
+          label,
+          content: contents[i] ?? '',
+        }));
+
+      const extractCorrectAnswer = (type: number): any => {
+        const correct = opts.filter((o: any) => o.isCorrect === 1 || o.is_correct === 1);
+        if (!correct.length) return type === 2 ? [] : undefined;
+        const labels = correct.map((o: any) => o.optionLabel || o.option_label || o.label);
+        return type === 2 ? labels.sort() : labels[0];
+      };
+
+      const mapOptions = () => {
+        if (opts.length) {
+          return opts.map((o: any) => ({
+            label: o.optionLabel || o.option_label || o.label,
+            content: o.optionContent || o.option_content || o.content,
+          }));
+        }
+        if (detail.type === 3) return buildDefaultOptions(['T', 'F'], ['正确', '错误']);
+        return buildDefaultOptions(['A', 'B', 'C', 'D']);
+      };
+
       const formValues: any = {
         type: detail.type,
         subject: detail.subject,
@@ -178,27 +204,34 @@ const QuestionManage: React.FC = () => {
         analysis: detail.analysis,
         knowledgeIds: detail.knowledgeIds || detail.knowledge_ids || [],
       };
+
       if (detail.type === 1 || detail.type === 2 || detail.type === 3) {
-        formValues.options = detail.options || [
-          { label: 'A', content: '' },
-          { label: 'B', content: '' },
-          { label: 'C', content: '' },
-          { label: 'D', content: '' },
-        ];
-        if (detail.type === 3 && formValues.options.length < 2) {
-          formValues.options = [
-            { label: 'T', content: '正确' },
-            { label: 'F', content: '错误' },
-          ];
-        }
-        formValues.answer = detail.answer;
+        formValues.options = mapOptions();
+        formValues.answer = extractCorrectAnswer(detail.type);
       } else if (detail.type === 4) {
-        formValues.answer = detail.answer;
+        const correctOpt = opts.find((o: any) => o.isCorrect === 1);
+        formValues.answer =
+          detail.answer ||
+          correctOpt?.optionContent ||
+          correctOpt?.option_content ||
+          correctOpt?.content ||
+          '';
       } else if (detail.type === 5) {
-        formValues.referenceAnswer = detail.referenceAnswer || detail.reference_answer;
+        const correctOpt = opts.find((o: any) => o.isCorrect === 1);
+        formValues.referenceAnswer =
+          detail.referenceAnswer ||
+          detail.reference_answer ||
+          correctOpt?.optionContent ||
+          correctOpt?.option_content ||
+          correctOpt?.content ||
+          detail.analysis ||
+          '';
       }
-      form.setFieldsValue(formValues);
+
       setModalOpen(true);
+      setTimeout(() => {
+        form.setFieldsValue(formValues);
+      }, 0);
     } catch (error) {
       console.error('获取题目详情失败:', error);
     }
@@ -218,6 +251,25 @@ const QuestionManage: React.FC = () => {
     try {
       const values = await form.validateFields();
       setModalLoading(true);
+
+      const buildOptionsWithCorrect = (
+        type: number,
+        formOptions: any[],
+        answer: any
+      ): any[] => {
+        const correctSet: Set<string> = new Set();
+        if (type === 2 && Array.isArray(answer)) {
+          answer.forEach((a) => correctSet.add(String(a)));
+        } else if (answer !== undefined && answer !== null && answer !== '') {
+          correctSet.add(String(answer));
+        }
+        return (formOptions || []).map((o: any) => ({
+          optionLabel: o.label || '',
+          optionContent: o.content || '',
+          isCorrect: correctSet.has(String(o.label)) ? 1 : 0,
+        }));
+      };
+
       const payload: any = {
         type: values.type,
         subject: values.subject,
@@ -227,14 +279,19 @@ const QuestionManage: React.FC = () => {
         analysis: values.analysis,
         knowledgeIds: values.knowledgeIds || [],
       };
+
       if (values.type === 1 || values.type === 2 || values.type === 3) {
-        payload.options = values.options;
-        payload.answer = values.answer;
+        payload.options = buildOptionsWithCorrect(values.type, values.options, values.answer);
       } else if (values.type === 4) {
-        payload.answer = values.answer;
+        payload.options = values.answer
+          ? [{ optionLabel: 'ANS', optionContent: values.answer, isCorrect: 1 }]
+          : [];
       } else if (values.type === 5) {
-        payload.referenceAnswer = values.referenceAnswer;
+        payload.options = values.referenceAnswer
+          ? [{ optionLabel: 'REF', optionContent: values.referenceAnswer, isCorrect: 1 }]
+          : [];
       }
+
       if (editingId) {
         await questionApi.update(editingId, payload);
         message.success('更新成功');
@@ -261,26 +318,45 @@ const QuestionManage: React.FC = () => {
   };
 
   const currentType = Form.useWatch('type', form);
+  const [lastType, setLastType] = useState<number | undefined>();
 
   useEffect(() => {
-    if (!modalOpen) return;
+    if (!modalOpen) {
+      setLastType(undefined);
+      return;
+    }
+    const prevOptions = form.getFieldValue('options') || [];
+    const hasContent =
+      prevOptions.length > 0 &&
+      prevOptions.some((o: any) => o.content && String(o.content).trim().length > 0);
+    const typeChanged = lastType !== undefined && lastType !== currentType;
+
+    if (!typeChanged && hasContent) {
+      setLastType(currentType);
+      return;
+    }
+
     if (currentType === 3) {
       form.setFieldsValue({
         options: [
-          { label: 'T', content: '正确' },
-          { label: 'F', content: '错误' },
+          { label: 'T', content: typeChanged ? '正确' : form.getFieldValue('options')?.[0]?.content || '正确' },
+          { label: 'F', content: typeChanged ? '错误' : form.getFieldValue('options')?.[1]?.content || '错误' },
         ],
       });
+      if (typeChanged) form.setFieldsValue({ answer: undefined });
     } else if (currentType === 1 || currentType === 2) {
-      form.setFieldsValue({
-        options: [
-          { label: 'A', content: '' },
-          { label: 'B', content: '' },
-          { label: 'C', content: '' },
-          { label: 'D', content: '' },
-        ],
-      });
+      const labels = ['A', 'B', 'C', 'D'];
+      const opts: any[] = [];
+      for (let i = 0; i < 4; i++) {
+        opts.push({
+          label: labels[i],
+          content: typeChanged ? '' : prevOptions[i]?.content || '',
+        });
+      }
+      form.setFieldsValue({ options: opts });
+      if (typeChanged) form.setFieldsValue({ answer: undefined });
     }
+    setLastType(currentType);
   }, [currentType, modalOpen]);
 
   const columns = [

@@ -38,16 +38,7 @@ public class QuestionController {
         if (!UserContext.isTeacher()) {
             throw new BusinessException("只有教师可以更新题目");
         }
-        Question question = new Question();
-        question.setId(id);
-        question.setType(dto.getType());
-        question.setContent(dto.getContent());
-        question.setImage(dto.getImage());
-        question.setAnalysis(dto.getAnalysis());
-        question.setDifficulty(dto.getDifficulty());
-        question.setScore(dto.getScore());
-        question.setSubject(dto.getSubject());
-        questionService.updateQuestion(question);
+        questionService.updateQuestion(id, dto);
         return Result.success();
     }
 
