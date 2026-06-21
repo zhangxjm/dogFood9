@@ -19,12 +19,35 @@ func GetSparePartList(c *gin.Context) {
 		query = query.Where("name LIKE ?", "%"+name+"%")
 	}
 
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	var total int64
+	query.Model(&models.SparePart{}).Count(&total)
+
+	offset := (page - 1) * pageSize
+	query = query.Offset(offset).Limit(pageSize)
+
 	if err := query.Find(&parts).Error; err != nil {
 		utils.FailInternalError(c, "获取备件列表失败："+err.Error())
 		return
 	}
 
-	utils.Success(c, parts)
+	utils.Success(c, gin.H{
+		"list":     parts,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
+	})
 }
 
 // GetSparePart 获取单个备件详情
@@ -122,12 +145,35 @@ func GetSparePartStockList(c *gin.Context) {
 		query = query.Where("quantity <= min_stock")
 	}
 
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	var total int64
+	query.Model(&models.SparePartStock{}).Count(&total)
+
+	offset := (page - 1) * pageSize
+	query = query.Offset(offset).Limit(pageSize)
+
 	if err := query.Find(&stocks).Error; err != nil {
 		utils.FailInternalError(c, "获取备件库存列表失败："+err.Error())
 		return
 	}
 
-	utils.Success(c, stocks)
+	utils.Success(c, gin.H{
+		"list":     stocks,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
+	})
 }
 
 // GetSparePartStock 获取单个备件库存

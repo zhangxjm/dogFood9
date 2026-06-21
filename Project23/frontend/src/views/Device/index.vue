@@ -76,7 +76,7 @@
           :total="pagination.total"
           layout="total, sizes, prev, pager, next, jumper"
           background
-          @size-change="loadDeviceList"
+          @size-change="handleDeviceSizeChange"
           @current-change="loadDeviceList"
         />
       </div>
@@ -192,7 +192,7 @@ async function loadDeviceList() {
     })
     if (res?.data) {
       deviceList.value = res.data.list || res.data
-      pagination.total = res.data.total || res.data.length
+      pagination.total = res.data.total || 0
     }
   } catch (e) {
     ElMessage.error('加载设备列表失败：' + (e?.message || '未知错误'))
@@ -220,6 +220,11 @@ function generateMockData() {
     remark: ''
   }))
   pagination.total = 48
+}
+
+function handleDeviceSizeChange() {
+  pagination.page = 1
+  loadDeviceList()
 }
 
 function resetSearch() {

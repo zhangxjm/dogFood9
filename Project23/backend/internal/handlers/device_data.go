@@ -34,18 +34,35 @@ func GetDeviceDataList(c *gin.Context) {
 		}
 	}
 
-	if limitStr := c.Query("limit"); limitStr != "" {
-		if limit, err := strconv.Atoi(limitStr); err == nil {
-			query = query.Limit(limit)
-		}
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	if page < 1 {
+		page = 1
 	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	var total int64
+	query.Model(&models.DeviceData{}).Count(&total)
+
+	offset := (page - 1) * pageSize
+	query = query.Offset(offset).Limit(pageSize)
 
 	if err := query.Order("timestamp DESC").Find(&dataList).Error; err != nil {
 		utils.FailInternalError(c, "获取设备数据失败："+err.Error())
 		return
 	}
 
-	utils.Success(c, dataList)
+	utils.Success(c, gin.H{
+		"list":     dataList,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
+	})
 }
 
 // GetLatestDeviceData 获取设备最新数据

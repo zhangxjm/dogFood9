@@ -12,7 +12,7 @@
       <el-col :span="6">
         <StatCard
           title="设备总数"
-          :value="stats.totalDevices || 0"
+          :value="stats.total_devices || 0"
           icon="Monitor"
           bgColor="#ecf5ff"
           iconColor="#409EFF"
@@ -23,7 +23,7 @@
       <el-col :span="6">
         <StatCard
           title="运行中"
-          :value="stats.runningDevices || 0"
+          :value="stats.running_devices || 0"
           icon="CircleCheck"
           bgColor="#f0f9eb"
           iconColor="#67C23A"
@@ -34,7 +34,7 @@
       <el-col :span="6">
         <StatCard
           title="待处理预警"
-          :value="stats.pendingAlerts || 0"
+          :value="stats.unresolved_alerts || 0"
           icon="Warning"
           bgColor="#fdf6ec"
           iconColor="#E6A23C"
@@ -45,7 +45,7 @@
       <el-col :span="6">
         <StatCard
           title="故障设备"
-          :value="stats.faultDevices || 0"
+          :value="stats.fault_devices || 0"
           icon="CircleClose"
           bgColor="#fef0f0"
           iconColor="#F56C6C"
@@ -92,16 +92,18 @@
             <el-button type="primary" link @click="goToAlerts">查看全部</el-button>
           </div>
           <el-table :data="recentAlerts" style="width: 100%">
-            <el-table-column prop="deviceName" label="设备名称" width="120" />
-            <el-table-column prop="type" label="类型" width="100">
+            <el-table-column prop="device_id" label="设备ID" width="80" />
+            <el-table-column prop="alert_type" label="类型" width="120">
               <template #default="{ row }">
                 <el-tag :type="getAlertTagType(row.level)" size="small">
-                  {{ getAlertLevelText(row.level) }}
+                  {{ row.alert_type }}
                 </el-tag>
               </template>
             </el-table-column>
             <el-table-column prop="message" label="预警信息" />
-            <el-table-column prop="time" label="时间" width="160" />
+            <el-table-column prop="timestamp" label="时间" width="170">
+              <template #default="{ row }">{{ formatTime(row.timestamp) }}</template>
+            </el-table-column>
           </el-table>
         </div>
       </el-col>
@@ -112,18 +114,22 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import StatCard from '@/components/StatCard/index.vue'
-import { getDashboardStats, getDeviceStatusOverview, getRecentAlerts } from '@/api/dashboard'
+import { getDashboardStats, getDeviceStatusOverview, getAlertStats, getRealtimeDataTrend, getRecentAlerts } from '@/api/dashboard'
 
 const router = useRouter()
 const dataType = ref('temperature')
 const stats = reactive({
-  totalDevices: 48,
-  runningDevices: 36,
-  pendingAlerts: 8,
-  faultDevices: 3
+  total_devices: 0,
+  running_devices: 0,
+  unresolved_alerts: 0,
+  fault_devices: 0
 })
 const recentAlerts = ref([])
+const statusDistribution = ref([])
+const alertDistribution = ref([])
+const trendData = ref([])
 
 onMounted(() => {
   loadData()
@@ -131,26 +137,21 @@ onMounted(() => {
 
 async function loadData() {
   try {
-    const [statsRes, statusRes, alertsRes] = await Promise.all([
+    const [statsRes, statusRes, alertsDistRes, trendRes, alertsRes] = await Promise.all([
       getDashboardStats().catch(() => null),
       getDeviceStatusOverview().catch(() => null),
-      getRecentAlerts({ limit: 5 }).catch(() => null)
+      getAlertStats().catch(() => null),
+      getRealtimeDataTrend({ device_id: 1, hours: 24 }).catch(() => null),
+      getRecentAlerts({ page: 1, pageSize: 5 }).catch(() => null)
     ])
     if (statsRes?.data) Object.assign(stats, statsRes.data)
-    if (alertsRes?.data) recentAlerts.value = alertsRes.data
+    if (statusRes?.data) statusDistribution.value = statusRes.data
+    if (alertsDistRes?.data) alertDistribution.value = alertsDistRes.data
+    if (trendRes?.data?.data) trendData.value = trendRes.data.data
+    if (alertsRes?.data?.list) recentAlerts.value = alertsRes.data.list
   } catch (e) {
-    generateMockData()
+    ElMessage.error('加载仪表盘数据失败')
   }
-}
-
-function generateMockData() {
-  recentAlerts.value = [
-    { deviceName: '电机A-01', level: 'critical', type: '温度过高', message: '温度超过阈值 95°C', time: '2024-01-15 14:32:15' },
-    { deviceName: '泵B-03', level: 'warning', type: '振动异常', message: '振动值达到警戒值', time: '2024-01-15 14:28:42' },
-    { deviceName: '压缩机C-02', level: 'info', type: '压力波动', message: '压力波动范围较大', time: '2024-01-15 14:15:33' },
-    { deviceName: '电机A-05', level: 'warning', type: '电流异常', message: '电流值超出正常范围', time: '2024-01-15 13:58:21' },
-    { deviceName: '泵B-01', level: 'critical', type: '设备停机', message: '设备意外停机', time: '2024-01-15 13:42:10' }
-  ]
 }
 
 function refreshData() {
@@ -161,27 +162,43 @@ function goToAlerts() {
   router.push('/alerts')
 }
 
+function formatTime(ts) {
+  if (!ts) return '-'
+  const d = new Date(ts)
+  if (isNaN(d.getTime())) return ts
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+}
+
+const fieldMap = {
+  temperature: 'temp',
+  vibration: 'vibration',
+  pressure: 'pressure',
+  current: 'current'
+}
+
+const unitMap = {
+  temperature: '°C',
+  vibration: 'mm/s',
+  pressure: 'MPa',
+  current: 'A'
+}
+
+const nameMap = {
+  temperature: '温度',
+  vibration: '振动',
+  pressure: '压力',
+  current: '电流'
+}
+
 const trendChartOption = computed(() => {
-  const xData = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`)
-  const generateData = (base, range) => xData.map(() => (base + (Math.random() - 0.5) * range).toFixed(2))
-  const dataMap = {
-    temperature: generateData(70, 20),
-    vibration: generateData(5, 2),
-    pressure: generateData(0.6, 0.3),
-    current: generateData(25, 10)
-  }
-  const unitMap = {
-    temperature: '°C',
-    vibration: 'mm/s',
-    pressure: 'MPa',
-    current: 'A'
-  }
-  const nameMap = {
-    temperature: '温度',
-    vibration: '振动',
-    pressure: '压力',
-    current: '电流'
-  }
+  const field = fieldMap[dataType.value]
+  const xData = trendData.value.map(d => {
+    const dt = new Date(d.timestamp)
+    return `${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`
+  })
+  const yData = trendData.value.map(d => d[field])
+
   return {
     tooltip: { trigger: 'axis' },
     grid: { left: 50, right: 20, top: 30, bottom: 30 },
@@ -198,7 +215,7 @@ const trendChartOption = computed(() => {
       name: nameMap[dataType.value],
       type: 'line',
       smooth: true,
-      data: dataMap[dataType.value],
+      data: yData,
       areaStyle: {
         color: {
           type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
@@ -214,6 +231,13 @@ const trendChartOption = computed(() => {
   }
 })
 
+const statusColorMap = {
+  '运行中': '#67C23A',
+  '待机': '#909399',
+  '故障': '#F56C6C',
+  '维护中': '#E6A23C'
+}
+
 const statusChartOption = computed(() => ({
   tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
   legend: { orient: 'vertical', right: 10, top: 'center' },
@@ -223,12 +247,11 @@ const statusChartOption = computed(() => ({
     center: ['35%', '50%'],
     avoidLabelOverlap: false,
     label: { show: false },
-    data: [
-      { value: 36, name: '运行中', itemStyle: { color: '#67C23A' } },
-      { value: 6, name: '待机', itemStyle: { color: '#909399' } },
-      { value: 3, name: '故障', itemStyle: { color: '#F56C6C' } },
-      { value: 3, name: '维护中', itemStyle: { color: '#E6A23C' } }
-    ]
+    data: statusDistribution.value.map(item => ({
+      value: item.count,
+      name: item.status,
+      itemStyle: { color: statusColorMap[item.status] || '#909399' }
+    }))
   }]
 }))
 
@@ -237,20 +260,20 @@ const alertChartOption = computed(() => ({
   grid: { left: 50, right: 20, top: 30, bottom: 30 },
   xAxis: {
     type: 'category',
-    data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+    data: alertDistribution.value.map(d => d.alert_type)
   },
   yAxis: { type: 'value' },
   series: [
-    { name: '严重', type: 'bar', stack: 'total', data: [2, 1, 3, 2, 4, 1, 2], itemStyle: { color: '#F56C6C' } },
-    { name: '警告', type: 'bar', stack: 'total', data: [5, 4, 6, 3, 5, 2, 4], itemStyle: { color: '#E6A23C' } },
-    { name: '提示', type: 'bar', stack: 'total', data: [8, 6, 9, 7, 10, 5, 7], itemStyle: { color: '#409EFF' } }
+    {
+      name: '预警数量',
+      type: 'bar',
+      data: alertDistribution.value.map(d => d.count),
+      itemStyle: { color: '#E6A23C' },
+      barWidth: 40,
+      label: { show: true, position: 'top' }
+    }
   ]
 }))
-
-function getAlertLevelText(level) {
-  const map = { critical: '严重', warning: '警告', info: '提示' }
-  return map[level] || '未知'
-}
 
 function getAlertTagType(level) {
   const map = { critical: 'danger', warning: 'warning', info: 'info' }

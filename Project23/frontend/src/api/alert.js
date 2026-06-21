@@ -17,7 +17,7 @@ export function getAlertDetail(id) {
 
 export function handleAlert(id, data) {
   return request({
-    url: `/alerts/${id}/handle`,
+    url: `/alerts/${id}/resolve`,
     method: 'put',
     data
   })
@@ -25,7 +25,7 @@ export function handleAlert(id, data) {
 
 export function getPredictionAnalysis(params) {
   return request({
-    url: '/alerts/prediction',
+    url: '/predictions/all',
     method: 'get',
     params
   })
@@ -33,14 +33,14 @@ export function getPredictionAnalysis(params) {
 
 export function getAlertStats() {
   return request({
-    url: '/alerts/stats',
+    url: '/statistics/overview',
     method: 'get'
   })
 }
 
 export function getAlertHistory(params) {
   return request({
-    url: '/alerts/history',
+    url: '/alerts',
     method: 'get',
     params
   })

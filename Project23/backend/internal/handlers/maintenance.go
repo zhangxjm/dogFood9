@@ -26,18 +26,35 @@ func GetMaintenanceRecordList(c *gin.Context) {
 		query = query.Where("maintain_type = ?", maintainType)
 	}
 
-	if limitStr := c.Query("limit"); limitStr != "" {
-		if limit, err := strconv.Atoi(limitStr); err == nil {
-			query = query.Limit(limit)
-		}
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	if page < 1 {
+		page = 1
 	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	var total int64
+	query.Model(&models.MaintenanceRecord{}).Count(&total)
+
+	offset := (page - 1) * pageSize
+	query = query.Offset(offset).Limit(pageSize)
 
 	if err := query.Order("start_time DESC").Find(&records).Error; err != nil {
 		utils.FailInternalError(c, "获取维护记录列表失败："+err.Error())
 		return
 	}
 
-	utils.Success(c, records)
+	utils.Success(c, gin.H{
+		"list":     records,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
+	})
 }
 
 // GetMaintenanceRecord 获取单个维护记录
@@ -142,12 +159,35 @@ func GetMaintenancePlanList(c *gin.Context) {
 		query = query.Where("status = ?", status)
 	}
 
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 10
+	}
+	if pageSize > 100 {
+		pageSize = 100
+	}
+
+	var total int64
+	query.Model(&models.MaintenancePlan{}).Count(&total)
+
+	offset := (page - 1) * pageSize
+	query = query.Offset(offset).Limit(pageSize)
+
 	if err := query.Order("next_maintain_time ASC").Find(&plans).Error; err != nil {
 		utils.FailInternalError(c, "获取维护计划列表失败："+err.Error())
 		return
 	}
 
-	utils.Success(c, plans)
+	utils.Success(c, gin.H{
+		"list":     plans,
+		"total":    total,
+		"page":     page,
+		"pageSize": pageSize,
+	})
 }
 
 // GetMaintenancePlan 获取单个维护计划

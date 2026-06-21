@@ -2,28 +2,28 @@ import request from '@/utils/request'
 
 export function getDashboardStats() {
   return request({
-    url: '/dashboard/stats',
+    url: '/statistics/overview',
     method: 'get'
   })
 }
 
 export function getDeviceStatusOverview() {
   return request({
-    url: '/dashboard/device-status',
+    url: '/statistics/device-status-distribution',
     method: 'get'
   })
 }
 
 export function getAlertStats() {
   return request({
-    url: '/dashboard/alert-stats',
+    url: '/statistics/alert-type-distribution',
     method: 'get'
   })
 }
 
 export function getRealtimeDataTrend(params) {
   return request({
-    url: '/dashboard/data-trend',
+    url: '/device-data/trend/' + (params.device_id || '1'),
     method: 'get',
     params
   })
@@ -31,7 +31,7 @@ export function getRealtimeDataTrend(params) {
 
 export function getRecentAlerts(params) {
   return request({
-    url: '/dashboard/recent-alerts',
+    url: '/alerts',
     method: 'get',
     params
   })

@@ -11,14 +11,14 @@
             <el-form :inline="true" :model="planSearch">
               <el-form-item label="计划状态">
                 <el-select v-model="planSearch.status" placeholder="全部" clearable style="width: 140px">
-                  <el-option label="未开始" value="pending" />
-                  <el-option label="进行中" value="processing" />
-                  <el-option label="已完成" value="completed" />
-                  <el-option label="已逾期" value="overdue" />
+                  <el-option label="待执行" value="待执行" />
+                  <el-option label="进行中" value="进行中" />
+                  <el-option label="已完成" value="已完成" />
+                  <el-option label="已逾期" value="已逾期" />
                 </el-select>
               </el-form-item>
-              <el-form-item label="设备名称">
-                <el-input v-model="planSearch.deviceName" placeholder="请输入设备名称" clearable />
+              <el-form-item label="设备ID">
+                <el-input v-model="planSearch.device_id" placeholder="请输入设备ID" clearable />
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="loadPlanList">
@@ -38,31 +38,29 @@
           </div>
 
           <el-table :data="planList" v-loading="planLoading" style="width: 100%">
-            <el-table-column prop="code" label="计划编号" width="120" />
-            <el-table-column prop="deviceName" label="设备名称" width="140" />
-            <el-table-column prop="type" label="维护类型" width="120">
-              <template #default="{ row }">
-                <el-tag :type="row.type === 'routine' ? 'info' : row.type === 'preventive' ? 'warning' : 'danger'" size="small">
-                  {{ getMaintenanceType(row.type) }}
-                </el-tag>
-              </template>
+            <el-table-column prop="id" label="ID" width="60" />
+            <el-table-column prop="plan_name" label="计划名称" width="150" />
+            <el-table-column prop="device_id" label="设备ID" width="80" />
+            <el-table-column prop="plan_type" label="维护类型" width="120">
+              <template #default="{ row }">{{ getMaintenanceType(row.plan_type) }}</template>
             </el-table-column>
-            <el-table-column prop="planDate" label="计划日期" width="120" />
-            <el-table-column prop="cycle" label="维护周期" width="100" />
-            <el-table-column prop="assignee" label="负责人" width="100" />
+            <el-table-column prop="frequency" label="维护周期" width="100" />
+            <el-table-column prop="next_maintain_time" label="下次维护" width="180">
+              <template #default="{ row }">{{ formatTime(row.next_maintain_time) }}</template>
+            </el-table-column>
             <el-table-column prop="status" label="状态" width="100">
               <template #default="{ row }">
                 <el-tag :type="getPlanStatusTagType(row.status)" size="small">
-                  {{ getPlanStatusText(row.status) }}
+                  {{ row.status }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="description" label="描述" show-overflow-tooltip />
+            <el-table-column prop="remark" label="备注" show-overflow-tooltip />
             <el-table-column label="操作" width="200" fixed="right">
               <template #default="{ row }">
                 <el-button type="primary" link @click="viewPlan(row)">查看</el-button>
                 <el-button type="primary" link @click="editPlan(row)">编辑</el-button>
-                <el-button type="success" link v-if="row.status === 'pending' || row.status === 'overdue'" @click="executePlan(row)">执行</el-button>
+                <el-button type="success" link v-if="row.status === '待执行' || row.status === '已逾期'" @click="executePlan(row)">执行</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -75,7 +73,7 @@
               :total="planPagination.total"
               layout="total, sizes, prev, pager, next, jumper"
               background
-              @size-change="loadPlanList"
+              @size-change="handlePlanSizeChange"
               @current-change="loadPlanList"
             />
           </div>
@@ -85,24 +83,15 @@
       <el-tab-pane label="维护记录" name="records">
         <div class="card-shadow" style="padding: 20px">
           <el-form :inline="true" :model="recordSearch" class="mb-16">
-            <el-form-item label="设备名称">
-              <el-input v-model="recordSearch.deviceName" placeholder="请输入设备名称" clearable />
+            <el-form-item label="设备ID">
+              <el-input v-model="recordSearch.device_id" placeholder="请输入设备ID" clearable />
             </el-form-item>
             <el-form-item label="维护类型">
-              <el-select v-model="recordSearch.type" placeholder="全部" clearable style="width: 140px">
-                <el-option label="日常维护" value="routine" />
-                <el-option label="预防性维护" value="preventive" />
-                <el-option label="故障维修" value="repair" />
+              <el-select v-model="recordSearch.maintain_type" placeholder="全部" clearable style="width: 140px">
+                <el-option label="日常维护" value="日常维护" />
+                <el-option label="预防性维护" value="预防性维护" />
+                <el-option label="故障维修" value="故障维修" />
               </el-select>
-            </el-form-item>
-            <el-form-item label="日期范围">
-              <el-date-picker
-                v-model="recordSearch.dateRange"
-                type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-              />
             </el-form-item>
             <el-form-item>
               <el-button type="primary" @click="loadRecordList">
@@ -117,26 +106,19 @@
           </el-form>
 
           <el-table :data="recordList" v-loading="recordLoading" style="width: 100%">
-            <el-table-column prop="code" label="记录编号" width="120" />
-            <el-table-column prop="deviceName" label="设备名称" width="140" />
-            <el-table-column prop="type" label="维护类型" width="120">
-              <template #default="{ row }">
-                <el-tag :type="row.type === 'routine' ? 'info' : row.type === 'preventive' ? 'warning' : 'danger'" size="small">
-                  {{ getMaintenanceType(row.type) }}
-                </el-tag>
-              </template>
+            <el-table-column prop="id" label="ID" width="60" />
+            <el-table-column prop="device_id" label="设备ID" width="80" />
+            <el-table-column prop="maintain_type" label="维护类型" width="120">
+              <template #default="{ row }">{{ row.maintain_type }}</template>
             </el-table-column>
-            <el-table-column prop="startTime" label="开始时间" width="160" />
-            <el-table-column prop="endTime" label="结束时间" width="160" />
-            <el-table-column prop="duration" label="耗时(h)" width="90" />
-            <el-table-column prop="assignee" label="维护人员" width="100" />
-            <el-table-column prop="result" label="结果" width="100">
-              <template #default="{ row }">
-                <el-tag :type="row.result === 'success' ? 'success' : 'danger'" size="small">
-                  {{ row.result === 'success' ? '成功' : '失败' }}
-                </el-tag>
-              </template>
+            <el-table-column prop="operator" label="维护人员" width="100" />
+            <el-table-column prop="start_time" label="开始时间" width="180">
+              <template #default="{ row }">{{ formatTime(row.start_time) }}</template>
             </el-table-column>
+            <el-table-column prop="end_time" label="结束时间" width="180">
+              <template #default="{ row }">{{ formatTime(row.end_time) }}</template>
+            </el-table-column>
+            <el-table-column prop="cost" label="费用" width="100" />
             <el-table-column prop="content" label="维护内容" show-overflow-tooltip />
             <el-table-column label="操作" width="100" fixed="right">
               <template #default="{ row }">
@@ -153,7 +135,7 @@
               :total="recordPagination.total"
               layout="total, sizes, prev, pager, next, jumper"
               background
-              @size-change="loadRecordList"
+              @size-change="handleRecordSizeChange"
               @current-change="loadRecordList"
             />
           </div>
@@ -163,26 +145,21 @@
 
     <el-dialog v-model="planDialogVisible" :title="planDialogTitle" width="600px" destroy-on-close>
       <el-form :model="planForm" :rules="planRules" ref="planFormRef" label-width="100px">
-        <el-form-item label="设备名称" prop="deviceName">
-          <el-select v-model="planForm.deviceName" placeholder="请选择设备" style="width: 100%">
-            <el-option label="电机A-01" value="电机A-01" />
-            <el-option label="泵B-03" value="泵B-03" />
-            <el-option label="压缩机C-02" value="压缩机C-02" />
-            <el-option label="风机D-05" value="风机D-05" />
-          </el-select>
+        <el-form-item label="计划名称" prop="plan_name">
+          <el-input v-model="planForm.plan_name" placeholder="请输入计划名称" />
         </el-form-item>
-        <el-form-item label="维护类型" prop="type">
-          <el-select v-model="planForm.type" placeholder="请选择维护类型" style="width: 100%">
-            <el-option label="日常维护" value="routine" />
-            <el-option label="预防性维护" value="preventive" />
-            <el-option label="故障维修" value="repair" />
-          </el-select>
+        <el-form-item label="设备ID" prop="device_id">
+          <el-input-number v-model="planForm.device_id" :min="1" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="计划日期" prop="planDate">
-          <el-date-picker v-model="planForm.planDate" type="date" placeholder="选择计划日期" style="width: 100%" />
+        <el-form-item label="维护类型" prop="plan_type">
+          <el-select v-model="planForm.plan_type" placeholder="请选择维护类型" style="width: 100%">
+            <el-option label="日常维护" value="日常维护" />
+            <el-option label="预防性维护" value="预防性维护" />
+            <el-option label="故障维修" value="故障维修" />
+          </el-select>
         </el-form-item>
         <el-form-item label="维护周期">
-          <el-select v-model="planForm.cycle" placeholder="请选择维护周期" style="width: 100%">
+          <el-select v-model="planForm.frequency" placeholder="请选择维护周期" style="width: 100%">
             <el-option label="每周" value="每周" />
             <el-option label="每月" value="每月" />
             <el-option label="每季度" value="每季度" />
@@ -190,11 +167,11 @@
             <el-option label="每年" value="每年" />
           </el-select>
         </el-form-item>
-        <el-form-item label="负责人">
-          <el-input v-model="planForm.assignee" placeholder="请输入负责人" />
+        <el-form-item label="下次维护">
+          <el-date-picker v-model="planForm.next_maintain_time" type="datetime" placeholder="选择维护时间" style="width: 100%" />
         </el-form-item>
-        <el-form-item label="维护描述">
-          <el-input v-model="planForm.description" type="textarea" :rows="3" placeholder="请输入维护描述" />
+        <el-form-item label="备注">
+          <el-input v-model="planForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -205,24 +182,15 @@
 
     <el-dialog v-model="recordDialogVisible" title="维护记录详情" width="600px">
       <el-descriptions :column="2" border v-if="currentRecord">
-        <el-descriptions-item label="记录编号">{{ currentRecord.code }}</el-descriptions-item>
-        <el-descriptions-item label="设备名称">{{ currentRecord.deviceName }}</el-descriptions-item>
-        <el-descriptions-item label="维护类型">
-          <el-tag :type="currentRecord.type === 'routine' ? 'info' : currentRecord.type === 'preventive' ? 'warning' : 'danger'" size="small">
-            {{ getMaintenanceType(currentRecord.type) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="执行结果">
-          <el-tag :type="currentRecord.result === 'success' ? 'success' : 'danger'" size="small">
-            {{ currentRecord.result === 'success' ? '成功' : '失败' }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="开始时间">{{ currentRecord.startTime }}</el-descriptions-item>
-        <el-descriptions-item label="结束时间">{{ currentRecord.endTime }}</el-descriptions-item>
-        <el-descriptions-item label="维护人员" :span="2">{{ currentRecord.assignee }}</el-descriptions-item>
-        <el-descriptions-item label="维护内容" :span="2">{{ currentRecord.content }}</el-descriptions-item>
-        <el-descriptions-item label="更换备件" :span="2">{{ currentRecord.parts || '无' }}</el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2">{{ currentRecord.remark || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="ID">{{ currentRecord.id }}</el-descriptions-item>
+        <el-descriptions-item label="设备ID">{{ currentRecord.device_id }}</el-descriptions-item>
+        <el-descriptions-item label="维护类型">{{ currentRecord.maintain_type }}</el-descriptions-item>
+        <el-descriptions-item label="维护人员">{{ currentRecord.operator }}</el-descriptions-item>
+        <el-descriptions-item label="开始时间">{{ formatTime(currentRecord.start_time) }}</el-descriptions-item>
+        <el-descriptions-item label="结束时间">{{ formatTime(currentRecord.end_time) }}</el-descriptions-item>
+        <el-descriptions-item label="费用">{{ currentRecord.cost }}</el-descriptions-item>
+        <el-descriptions-item label="备注">{{ currentRecord.remark || '无' }}</el-descriptions-item>
+        <el-descriptions-item label="维护内容" :span="2">{{ currentRecord.content || '无' }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -243,8 +211,8 @@ const isPlanEdit = ref(false)
 const planFormRef = ref(null)
 const currentRecord = ref(null)
 
-const planSearch = reactive({ status: '', deviceName: '' })
-const recordSearch = reactive({ deviceName: '', type: '', dateRange: [] })
+const planSearch = reactive({ status: '', device_id: '' })
+const recordSearch = reactive({ device_id: '', maintain_type: '' })
 
 const planPagination = reactive({ page: 1, pageSize: 10, total: 0 })
 const recordPagination = reactive({ page: 1, pageSize: 10, total: 0 })
@@ -254,19 +222,19 @@ const recordList = ref([])
 
 const planForm = reactive({
   id: null,
-  deviceName: '',
-  type: '',
-  planDate: '',
-  cycle: '',
-  assignee: '',
-  description: '',
-  status: 'pending'
+  plan_name: '',
+  device_id: null,
+  plan_type: '',
+  frequency: '',
+  next_maintain_time: '',
+  status: '待执行',
+  remark: ''
 })
 
 const planRules = {
-  deviceName: [{ required: true, message: '请选择设备', trigger: 'change' }],
-  type: [{ required: true, message: '请选择维护类型', trigger: 'change' }],
-  planDate: [{ required: true, message: '请选择计划日期', trigger: 'change' }]
+  plan_name: [{ required: true, message: '请输入计划名称', trigger: 'blur' }],
+  device_id: [{ required: true, message: '请输入设备ID', trigger: 'blur' }],
+  plan_type: [{ required: true, message: '请选择维护类型', trigger: 'change' }]
 }
 
 onMounted(() => {
@@ -277,44 +245,29 @@ onMounted(() => {
 async function loadPlanList() {
   planLoading.value = true
   try {
-    const res = await getMaintenancePlanList({ ...planSearch, page: planPagination.page, pageSize: planPagination.pageSize })
+    const params = { page: planPagination.page, pageSize: planPagination.pageSize }
+    if (planSearch.status) params.status = planSearch.status
+    if (planSearch.device_id) params.device_id = planSearch.device_id
+    const res = await getMaintenancePlanList(params)
     if (res?.data) {
-      planList.value = res.data.list || res.data
-      planPagination.total = res.data.total || res.data.length
-    } else {
-      generateMockPlans()
+      planList.value = res.data.list || []
+      planPagination.total = res.data.total || 0
     }
   } catch (e) {
-    generateMockPlans()
+    ElMessage.error('加载维护计划失败：' + (e?.message || '未知错误'))
   } finally {
     planLoading.value = false
   }
 }
 
-function generateMockPlans() {
-  const types = ['routine', 'preventive', 'repair']
-  const statuses = ['pending', 'processing', 'completed', 'overdue']
-  const devices = ['电机A-01', '泵B-03', '压缩机C-02', '风机D-05', '电机A-05']
-  const assignees = ['张工', '李工', '王工', '赵工', '钱工']
-  const cycles = ['每周', '每月', '每季度', '每半年', '每年']
-
-  planList.value = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    code: `MP${String(2024001 + i).padStart(8, '0')}`,
-    deviceName: devices[i % 5],
-    type: types[i % 3],
-    planDate: `2024-01-${String(15 + (i % 10)).padStart(2, '0')}`,
-    cycle: cycles[i % 5],
-    assignee: assignees[i % 5],
-    status: statuses[i % 4],
-    description: `${['设备常规检查保养', '预防性维护检修', '故障诊断修复'][i % 3]}`
-  }))
-  planPagination.total = 32
+function handlePlanSizeChange() {
+  planPagination.page = 1
+  loadPlanList()
 }
 
 function resetPlanSearch() {
   planSearch.status = ''
-  planSearch.deviceName = ''
+  planSearch.device_id = ''
   planPagination.page = 1
   loadPlanList()
 }
@@ -322,47 +275,29 @@ function resetPlanSearch() {
 async function loadRecordList() {
   recordLoading.value = true
   try {
-    const res = await getMaintenanceRecordList({ ...recordSearch, page: recordPagination.page, pageSize: recordPagination.pageSize })
+    const params = { page: recordPagination.page, pageSize: recordPagination.pageSize }
+    if (recordSearch.device_id) params.device_id = recordSearch.device_id
+    if (recordSearch.maintain_type) params.maintain_type = recordSearch.maintain_type
+    const res = await getMaintenanceRecordList(params)
     if (res?.data) {
-      recordList.value = res.data.list || res.data
-      recordPagination.total = res.data.total || res.data.length
-    } else {
-      generateMockRecords()
+      recordList.value = res.data.list || []
+      recordPagination.total = res.data.total || 0
     }
   } catch (e) {
-    generateMockRecords()
+    ElMessage.error('加载维护记录失败：' + (e?.message || '未知错误'))
   } finally {
     recordLoading.value = false
   }
 }
 
-function generateMockRecords() {
-  const types = ['routine', 'preventive', 'repair']
-  const devices = ['电机A-01', '泵B-03', '压缩机C-02', '风机D-05', '电机A-05']
-  const assignees = ['张工', '李工', '王工', '赵工', '钱工']
-  const results = ['success', 'success', 'success', 'success', 'failed']
-
-  recordList.value = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    code: `MR${String(2024001 + i).padStart(8, '0')}`,
-    deviceName: devices[i % 5],
-    type: types[i % 3],
-    startTime: `2024-01-${String(10 + i).padStart(2, '0')} 09:00:00`,
-    endTime: `2024-01-${String(10 + i).padStart(2, '0')} ${String(11 + (i % 4)).padStart(2, '0')}:30:00`,
-    duration: ((i % 4) + 2) + 0.5,
-    assignee: assignees[i % 5],
-    result: results[i % 5],
-    content: '设备检查、清洁、润滑、紧固连接件、更换易损件',
-    parts: i % 3 === 0 ? '轴承1个,润滑油2L' : '',
-    remark: ''
-  }))
-  recordPagination.total = 68
+function handleRecordSizeChange() {
+  recordPagination.page = 1
+  loadRecordList()
 }
 
 function resetRecordSearch() {
-  recordSearch.deviceName = ''
-  recordSearch.type = ''
-  recordSearch.dateRange = []
+  recordSearch.device_id = ''
+  recordSearch.maintain_type = ''
   recordPagination.page = 1
   loadRecordList()
 }
@@ -371,7 +306,7 @@ function openPlanDialog() {
   isPlanEdit.value = false
   planDialogTitle.value = '新增维护计划'
   Object.assign(planForm, {
-    id: null, deviceName: '', type: '', planDate: '', cycle: '', assignee: '', description: '', status: 'pending'
+    id: null, plan_name: '', device_id: null, plan_type: '', frequency: '', next_maintain_time: '', status: '待执行', remark: ''
   })
   planDialogVisible.value = true
 }
@@ -387,8 +322,14 @@ function viewPlan(row) {
   editPlan(row)
 }
 
-function executePlan(row) {
-  ElMessage.success(`已开始执行计划: ${row.code}`)
+async function executePlan(row) {
+  try {
+    await updateMaintenancePlan(row.id, { ...row, status: '进行中' })
+    ElMessage.success(`已开始执行计划: ${row.plan_name}`)
+    loadPlanList()
+  } catch (e) {
+    ElMessage.error('执行失败：' + (e?.message || '未知错误'))
+  }
 }
 
 async function submitPlan() {
@@ -402,11 +343,11 @@ async function submitPlan() {
           await createMaintenancePlan(planForm)
         }
         ElMessage.success(isPlanEdit.value ? '更新成功' : '新增成功')
+        planDialogVisible.value = false
+        loadPlanList()
       } catch (e) {
-        ElMessage.success(isPlanEdit.value ? '更新成功' : '新增成功')
+        ElMessage.error(isPlanEdit.value ? '更新失败' : '新增失败')
       }
-      planDialogVisible.value = false
-      loadPlanList()
     }
   })
 }
@@ -417,18 +358,18 @@ function viewRecord(row) {
 }
 
 function getMaintenanceType(type) {
-  const map = { routine: '日常维护', preventive: '预防性维护', repair: '故障维修' }
+  const map = { '日常维护': '日常维护', '预防性维护': '预防性维护', '故障维修': '故障维修' }
   return map[type] || type
 }
 
-function getPlanStatusText(status) {
-  const map = { pending: '未开始', processing: '进行中', completed: '已完成', overdue: '已逾期' }
-  return map[status] || status
+function getPlanStatusTagType(status) {
+  const map = { '待执行': 'info', '进行中': 'warning', '已完成': 'success', '已逾期': 'danger' }
+  return map[status] || 'info'
 }
 
-function getPlanStatusTagType(status) {
-  const map = { pending: 'info', processing: 'warning', completed: 'success', overdue: 'danger' }
-  return map[status] || 'info'
+function formatTime(t) {
+  if (!t) return '-'
+  return new Date(t).toLocaleString('zh-CN')
 }
 </script>
 

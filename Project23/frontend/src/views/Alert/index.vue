@@ -55,17 +55,16 @@
               </el-select>
             </el-form-item>
             <el-form-item label="处理状态">
-              <el-select v-model="searchForm.status" placeholder="全部" clearable style="width: 140px">
-                <el-option label="待处理" value="pending" />
-                <el-option label="处理中" value="processing" />
-                <el-option label="已处理" value="resolved" />
+              <el-select v-model="searchForm.is_resolved" placeholder="全部" clearable style="width: 140px">
+                <el-option label="待处理" :value="false" />
+                <el-option label="已处理" :value="true" />
               </el-select>
             </el-form-item>
-            <el-form-item label="设备名称">
-              <el-input v-model="searchForm.deviceName" placeholder="请输入设备名称" clearable />
+            <el-form-item label="设备ID">
+              <el-input v-model="searchForm.device_id" placeholder="请输入设备ID" clearable />
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="loadAlertList">
+              <el-button type="primary" @click="handleSearch">
                 <el-icon><Search /></el-icon>
                 查询
               </el-button>
@@ -79,8 +78,8 @@
 
         <div class="card-shadow">
           <el-table :data="alertList" v-loading="loading" style="width: 100%">
-            <el-table-column prop="code" label="预警编号" width="120" />
-            <el-table-column prop="deviceName" label="设备名称" width="140" />
+            <el-table-column prop="id" label="预警ID" width="80" />
+            <el-table-column prop="device_id" label="设备ID" width="80" />
             <el-table-column prop="level" label="级别" width="80">
               <template #default="{ row }">
                 <el-tag :type="getLevelTagType(row.level)" size="small" effect="dark">
@@ -88,21 +87,23 @@
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="type" label="预警类型" width="120" />
+            <el-table-column prop="alert_type" label="预警类型" width="120" />
             <el-table-column prop="message" label="预警信息" show-overflow-tooltip />
             <el-table-column prop="value" label="当前值" width="100" />
             <el-table-column prop="threshold" label="阈值" width="100" />
-            <el-table-column prop="status" label="处理状态" width="100">
+            <el-table-column label="处理状态" width="100">
               <template #default="{ row }">
-                <el-tag :type="getStatusTagType(row.status)" size="small">
-                  {{ getStatusText(row.status) }}
+                <el-tag :type="row.is_resolved ? 'success' : 'warning'" size="small">
+                  {{ row.is_resolved ? '已处理' : '待处理' }}
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column prop="time" label="预警时间" width="160" />
+            <el-table-column prop="timestamp" label="预警时间" width="170">
+              <template #default="{ row }">{{ formatTime(row.timestamp) }}</template>
+            </el-table-column>
             <el-table-column label="操作" width="180" fixed="right">
               <template #default="{ row }">
-                <el-button type="primary" link @click="viewDetail(row)" v-if="row.status !== 'resolved'">处理</el-button>
+                <el-button type="primary" link @click="viewDetail(row)" v-if="!row.is_resolved">处理</el-button>
                 <el-button type="primary" link @click="viewDetail(row)">详情</el-button>
               </template>
             </el-table-column>
@@ -116,7 +117,7 @@
               :total="pagination.total"
               layout="total, sizes, prev, pager, next, jumper"
               background
-              @size-change="loadAlertList"
+              @size-change="handleSizeChange"
               @current-change="loadAlertList"
             />
           </div>
@@ -141,28 +142,30 @@
             <div class="card-shadow" style="padding: 20px">
               <h3 class="chart-title">高风险设备预警</h3>
               <el-table :data="highRiskDevices" style="width: 100%">
-                <el-table-column prop="deviceName" label="设备名称" width="150" />
-                <el-table-column prop="type" label="设备类型" width="100" />
-                <el-table-column prop="riskLevel" label="风险等级" width="100">
+                <el-table-column prop="device_id" label="设备ID" width="100" />
+                <el-table-column prop="risk_level" label="风险等级" width="100">
                   <template #default="{ row }">
-                    <el-tag :type="getRiskTagType(row.riskLevel)" size="small" effect="dark">
-                      {{ row.riskLevel }}
+                    <el-tag :type="getRiskTagType(row.risk_level)" size="small" effect="dark">
+                      {{ row.risk_level }}
                     </el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column prop="healthScore" label="健康得分" width="120">
+                <el-table-column prop="fault_probability" label="故障概率" width="120">
                   <template #default="{ row }">
                     <el-progress
-                      :percentage="row.healthScore"
-                      :color="row.healthScore > 70 ? '#67C23A' : row.healthScore > 40 ? '#E6A23C' : '#F56C6C'"
+                      :percentage="Math.round(row.fault_probability * 100)"
+                      :color="row.fault_probability > 0.7 ? '#F56C6C' : row.fault_probability > 0.4 ? '#E6A23C' : '#67C23A'"
                     />
                   </template>
                 </el-table-column>
-                <el-table-column prop="predictedFailure" label="预计故障时间" width="150" />
-                <el-table-column prop="suggestion" label="建议措施" />
-                <el-table-column label="操作" width="120">
+                <el-table-column label="风险因素" show-overflow-tooltip>
                   <template #default="{ row }">
-                    <el-button type="primary" link>安排维护</el-button>
+                    {{ (row.factors || []).join('、') }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="建议措施" show-overflow-tooltip>
+                  <template #default="{ row }">
+                    {{ (row.recommendations || []).join('、') }}
                   </template>
                 </el-table-column>
               </el-table>
@@ -174,31 +177,25 @@
 
     <el-dialog v-model="detailDialogVisible" title="预警详情" width="600px">
       <el-descriptions :column="2" border v-if="currentAlert">
-        <el-descriptions-item label="预警编号">{{ currentAlert.code }}</el-descriptions-item>
+        <el-descriptions-item label="预警ID">{{ currentAlert.id }}</el-descriptions-item>
         <el-descriptions-item label="预警级别">
           <el-tag :type="getLevelTagType(currentAlert.level)" effect="dark">
             {{ getLevelText(currentAlert.level) }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="设备名称">{{ currentAlert.deviceName }}</el-descriptions-item>
-        <el-descriptions-item label="预警类型">{{ currentAlert.type }}</el-descriptions-item>
+        <el-descriptions-item label="设备ID">{{ currentAlert.device_id }}</el-descriptions-item>
+        <el-descriptions-item label="预警类型">{{ currentAlert.alert_type }}</el-descriptions-item>
         <el-descriptions-item label="当前值">{{ currentAlert.value }}</el-descriptions-item>
         <el-descriptions-item label="阈值">{{ currentAlert.threshold }}</el-descriptions-item>
-        <el-descriptions-item label="预警时间" :span="2">{{ currentAlert.time }}</el-descriptions-item>
+        <el-descriptions-item label="预警时间" :span="2">{{ formatTime(currentAlert.timestamp) }}</el-descriptions-item>
         <el-descriptions-item label="预警信息" :span="2">{{ currentAlert.message }}</el-descriptions-item>
       </el-descriptions>
 
-      <div style="margin-top: 20px" v-if="currentAlert && currentAlert.status !== 'resolved'">
+      <div style="margin-top: 20px" v-if="currentAlert && !currentAlert.is_resolved">
         <h4 style="margin-bottom: 12px">处理信息</h4>
         <el-form label-width="100px">
           <el-form-item label="处理措施">
             <el-input v-model="handleForm.measure" type="textarea" :rows="3" placeholder="请输入处理措施" />
-          </el-form-item>
-          <el-form-item label="处理结果">
-            <el-radio-group v-model="handleForm.result">
-              <el-radio value="resolved">已解决</el-radio>
-              <el-radio value="processing">处理中</el-radio>
-            </el-radio-group>
           </el-form-item>
         </el-form>
       </div>
@@ -206,7 +203,7 @@
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
         <el-button
-          v-if="currentAlert && currentAlert.status !== 'resolved'"
+          v-if="currentAlert && !currentAlert.is_resolved"
           type="primary"
           @click="submitHandle"
         >
@@ -230,8 +227,8 @@ const currentAlert = ref(null)
 
 const searchForm = reactive({
   level: '',
-  status: '',
-  deviceName: ''
+  is_resolved: '',
+  device_id: ''
 })
 
 const pagination = reactive({
@@ -241,47 +238,54 @@ const pagination = reactive({
 })
 
 const alertStats = reactive({
-  critical: 3,
-  warning: 12,
-  info: 25,
-  pending: 8
+  critical: 0,
+  warning: 0,
+  info: 0,
+  pending: 0
 })
 
 const alertList = ref([])
 
 const handleForm = reactive({
-  measure: '',
-  result: 'resolved'
+  measure: ''
 })
 
-const highRiskDevices = ref([
-  { deviceName: '电机A-01', type: '电机', riskLevel: '高', healthScore: 35, predictedFailure: '约15天内', suggestion: '立即停机检修，更换轴承' },
-  { deviceName: '泵B-03', type: '泵', riskLevel: '中', healthScore: 58, predictedFailure: '约30天内', suggestion: '近期安排维护保养' },
-  { deviceName: '压缩机C-02', type: '压缩机', riskLevel: '高', healthScore: 42, predictedFailure: '约20天内', suggestion: '检查密封件，更换润滑油' },
-  { deviceName: '风机D-05', type: '风机', riskLevel: '中', healthScore: 65, predictedFailure: '约45天内', suggestion: '正常监控，下次维护检查' }
-])
+const highRiskDevices = ref([])
 
 onMounted(() => {
   loadAlertList()
   loadAlertStats()
+  loadPredictions()
 })
+
+function handleSizeChange() {
+  pagination.page = 1
+  loadAlertList()
+}
+
+function handleSearch() {
+  pagination.page = 1
+  loadAlertList()
+}
 
 async function loadAlertList() {
   loading.value = true
   try {
-    const res = await getAlertList({
-      ...searchForm,
+    const params = {
       page: pagination.page,
       pageSize: pagination.pageSize
-    })
+    }
+    if (searchForm.level) params.level = searchForm.level
+    if (searchForm.is_resolved !== '' && searchForm.is_resolved !== null) params.is_resolved = searchForm.is_resolved
+    if (searchForm.device_id) params.device_id = searchForm.device_id
+
+    const res = await getAlertList(params)
     if (res?.data) {
-      alertList.value = res.data.list || res.data
-      pagination.total = res.data.total || res.data.length
-    } else {
-      generateMockData()
+      alertList.value = res.data.list || []
+      pagination.total = res.data.total || 0
     }
   } catch (e) {
-    generateMockData()
+    ElMessage.error('加载预警列表失败')
   } finally {
     loading.value = false
   }
@@ -290,38 +294,31 @@ async function loadAlertList() {
 async function loadAlertStats() {
   try {
     const res = await getAlertStats()
-    if (res?.data) Object.assign(alertStats, res.data)
+    if (res?.data) {
+      const d = res.data
+      alertStats.critical = d.today_alerts || 0
+      alertStats.warning = d.unresolved_alerts || 0
+      alertStats.pending = d.unresolved_alerts || 0
+    }
+  } catch (e) {
+    ElMessage.error('加载预警统计失败')
+  }
+}
+
+async function loadPredictions() {
+  try {
+    const res = await getPredictionAnalysis()
+    if (res?.data?.results) {
+      highRiskDevices.value = res.data.results
+    }
   } catch (e) {
   }
 }
 
-function generateMockData() {
-  const levels = ['critical', 'warning', 'info']
-  const statuses = ['pending', 'processing', 'resolved']
-  const types = ['温度过高', '振动异常', '压力波动', '电流异常', '设备停机']
-  const devices = ['电机A-01', '泵B-03', '压缩机C-02', '风机D-05', '电机A-05']
-  const values = ['95°C', '7.2mm/s', '0.95MPa', '35A', '-']
-  const thresholds = ['80°C', '6mm/s', '0.8MPa', '30A', '-']
-
-  alertList.value = Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    code: `ALT${String(Date.now() + i).slice(-8)}`,
-    deviceName: devices[i % 5],
-    level: levels[i % 3],
-    type: types[i % 5],
-    message: `${types[i % 5]}，需要及时处理`,
-    value: values[i % 5],
-    threshold: thresholds[i % 5],
-    status: statuses[i % 3],
-    time: `2024-01-${String(15 - Math.floor(i / 3)).padStart(2, '0')} ${String(14 - i).padStart(2, '0')}:${String(30 + i * 2).padStart(2, '0')}:00`
-  }))
-  pagination.total = 45
-}
-
 function resetSearch() {
   searchForm.level = ''
-  searchForm.status = ''
-  searchForm.deviceName = ''
+  searchForm.is_resolved = ''
+  searchForm.device_id = ''
   pagination.page = 1
   loadAlertList()
 }
@@ -329,7 +326,6 @@ function resetSearch() {
 function viewDetail(row) {
   currentAlert.value = row
   handleForm.measure = ''
-  handleForm.result = 'resolved'
   detailDialogVisible.value = true
 }
 
@@ -338,15 +334,20 @@ async function submitHandle() {
     await handleAlert(currentAlert.value.id, handleForm)
     ElMessage.success('处理成功')
   } catch (e) {
-    const idx = alertList.value.findIndex(a => a.id === currentAlert.value.id)
-    if (idx > -1) {
-      alertList.value[idx].status = handleForm.result
-    }
-    ElMessage.success('处理成功')
+    ElMessage.error('处理失败')
+    return
   }
   detailDialogVisible.value = false
   loadAlertList()
   loadAlertStats()
+}
+
+function formatTime(ts) {
+  if (!ts) return '-'
+  const d = new Date(ts)
+  if (isNaN(d.getTime())) return ts
+  const pad = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 }
 
 const healthOption = computed(() => ({
@@ -354,66 +355,54 @@ const healthOption = computed(() => ({
   grid: { left: 50, right: 20, top: 30, bottom: 40 },
   xAxis: {
     type: 'category',
-    data: ['电机A-01', '泵B-03', '压缩机C-02', '风机D-05', '电机A-05', '泵B-01'],
+    data: highRiskDevices.value.map(d => `设备${d.device_id}`),
     axisLabel: { rotate: 30 }
   },
   yAxis: {
     type: 'value',
     max: 100,
-    name: '健康得分'
+    name: '故障概率(%)'
   },
   series: [{
     type: 'bar',
-    data: [
-      { value: 35, itemStyle: { color: '#F56C6C' } },
-      { value: 58, itemStyle: { color: '#E6A23C' } },
-      { value: 42, itemStyle: { color: '#F56C6C' } },
-      { value: 65, itemStyle: { color: '#E6A23C' } },
-      { value: 88, itemStyle: { color: '#67C23A' } },
-      { value: 76, itemStyle: { color: '#67C23A' } }
-    ],
+    data: highRiskDevices.value.map(d => ({
+      value: Math.round(d.fault_probability * 100),
+      itemStyle: { color: d.fault_probability > 0.7 ? '#F56C6C' : d.fault_probability > 0.4 ? '#E6A23C' : '#67C23A' }
+    })),
     barWidth: 40,
     label: { show: true, position: 'top' }
   }]
 }))
 
-const predictionOption = computed(() => {
-  const xData = Array.from({ length: 14 }, (_, i) => `第${i + 1}天`)
-  return {
-    tooltip: { trigger: 'axis' },
-    legend: { data: ['预测故障率', '历史故障率'] },
-    grid: { left: 50, right: 20, top: 40, bottom: 30 },
-    xAxis: { type: 'category', data: xData },
-    yAxis: { type: 'value', name: '故障率(%)', max: 10 },
-    series: [
-      {
-        name: '历史故障率',
-        type: 'line',
-        smooth: true,
-        data: [2.1, 2.3, 2.5, 2.8, 3.1, 3.5, 3.8, 4.2, null, null, null, null, null, null],
-        lineStyle: { color: '#409EFF' },
-        itemStyle: { color: '#409EFF' }
-      },
-      {
-        name: '预测故障率',
-        type: 'line',
-        smooth: true,
-        lineStyle: { type: 'dashed', color: '#F56C6C' },
-        itemStyle: { color: '#F56C6C' },
-        data: [null, null, null, null, null, null, null, 4.2, 4.8, 5.5, 6.3, 7.2, 8.5, 9.8],
-        areaStyle: {
-          color: {
-            type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-            colorStops: [
-              { offset: 0, color: 'rgba(245, 108, 108, 0.3)' },
-              { offset: 1, color: 'rgba(245, 108, 108, 0.05)' }
-            ]
-          }
+const predictionOption = computed(() => ({
+  tooltip: { trigger: 'axis' },
+  legend: { data: ['故障概率'] },
+  grid: { left: 50, right: 20, top: 40, bottom: 30 },
+  xAxis: {
+    type: 'category',
+    data: highRiskDevices.value.map(d => `设备${d.device_id}`)
+  },
+  yAxis: { type: 'value', name: '故障概率', max: 1 },
+  series: [
+    {
+      name: '故障概率',
+      type: 'line',
+      smooth: true,
+      data: highRiskDevices.value.map(d => d.fault_probability),
+      lineStyle: { color: '#F56C6C' },
+      itemStyle: { color: '#F56C6C' },
+      areaStyle: {
+        color: {
+          type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+          colorStops: [
+            { offset: 0, color: 'rgba(245, 108, 108, 0.3)' },
+            { offset: 1, color: 'rgba(245, 108, 108, 0.05)' }
+          ]
         }
       }
-    ]
-  }
-})
+    }
+  ]
+}))
 
 function getLevelText(level) {
   const map = { critical: '严重', warning: '警告', info: '提示' }
@@ -425,18 +414,8 @@ function getLevelTagType(level) {
   return map[level] || 'info'
 }
 
-function getStatusText(status) {
-  const map = { pending: '待处理', processing: '处理中', resolved: '已处理' }
-  return map[status] || status
-}
-
-function getStatusTagType(status) {
-  const map = { pending: 'warning', processing: 'primary', resolved: 'success' }
-  return map[status] || 'info'
-}
-
 function getRiskTagType(risk) {
-  const map = { '高': 'danger', '中': 'warning', '低': 'success' }
+  const map = { '高': 'danger', '中': 'warning', '低': 'success', high: 'danger', medium: 'warning', low: 'success' }
   return map[risk] || 'info'
 }
 </script>
