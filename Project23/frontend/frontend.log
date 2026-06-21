@@ -1,0 +1,37 @@
+ INFO  Accepting connections at http://localhost:5173
+ HTTP  6/21/2026 9:04:18 AM ::1 GET /
+ HTTP  6/21/2026 9:04:18 AM ::1 Returned 200 in 198 ms
+ HTTP  6/21/2026 9:04:32 AM ::1 GET /
+ HTTP  6/21/2026 9:04:32 AM ::1 Returned 200 in 9 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-H_rQbCKy.js
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-DZL0h0bP.css
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 31 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 37 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/MainLayout-DUvWnlMl.js
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/MainLayout-CgsRI5SD.css
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-BnN1mu0s.css
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-ZaKMz8ZO.js
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-DaZ8ckuC.js
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 2 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 2 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/request-b_JAeFZM.js
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 2 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 3 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 8 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 9 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /@vite/client
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 1 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /api/dashboard/stats
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /api/dashboard/device-status
+ HTTP  6/21/2026 9:04:33 AM ::1 GET /api/dashboard/recent-alerts?limit=5
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 1 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 2 ms
+ HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 1 ms
+ HTTP  6/21/2026 9:04:46 AM ::1 GET /assets/index-BOCVvgUh.js
+ HTTP  6/21/2026 9:04:46 AM ::1 GET /assets/index-jI-9mKND.css
+ HTTP  6/21/2026 9:04:46 AM ::1 GET /assets/device-C98oYED2.js
+ HTTP  6/21/2026 9:04:46 AM ::1 Returned 200 in 136 ms
+ HTTP  6/21/2026 9:04:46 AM ::1 Returned 200 in 53 ms
+ HTTP  6/21/2026 9:04:46 AM ::1 Returned 200 in 47 ms
+ HTTP  6/21/2026 9:04:46 AM ::1 GET /api/devices?name=&type=&status=&page=1&pageSize=10
+ HTTP  6/21/2026 9:04:46 AM ::1 Returned 200 in 8 ms
