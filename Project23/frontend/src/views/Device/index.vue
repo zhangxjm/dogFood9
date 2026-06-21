@@ -193,11 +193,9 @@ async function loadDeviceList() {
     if (res?.data) {
       deviceList.value = res.data.list || res.data
       pagination.total = res.data.total || res.data.length
-    } else {
-      generateMockData()
     }
   } catch (e) {
-    generateMockData()
+    ElMessage.error('加载设备列表失败：' + (e?.message || '未知错误'))
   } finally {
     loading.value = false
   }
@@ -270,9 +268,7 @@ async function submitForm() {
         dialogVisible.value = false
         loadDeviceList()
       } catch (e) {
-        ElMessage.success(isEdit.value ? '更新成功' : '新增成功')
-        dialogVisible.value = false
-        loadDeviceList()
+        ElMessage.error(isEdit.value ? '更新失败' : '新增失败')
       }
     }
   })
@@ -288,10 +284,10 @@ async function deleteDevice(row) {
     try {
       await deleteDeviceApi(row.id)
       ElMessage.success('删除成功')
+      loadDeviceList()
     } catch (e) {
-      ElMessage.success('删除成功')
+      ElMessage.error('删除失败：' + (e?.message || '未知错误'))
     }
-    loadDeviceList()
   } catch (e) {
   }
 }

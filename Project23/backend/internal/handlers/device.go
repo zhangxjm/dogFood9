@@ -118,8 +118,13 @@ func DeleteDevice(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Delete(&device).Error; err != nil {
-		utils.FailInternalError(c, "删除设备失败："+err.Error())
+	result := database.DB.Delete(&device)
+	if result.Error != nil {
+		utils.FailInternalError(c, "删除设备失败："+result.Error.Error())
+		return
+	}
+	if result.RowsAffected == 0 {
+		utils.FailInternalError(c, "删除设备失败：未找到可删除的记录")
 		return
 	}
 

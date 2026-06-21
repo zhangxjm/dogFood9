@@ -1,37 +1,27 @@
  INFO  Accepting connections at http://localhost:5173
- HTTP  6/21/2026 9:04:18 AM ::1 GET /
- HTTP  6/21/2026 9:04:18 AM ::1 Returned 200 in 198 ms
- HTTP  6/21/2026 9:04:32 AM ::1 GET /
- HTTP  6/21/2026 9:04:32 AM ::1 Returned 200 in 9 ms
- HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-H_rQbCKy.js
- HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-DZL0h0bP.css
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 31 ms
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 37 ms
- HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/MainLayout-DUvWnlMl.js
- HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/MainLayout-CgsRI5SD.css
- HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-BnN1mu0s.css
- HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-ZaKMz8ZO.js
- HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/index-DaZ8ckuC.js
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 2 ms
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 2 ms
- HTTP  6/21/2026 9:04:33 AM ::1 GET /assets/request-b_JAeFZM.js
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 2 ms
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 3 ms
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 8 ms
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 9 ms
- HTTP  6/21/2026 9:04:33 AM ::1 GET /@vite/client
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 1 ms
- HTTP  6/21/2026 9:04:33 AM ::1 GET /api/dashboard/stats
- HTTP  6/21/2026 9:04:33 AM ::1 GET /api/dashboard/device-status
- HTTP  6/21/2026 9:04:33 AM ::1 GET /api/dashboard/recent-alerts?limit=5
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 1 ms
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 2 ms
- HTTP  6/21/2026 9:04:33 AM ::1 Returned 200 in 1 ms
- HTTP  6/21/2026 9:04:46 AM ::1 GET /assets/index-BOCVvgUh.js
- HTTP  6/21/2026 9:04:46 AM ::1 GET /assets/index-jI-9mKND.css
- HTTP  6/21/2026 9:04:46 AM ::1 GET /assets/device-C98oYED2.js
- HTTP  6/21/2026 9:04:46 AM ::1 Returned 200 in 136 ms
- HTTP  6/21/2026 9:04:46 AM ::1 Returned 200 in 53 ms
- HTTP  6/21/2026 9:04:46 AM ::1 Returned 200 in 47 ms
- HTTP  6/21/2026 9:04:46 AM ::1 GET /api/devices?name=&type=&status=&page=1&pageSize=10
- HTTP  6/21/2026 9:04:46 AM ::1 Returned 200 in 8 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /maintenance
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 200 in 25 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /assets/index-DZL0h0bP.css
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /assets/index-Bmtnhd-q.js
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /.well-known/appspecific/com.chrome.devtools.json
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 0 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 8 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 10 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /assets/MainLayout-PquDGWsa.js
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /assets/index-MnNiHKVb.js
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /assets/MainLayout-CgsRI5SD.css
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /assets/index-CnUYbwKh.css
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /assets/request-Y6ygM0bz.js
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 5 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 3 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 4 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 2 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 3 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /api/maintenance/plans?status=&deviceName=&page=1&pageSize=10
+ HTTP  6/21/2026 1:46:41 PM ::1 GET /api/maintenance/records?deviceName=&type=&page=1&pageSize=10
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 1 ms
+ HTTP  6/21/2026 1:46:41 PM ::1 Returned 304 in 2 ms
+ HTTP  6/21/2026 1:46:42 PM ::1 GET /vite.svg
+ HTTP  6/21/2026 1:46:42 PM ::1 Returned 304 in 3 ms
+ HTTP  6/21/2026 1:46:46 PM ::1 GET /api/maintenance/plans?status=&deviceName=&page=1&pageSize=50
+ HTTP  6/21/2026 1:46:46 PM ::1 Returned 304 in 8 ms
