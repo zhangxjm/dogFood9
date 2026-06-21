@@ -1,0 +1,29 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: whiteboard-server
+    ports:
+      - "3001:3001"
+    volumes:
+      - server-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_DIR=/app/data
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: whiteboard-client
+    ports:
+      - "8080:80"
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  server-data:
